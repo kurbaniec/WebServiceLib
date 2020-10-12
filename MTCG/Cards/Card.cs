@@ -11,11 +11,6 @@ namespace MTCG.Cards
         protected uint _elementDamage;
         protected bool _inDeck;
         protected bool _inStore;
-
-        public abstract bool IsResistant(Card enemyCard);
-        public abstract bool IsWeak(Card enemyCard);
-        public abstract bool CanEvade(Card enemyCard);
         public abstract uint CalculateDamage(List<Card> enemyCard);
-
     }
 }

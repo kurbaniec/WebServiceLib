@@ -9,5 +9,10 @@
             this._type = type;
             this._elementDamage = elementDamage;
         }
+
+        public abstract bool IsResistant(Card enemyCard);
+        public abstract bool IsWeak(Card enemyCard);
+        public abstract bool CanEvade(Card enemyCard);
+        public abstract bool UseElementDamage(Card enemyCard);
     }
 }
