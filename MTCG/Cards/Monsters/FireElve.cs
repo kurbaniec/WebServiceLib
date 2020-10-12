@@ -4,6 +4,12 @@ namespace MTCG.Cards.Monsters
 {
     public class FireElve : Monster
     {
+        public FireElve(string name, uint damage, ElementType type, uint elementDamage) :
+            base(name, damage, type, elementDamage)
+        {
+
+        }
+
         public override bool IsResistant(Card enemyCard)
         {
             throw new System.NotImplementedException();
@@ -16,7 +22,7 @@ namespace MTCG.Cards.Monsters
 
         public override bool CanEvade(Card enemyCard)
         {
-            throw new System.NotImplementedException();
+            return enemyCard is Dragon;
         }
 
         public override uint CalculateDamage(List<Card> enemyCard)

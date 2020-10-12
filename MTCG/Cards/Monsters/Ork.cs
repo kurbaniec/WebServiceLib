@@ -4,6 +4,9 @@ namespace MTCG.Cards.Monsters
 {
     public class Ork : Monster
     {
+        public Ork(string name, uint damage, ElementType type, uint elementDamage) : base(name, damage, type, elementDamage)
+        {
+        }
         public override bool IsResistant(Card enemyCard)
         {
             throw new System.NotImplementedException();
@@ -23,5 +26,7 @@ namespace MTCG.Cards.Monsters
         {
             throw new System.NotImplementedException();
         }
+
+        
     }
 }

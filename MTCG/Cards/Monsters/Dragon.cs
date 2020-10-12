@@ -2,9 +2,9 @@
 
 namespace MTCG.Cards.Monsters
 {
-    public class Wizzard : Monster
+    public class Dragon : Monster
     {
-        public Wizzard(string name, uint damage, ElementType type, uint elementDamage) : base(name, damage, type, elementDamage)
+        public Dragon(string name, uint damage, ElementType type, uint elementDamage) : base(name, damage, type, elementDamage)
         {
         }
 
