@@ -10,7 +10,7 @@ namespace MTCG.Cards.Monsters
 
         public override bool IsResistant(Card enemyCard)
         {
-            throw new System.NotImplementedException();
+            return enemyCard is Ork;
         }
 
         public override bool IsWeak(Card enemyCard)
