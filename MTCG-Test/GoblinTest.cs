@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace MTCG_Test
 {
-    public class DragonTest
+    public class GoblinTest
     {
         [SetUp]
         public void Setup()

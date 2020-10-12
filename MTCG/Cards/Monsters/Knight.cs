@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MTCG.Cards.Spells;
 
 namespace MTCG.Cards.Monsters
 {
@@ -15,7 +16,7 @@ namespace MTCG.Cards.Monsters
 
         public override bool IsWeak(Card enemyCard)
         {
-            throw new System.NotImplementedException();
+            return enemyCard is WaterSpell;
         }
 
         public override bool CanEvade(Card enemyCard)
@@ -28,6 +29,6 @@ namespace MTCG.Cards.Monsters
             throw new System.NotImplementedException();
         }
 
-        
+
     }
 }
