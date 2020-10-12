@@ -23,7 +23,7 @@ namespace MTCG.Cards.Monsters
             throw new System.NotImplementedException();
         }
 
-        public override uint CalculateDamage(List<Card> enemyCard)
+        public override uint CalculateDamage(List<Card> enemyCards)
         {
             throw new System.NotImplementedException();
         }

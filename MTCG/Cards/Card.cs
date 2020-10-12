@@ -11,6 +11,6 @@ namespace MTCG.Cards
         protected uint _elementDamage;
         protected bool _inDeck;
         protected bool _inStore;
-        public abstract uint CalculateDamage(List<Card> enemyCard);
+        public abstract uint CalculateDamage(List<Card> enemyCards);
     }
 }

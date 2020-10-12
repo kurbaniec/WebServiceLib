@@ -25,7 +25,7 @@ namespace MTCG.Cards.Monsters
             return enemyCard is Dragon;
         }
 
-        public override uint CalculateDamage(List<Card> enemyCard)
+        public override uint CalculateDamage(List<Card> enemyCards)
         {
             throw new System.NotImplementedException();
         }
