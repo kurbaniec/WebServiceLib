@@ -8,7 +8,7 @@ namespace WebService_Lib
     {
         public void Start()
         {
-            Console.WriteLine("Hi!");
+            Console.WriteLine("WebService has started...");
         }
     }
 }

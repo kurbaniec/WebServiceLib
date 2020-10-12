@@ -1,4 +1,5 @@
 ﻿using System;
+using WebService_Lib;
 
 namespace WebService
 {
@@ -6,7 +7,8 @@ namespace WebService
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var service = new SimpleWebService();
+            service.Start();
         }
     }
 }
