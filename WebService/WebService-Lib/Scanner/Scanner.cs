@@ -6,6 +6,11 @@ using WebService_Lib.Attributes;
 
 namespace WebService_Lib
 {
+    /// <summary>
+    /// Scans a List of types from the main execution assembly to determine
+    /// <c>Component</c>s, <c>Controller</c>s and <c>Security</c> configs
+    /// for the <c>WebService_Lib</c>.
+    /// </summary>
     public class Scanner
     {
         private readonly List<Type> programAssembly;

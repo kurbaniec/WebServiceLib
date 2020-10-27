@@ -20,7 +20,7 @@ namespace WebService_Lib
         {
             Console.WriteLine("WebService has started...");
             var result = scanner.ScanAssembly();
-
+            var container = new Container(result.Item1);
         }
     }
 }
