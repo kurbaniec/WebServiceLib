@@ -20,6 +20,7 @@ namespace WebService_Lib
         {
             Console.WriteLine("WebService has started...");
             var result = scanner.ScanAssembly();
+
         }
     }
 }

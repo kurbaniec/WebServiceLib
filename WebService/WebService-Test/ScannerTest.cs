@@ -7,6 +7,7 @@ using WebService_Lib;
 using WebService_Test.Components;
 using WebService_Test.Controllers;
 using WebService_Test.Dummy;
+using WebService_Test.Securities;
 
 namespace WebService_Test
 {
@@ -20,18 +21,20 @@ namespace WebService_Test
             Type logger = typeof(TestLogger);
             Type controller = typeof(TestController);
             Type dummy = typeof(DummyClass);
-            assembly = new List<Type> { logger, controller, dummy };
+            Type wrongSecurity = typeof(WrongSecurity);
+            Type security = typeof(TestSecurity);
+            assembly = new List<Type> { logger, controller, dummy, wrongSecurity, security };
         }
 
         [Test, TestCase(TestName = "Count components", Description =
-        "Count components (classes annotated by 'Component' or 'Controller') from provided Assembly")]
+        "Count components (classes annotated by 'Component', 'Controller' or 'Security') from provided Assembly")]
         public void CountComponents()
         {
             var scanner = new Scanner(assembly);
 
             var result = scanner.ScanAssembly();
 
-            Assert.AreEqual(2, result.Item1.Count);
+            Assert.AreEqual(3, result.Item1.Count);
         }
 
         [Test, TestCase(TestName = "Check components types", Description =
@@ -44,6 +47,7 @@ namespace WebService_Test
 
             Assert.Contains(typeof(TestLogger), result.Item1);
             Assert.Contains(typeof(TestController), result.Item1);
+            Assert.Contains(typeof(TestSecurity), result.Item1);
         }
 
         [Test, TestCase(TestName = "Count controllers", Description =
@@ -68,8 +72,30 @@ namespace WebService_Test
             Assert.Contains(typeof(TestController), result.Item1);
         }
 
-        [Test, TestCase(TestName = "Count and check components and controllers with extracted execution assembly", Description =
-        "Count and check components and controllers from extracted execution Assembly")]
+        [Test, TestCase(TestName = "Security exists", Description =
+        "Check if there is a security config (classes annotated by 'Security' implementing 'ISecurity') from provided Assembly")]
+        public void SecurityExists()
+        {
+            var scanner = new Scanner(assembly);
+
+            var result = scanner.ScanAssembly();
+
+            Assert.NotNull(result.Item3);
+        }
+
+        [Test, TestCase(TestName = "Check security type", Description =
+        "Check if security config has expected type")]
+        public void CheckSecurityType()
+        {
+            var scanner = new Scanner(assembly);
+
+            var result = scanner.ScanAssembly();
+
+            Assert.AreEqual(typeof(TestSecurity), result.Item3);
+        }
+
+        [Test, TestCase(TestName = "Count and check components, controllers and security config with extracted execution assembly", Description =
+        "Count and check components, controllers and security config from extracted execution Assembly")]
         public void UseRealAssembly()
         {
             var executionAssembly = Assembly.GetExecutingAssembly().GetTypes().ToList();
@@ -77,11 +103,13 @@ namespace WebService_Test
 
             var result = scanner.ScanAssembly();
 
-            Assert.AreEqual(2, result.Item1.Count);
+            Assert.AreEqual(3, result.Item1.Count);
             Assert.AreEqual(1, result.Item2.Count);
+            Assert.NotNull(result.Item3);
             Assert.Contains(typeof(TestLogger), result.Item1);
             Assert.Contains(typeof(TestController), result.Item1);
             Assert.Contains(typeof(TestController), result.Item2);
+            Assert.AreEqual(typeof(TestSecurity), result.Item3);
         }
     }
 }
