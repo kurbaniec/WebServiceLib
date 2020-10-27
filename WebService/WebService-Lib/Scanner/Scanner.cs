@@ -7,8 +7,8 @@ namespace WebService_Lib
 {
     public class Scanner
     {
-        private readonly Assembly programAssembly;
-        public Scanner(Assembly programAssembly)
+        private readonly List<Type> programAssembly;
+        public Scanner(List<Type> programAssembly)
         {
             this.programAssembly = programAssembly;
         }
@@ -22,7 +22,7 @@ namespace WebService_Lib
             // See: https://stackoverflow.com/a/1315687/12347616
             // And scan for Attribues
             // See: https://stackoverflow.com/a/1226174/12347616
-            foreach (Type type in programAssembly.GetTypes())
+            foreach (Type type in programAssembly)
             {
                 var check = Attribute.GetCustomAttribute(type, typeof(Controller));
                 if (check != null)
