@@ -13,6 +13,9 @@ namespace WebService_Lib
     public class Container
     {
         private Dictionary<Type, object> container = new Dictionary<Type, object>();
+
+        public Dictionary<Type, object> GetContainer => container;
+
         public Container(List<Type> components)
         {
             foreach (var component in components)
