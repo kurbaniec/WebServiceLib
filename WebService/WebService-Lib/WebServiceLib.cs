@@ -7,22 +7,17 @@ namespace WebService_Lib
 {
     public class SimpleWebService
     {
-        private Assembly programAssembly;
+        private Scanner scanner;
 
         public SimpleWebService(Assembly programAssembly)
         {
-            this.programAssembly = programAssembly;
+            scanner = new Scanner(programAssembly);
         }
 
         public void Start()
         {
-            // Get program Assemblies
-            // See: https://stackoverflow.com/a/1315687/12347616
             Console.WriteLine("WebService has started...");
-            foreach (Type type in programAssembly.GetTypes())
-            {
-                Console.WriteLine(type.FullName);
-            }
+            var result = scanner.ScanAssembly();
         }
     }
 }
