@@ -26,6 +26,27 @@ namespace WebService_Lib
                 container.Add(component, instance);
             }
 
+            Autowire(components);
+        }
+
+        /// <summary>
+        /// Add an object to the container and perform autowiring.
+        /// </summary>
+        /// <param name="obj">Object to be added</param>
+        public void Add(object obj)
+        {
+            container.Add(obj.GetType(), obj);
+            Autowire(new List<Type>(container.Keys));
+        }
+
+        /// <summary>
+        /// Perform autowiring on all components.
+        /// Autowiring means that fields with the <c>[Autowired]</c> attribute will
+        /// be dynamically set when a matching component is found.
+        /// </summary>
+        /// <param name="components"></param>
+        private void Autowire(List<Type> components)
+        {
             foreach (var component in components)
             {
                 // In C# there is a distinct difference between fields and props
@@ -54,7 +75,7 @@ namespace WebService_Lib
                         else
                         {
                             Console.Error.WriteLine("Err: Can not find property of type " + fType.FullName +
-                                " to autowire field " + field.Name + " in Class " + component.FullName);
+                                                    " to autowire field " + field.Name + " in Class " + component.FullName);
                             Console.Error.WriteLine("Err: Field will not be initialized");
                         }
                     }

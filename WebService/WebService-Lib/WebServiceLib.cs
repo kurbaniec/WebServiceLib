@@ -22,9 +22,11 @@ namespace WebService_Lib
             var result = scanner.ScanAssembly();
             var container = new Container(result.Item1);
             var auth = (AuthCheck?)null;
-            if (result.Item3 != null) auth = new AuthCheck((ISecurity)container.GetContainer[result.Item3]);
-
-
+            if (result.Item3 != null)
+            {
+                auth = new AuthCheck((ISecurity)container.GetContainer[result.Item3]);
+                container.Add(auth);
+            }
         }
     }
 }
