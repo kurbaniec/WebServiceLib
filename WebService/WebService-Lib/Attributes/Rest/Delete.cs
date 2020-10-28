@@ -3,13 +3,13 @@
 namespace WebService_Lib.Attributes.Rest
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class Delete : Attribute
+    public class Delete : Attribute, IMethod
     {
-        private string path;
+        public string Path { get; }
 
         public Delete(string path)
         {
-            this.path = path;
+            this.Path = path;
         }
     }
 }

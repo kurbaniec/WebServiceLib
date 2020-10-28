@@ -1,4 +1,5 @@
 ﻿using System;
+using WebService_Lib.Attributes.Rest;
 
 namespace WebService_Lib.Server
 {
@@ -40,6 +41,37 @@ namespace WebService_Lib.Server
             }
 
             return parsedMethod;
+        }
+
+        public static Method GetMethod(Type method)
+        {
+            Method parsedMethod;
+            if (method == typeof(Get))
+            {
+                return Method.Get;
+            }
+            else if (method == typeof(Post))
+            {
+                return Method.Post;
+            }
+            else if (method == typeof(Put))
+            {
+                return Method.Put;
+            }
+            else if (method == typeof(Delete))
+            {
+                return Method.Delete;
+            }
+            else if (method == typeof(Patch))
+            {
+                return Method.Patch;
+            }
+            else if (method == typeof(Post))
+            {
+                return Method.Post;
+            }
+
+            return Method.Get;
         }
     }
 }

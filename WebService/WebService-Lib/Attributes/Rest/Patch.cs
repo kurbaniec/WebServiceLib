@@ -3,13 +3,13 @@
 namespace WebService_Lib.Attributes.Rest
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class Patch : Attribute
+    public class Patch : Attribute, IMethod
     {
-        private string path;
+        public string Path { get; }
 
         public Patch(string path)
         {
-            this.path = path;
+            this.Path = path;
         }
     }
 }

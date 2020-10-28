@@ -3,13 +3,13 @@
 namespace WebService_Lib.Attributes.Rest
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class Post : Attribute
+    public class Post : Attribute, IMethod
     {
-        private string path;
+        public string Path { get; }
 
         public Post(string path)
         {
-            this.path = path;
+            this.Path = path;
         }
     }
 }
