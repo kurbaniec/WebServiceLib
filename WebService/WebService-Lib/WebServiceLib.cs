@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using WebService_Lib.Server;
 
 namespace WebService_Lib
 {
@@ -30,6 +31,7 @@ namespace WebService_Lib
                 container.Add(auth);
             }
 
+            var mapping = new Mapping(container.GetObjects(result.Item2));
         }
     }
 }

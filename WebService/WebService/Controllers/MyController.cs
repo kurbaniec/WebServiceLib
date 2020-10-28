@@ -14,7 +14,7 @@ namespace WebService.Controllers
         [Get("/hi")]
         public Response Hi()
         {
-            return new Response("hi");
+            return Response.PlainText("Hi!");
         }
     }
 }

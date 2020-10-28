@@ -2,7 +2,7 @@
 
 namespace WebService_Lib.Server.Exceptions
 {
-    public class EndpointNotFoundException : Exception
+    public class InvokeInvalidParamException : Exception
     {
 
     }

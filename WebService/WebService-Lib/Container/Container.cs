@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using WebService_Lib.Attributes;
 
@@ -37,6 +38,32 @@ namespace WebService_Lib
         {
             container.Add(obj.GetType(), obj);
             Autowire(new List<Type>(container.Keys));
+        }
+
+        /// <summary>
+        /// Get object from container that matches given type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>Found object or null</returns>
+        public object? Get(Type type)
+        {
+            return container[type];
+        }
+
+        /// <summary>
+        /// Get all objects from container that match list of types.
+        /// </summary>
+        /// <param name="types"></param>
+        /// <returns>List of objects</returns>
+        public List<object> GetObjects(List<Type> types)
+        {
+            var objects = new List<object>();
+            foreach (var type in types)
+            {
+                if (container.ContainsKey(type)) objects.Add(container[type]);
+            }
+
+            return objects;
         }
 
         /// <summary>

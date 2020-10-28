@@ -13,9 +13,11 @@ namespace WebService_Lib.Server
     public class Mapping
     {
         private Dictionary<Method, Dictionary<string, MethodCaller>> mappings;
+        public Dictionary<Method, Dictionary<string, MethodCaller>> GetMappings => mappings;
 
         public Mapping(List<object> controllers)
         {
+            mappings = new Dictionary<Method, Dictionary<string, MethodCaller>>();
             mappings.Add(Method.Get, new Dictionary<string, MethodCaller>());
             mappings.Add(Method.Post, new Dictionary<string, MethodCaller>());
             mappings.Add(Method.Put, new Dictionary<string, MethodCaller>());
@@ -89,6 +91,7 @@ namespace WebService_Lib.Server
                     var path = attribute.Path;
                     var methodCaller = new MethodCaller(method, controller, mappingsParam);
                     mappings[MethodUtilities.GetMethod(restMethod)].Add(path, methodCaller);
+                    break;
                 }
             }
         }
@@ -98,12 +101,16 @@ namespace WebService_Lib.Server
         /// </summary>
         /// <param name="authDetails"></param>
         /// <param name="payload"></param>
-        /// <exception>Throws an exception when invalid parameters are given</exception>
+        /// <exception>
+        /// Throws an exception when invalid parameters are given or when the given endpoint
+        /// does not exist.
+        /// </exception>
         /// <returns>Response as a Response object</returns>
         public Response Invoke(Method method, string path, AuthDetails? authDetails, object? payload)
         {
             var methodCaller = mappings[method][path];
-            return methodCaller.Invoke(authDetails, payload);
+            if (methodCaller != null) return methodCaller.Invoke(authDetails, payload);
+            throw new EndpointNotFoundException();
         }
 
 
@@ -150,7 +157,8 @@ namespace WebService_Lib.Server
                             break;
                     }
                 }
-
+                // Invoke method
+                // See: https://docs.microsoft.com/en-us/dotnet/api/system.reflection.methodbase.invoke?view=netcore-3.1
                 return (Response)method.Invoke(instance, parameters.ToArray());
             }
 
