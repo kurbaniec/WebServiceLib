@@ -83,5 +83,15 @@
         {
             this.security.RevokeToken(this.security.GenerateToken(username));
         }
+
+        /// <summary>
+        /// Return details of an authenticated user through its token.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public AuthDetails AuthDetails(string token)
+        {
+            return this.security.AuthDetails(token);
+        }
     }
 }

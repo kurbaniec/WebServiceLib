@@ -1,5 +1,7 @@
 ﻿using WebService.Components;
 using WebService_Lib.Attributes;
+using WebService_Lib.Attributes.Rest;
+using WebService_Lib.Server;
 
 namespace WebService.Controllers
 {
@@ -8,5 +10,11 @@ namespace WebService.Controllers
     {
         [Autowired]
         private Logger logger;
+
+        [Get("/hi")]
+        public Response Hi()
+        {
+            return new Response("hi");
+        }
     }
 }

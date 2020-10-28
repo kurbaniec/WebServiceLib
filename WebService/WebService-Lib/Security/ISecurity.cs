@@ -41,6 +41,13 @@ namespace WebService_Lib
         public void RevokeToken(string token);
 
         /// <summary>
+        /// Return details of an authenticated user through its token.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public AuthDetails AuthDetails(string token);
+
+        /// <summary>
         /// Used internally to determine which resources should be secured.
         /// </summary>
         /// <returns>

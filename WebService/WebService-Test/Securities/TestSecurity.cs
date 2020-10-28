@@ -29,6 +29,12 @@ namespace WebService_Test.Securities
             tokens.Remove(token);
         }
 
+        public AuthDetails AuthDetails(string token)
+        {
+            var username = token.Substring(0, token.Length - 6);
+            return new AuthDetails(token, username);
+        }
+
         public List<string> SecurePaths()
         {
             return new List<string> { "/secured" };

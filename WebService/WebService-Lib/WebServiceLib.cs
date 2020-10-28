@@ -9,11 +9,13 @@ namespace WebService_Lib
     public class SimpleWebService
     {
         private Scanner scanner;
+        private uint port;
 
-        public SimpleWebService(Assembly programAssembly)
+        public SimpleWebService(Assembly programAssembly, uint port = 8080)
         {
             // Convert Assembly to List<Type>
-            scanner = new Scanner(programAssembly.GetTypes().ToList());
+            this.scanner = new Scanner(programAssembly.GetTypes().ToList());
+            this.port = port;
         }
 
         public void Start()
@@ -27,6 +29,7 @@ namespace WebService_Lib
                 auth = new AuthCheck((ISecurity)container.GetContainer[result.Item3]);
                 container.Add(auth);
             }
+
         }
     }
 }
