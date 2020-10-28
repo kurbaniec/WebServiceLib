@@ -21,6 +21,10 @@ namespace WebService_Lib
             Console.WriteLine("WebService has started...");
             var result = scanner.ScanAssembly();
             var container = new Container(result.Item1);
+            var auth = (AuthCheck?)null;
+            if (result.Item3 != null) auth = new AuthCheck((ISecurity)container.GetContainer[result.Item3]);
+
+
         }
     }
 }

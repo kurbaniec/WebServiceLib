@@ -44,11 +44,13 @@ namespace WebService_Test
              "Check if authentication, defined in 'TestSecurity', is correctly handled with correct credentials")]
         public void CheckAuthenticationCorrectCredentials()
         {
+            var correctCredentials = security.CheckCredentials("admin", "admin");
+
             var authCheck = new AuthCheck(security);
 
             var isAuthenticated = authCheck.Authenticate("admin", "admin");
 
-            Assert.IsTrue(isAuthenticated);
+            Assert.IsTrue(isAuthenticated.Item1);
         }
 
         [Test, TestCase(TestName = "Check authentication with incorrect credentials", Description =
@@ -59,7 +61,7 @@ namespace WebService_Test
 
             var isAuthenticated = authCheck.Authenticate("admin", "1234");
 
-            Assert.IsFalse(isAuthenticated);
+            Assert.IsFalse(isAuthenticated.Item1);
         }
     }
 }
