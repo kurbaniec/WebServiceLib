@@ -31,6 +31,7 @@ namespace WebService_Test
             Assert.AreEqual(1, mapping.GetMappings[Method.Post].Count);
             Assert.AreEqual(1, mapping.GetMappings[Method.Put].Count);
             Assert.AreEqual(1, mapping.GetMappings[Method.Patch].Count);
+            Assert.AreEqual(1, mapping.GetMappings[Method.Delete].Count);
         }
 
         [Test, TestCase(TestName = "Check endpoint paths", Description =
@@ -44,6 +45,7 @@ namespace WebService_Test
             Assert.IsTrue(mapping.GetMappings[Method.Post].ContainsKey("/secured2"));
             Assert.IsTrue(mapping.GetMappings[Method.Put].ContainsKey("/insert"));
             Assert.IsTrue(mapping.GetMappings[Method.Patch].ContainsKey("/patch"));
+            Assert.IsTrue(mapping.GetMappings[Method.Delete].ContainsKey("/delete"));
         }
 
         [Test, TestCase(TestName = "Invoke endpoint with no parameters", Description =

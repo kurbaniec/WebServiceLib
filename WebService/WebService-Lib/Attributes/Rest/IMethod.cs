@@ -7,5 +7,6 @@ namespace WebService_Lib.Attributes.Rest
         // Make field Path mandatory
         // See: https://stackoverflow.com/a/2115156/12347616
         public string Path { get; }
+        public bool HasPathParam { get; }
     }
 }

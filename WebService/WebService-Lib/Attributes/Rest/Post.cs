@@ -6,10 +6,12 @@ namespace WebService_Lib.Attributes.Rest
     public class Post : Attribute, IMethod
     {
         public string Path { get; }
+        public bool HasPathParam { get; }
 
-        public Post(string path)
+        public Post(string path, bool hasPathParam = false)
         {
             this.Path = path;
+            this.HasPathParam = hasPathParam;
         }
     }
 }
