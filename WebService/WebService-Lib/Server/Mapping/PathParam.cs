@@ -7,15 +7,16 @@ namespace WebService_Lib.Server
     public class PathParam<T> where T : struct, IComparable
     {
         public T? Value { get; }
-        public PathParam(object? value)
+        public PathParam(string? value)
         {
-            if (value is T cast)
-            {
-                Value = cast;
-            }
+            if (value == null) Value = null;
             else
             {
-                value = null;
+                // Change type dynamically
+                // See: https://stackoverflow.com/a/4010198/12347616
+                var cast = Convert.ChangeType(value, typeof(T));
+                if (cast != null) Value = (T)cast;
+                else Value = null;
             }
         }
     }

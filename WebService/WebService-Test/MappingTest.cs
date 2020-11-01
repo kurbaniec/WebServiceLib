@@ -53,7 +53,7 @@ namespace WebService_Test
         public void InvokeNoParams()
         {
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Get, "/hi", null, null);
+            var response = mapping.Invoke(Method.Get, "/hi", null, null, null);
 
             Assert.NotNull(response);
         }
@@ -65,7 +65,7 @@ namespace WebService_Test
             var authDetails = new AuthDetails("test", "test");
 
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Get, "/secured", authDetails, null);
+            var response = mapping.Invoke(Method.Get, "/secured", authDetails, null, null);
 
             Assert.NotNull(response);
         }
@@ -78,7 +78,7 @@ namespace WebService_Test
             var plainText = "test";
 
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Post, "/secured2", authDetails, plainText);
+            var response = mapping.Invoke(Method.Post, "/secured2", authDetails, plainText, null);
 
             Assert.NotNull(response);
         }
@@ -90,7 +90,7 @@ namespace WebService_Test
             var json = new Dictionary<string, object> { ["test"] = 1 };
 
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Put, "/insert", null, json);
+            var response = mapping.Invoke(Method.Put, "/insert", null, json, null);
 
             Assert.NotNull(response);
         }
@@ -103,7 +103,7 @@ namespace WebService_Test
             var plainText = "test";
 
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Patch, "/patch", authDetails, plainText);
+            var response = mapping.Invoke(Method.Patch, "/patch", authDetails, plainText, null);
 
             Assert.NotNull(response);
         }
@@ -117,7 +117,7 @@ namespace WebService_Test
 
             var mapping = new Mapping(new List<object> { this.controller });
 
-            Assert.Throws<InvokeInvalidParamException>(() => mapping.Invoke(Method.Patch, "/patch", authDetails, illegalParam));
+            Assert.Throws<InvokeInvalidParamException>(() => mapping.Invoke(Method.Patch, "/patch", authDetails, illegalParam, null));
         }
 
     }

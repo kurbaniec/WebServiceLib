@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using WebService_Lib.Attributes.Rest;
 using WebService_Lib.Server.Exceptions;
@@ -12,17 +13,19 @@ namespace WebService_Lib.Server
     /// </summary>
     public class Mapping
     {
-        private Dictionary<Method, Dictionary<string, MethodCaller>> mappings;
-        public Dictionary<Method, Dictionary<string, MethodCaller>> GetMappings => mappings;
+        private Dictionary<Method, Dictionary<string, (bool, MethodCaller)>> mappings;
+        public Dictionary<Method, Dictionary<string, (bool, MethodCaller)>> GetMappings => mappings;
 
         public Mapping(List<object> controllers)
         {
-            mappings = new Dictionary<Method, Dictionary<string, MethodCaller>>();
-            mappings.Add(Method.Get, new Dictionary<string, MethodCaller>());
-            mappings.Add(Method.Post, new Dictionary<string, MethodCaller>());
-            mappings.Add(Method.Put, new Dictionary<string, MethodCaller>());
-            mappings.Add(Method.Delete, new Dictionary<string, MethodCaller>());
-            mappings.Add(Method.Patch, new Dictionary<string, MethodCaller>());
+            mappings = new Dictionary<Method, Dictionary<string, (bool, MethodCaller)>>
+            {
+                {Method.Get, new Dictionary<string, (bool, MethodCaller)>()},
+                {Method.Post, new Dictionary<string, (bool, MethodCaller)>()},
+                {Method.Put, new Dictionary<string, (bool, MethodCaller)>()},
+                {Method.Delete, new Dictionary<string, (bool, MethodCaller)>()},
+                {Method.Patch, new Dictionary<string, (bool, MethodCaller)>()}
+            };
 
             foreach (var controller in controllers)
             {
@@ -61,6 +64,7 @@ namespace WebService_Lib.Server
                     }
 
                     var mappingsParam = new List<MappingParams>();
+                    var pathParam = (Type?)null;
                     var error = false;
                     foreach (var parameter in parameters)
                     {
@@ -76,6 +80,11 @@ namespace WebService_Lib.Server
                         {
                             mappingsParam.Add(MappingParams.Json);
                         }
+                        else if (parameter.ParameterType == typeof(PathParam<>))
+                        {
+                            mappingsParam.Add(MappingParams.PathParam);
+                            pathParam = parameter.ParameterType.GenericTypeArguments[0];
+                        }
                         else
                         {
                             Console.Error.WriteLine("Err: Wrong endpoint method syntax - usage of not supported type " +
@@ -89,8 +98,9 @@ namespace WebService_Lib.Server
                     if (error) break;
 
                     var path = attribute.Path;
-                    var methodCaller = new MethodCaller(method, controller, mappingsParam);
-                    mappings[MethodUtilities.GetMethod(restMethod)].Add(path, methodCaller);
+                    var hasPathParam = attribute.HasPathParam;
+                    var methodCaller = new MethodCaller(method, controller, mappingsParam, pathParam);
+                    mappings[MethodUtilities.GetMethod(restMethod)].Add(path, (hasPathParam, methodCaller));
                     break;
                 }
             }
@@ -106,10 +116,9 @@ namespace WebService_Lib.Server
         /// does not exist.
         /// </exception>
         /// <returns>Response as a Response object</returns>
-        public Response Invoke(Method method, string path, AuthDetails? authDetails, object? payload)
+        public Response Invoke(Method method, string path, AuthDetails? authDetails, object? payload, string? pathParam)
         {
-            var methodCaller = mappings[method][path];
-            if (methodCaller != null) return methodCaller.Invoke(authDetails, payload);
+            if (mappings[method].ContainsKey(path)) return mappings[method][path].Item2.Invoke(authDetails, payload, pathParam);
             throw new EndpointNotFoundException();
         }
 
@@ -122,12 +131,14 @@ namespace WebService_Lib.Server
             private MethodInfo method;
             private object instance;
             private List<MappingParams> paramInfo;
+            private Type? pathParamType;
 
-            public MethodCaller(MethodInfo method, object instance, List<MappingParams> paramInfo)
+            public MethodCaller(MethodInfo method, object instance, List<MappingParams> paramInfo, Type? pathParamType)
             {
                 this.method = method;
                 this.instance = instance;
                 this.paramInfo = paramInfo;
+                this.pathParamType = pathParamType;
             }
 
             /// <summary>
@@ -137,7 +148,7 @@ namespace WebService_Lib.Server
             /// <param name="payload"></param>
             /// <exception>Throws an exception when invalid parameters are given</exception>
             /// <returns>Response as a Response object</returns>
-            public Response Invoke(AuthDetails? authDetails, object? payload)
+            public Response Invoke(AuthDetails? authDetails, object? payload, string? pathParam)
             {
                 var parameters = new List<object>();
                 foreach (var param in paramInfo)
@@ -155,6 +166,13 @@ namespace WebService_Lib.Server
                             if (payload is string) parameters.Add(payload);
                             else throw new InvokeInvalidParamException();
                             break;
+                        case MappingParams.PathParam:
+                            // Make generic path parameter instance
+                            var pathParamGenericType = typeof(PathParam<>);
+                            var constructType = pathParamGenericType.MakeGenericType(pathParamType);
+                            var pathParamObj = Activator.CreateInstance(constructType, pathParam);
+                            parameters.Add(pathParamObj);
+                            break;
                     }
                 }
                 // Invoke method
@@ -171,7 +189,8 @@ namespace WebService_Lib.Server
         {
             Auth,
             Text,
-            Json
+            Json,
+            PathParam,
         }
     }
 }
