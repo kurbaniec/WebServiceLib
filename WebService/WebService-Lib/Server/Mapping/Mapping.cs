@@ -55,9 +55,9 @@ namespace WebService_Lib.Server
                 if (customAttribute is IMethod attribute)
                 {
                     var parameters = method.GetParameters();
-                    if (parameters.Length > 2)
+                    if (parameters.Length > 3)
                     {
-                        Console.Error.WriteLine("Err: Wrong endpoint method syntax - more than two parameters");
+                        Console.Error.WriteLine("Err: Wrong endpoint method syntax - more than three parameters");
                         Console.Error.WriteLine("Err: Please correct method " + method.Name + " from Class " +
                                                 controller.GetType().FullName + " to restore functionality");
                         break;
@@ -80,7 +80,10 @@ namespace WebService_Lib.Server
                         {
                             mappingsParam.Add(MappingParams.Json);
                         }
-                        else if (parameter.ParameterType == typeof(PathParam<>))
+                        // In order to check generic types you must compare the original generic type,
+                        // not the concrete one
+                        // See: https://stackoverflow.com/a/457708/12347616
+                        else if (parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof(PathParam<>))
                         {
                             mappingsParam.Add(MappingParams.PathParam);
                             pathParam = parameter.ParameterType.GenericTypeArguments[0];
@@ -168,6 +171,7 @@ namespace WebService_Lib.Server
                             break;
                         case MappingParams.PathParam:
                             // Make generic path parameter instance
+                            // See: https://stackoverflow.com/a/43921901/12347616
                             var pathParamGenericType = typeof(PathParam<>);
                             var constructType = pathParamGenericType.MakeGenericType(pathParamType);
                             var pathParamObj = Activator.CreateInstance(constructType, pathParam);

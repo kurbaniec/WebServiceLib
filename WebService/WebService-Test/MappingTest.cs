@@ -108,6 +108,18 @@ namespace WebService_Test
             Assert.NotNull(response);
         }
 
+        [Test, TestCase(TestName = "Invoke endpoint with one parameter (PathParam)", Description =
+             "Invoke DELETE endpoint '/delete', defined in 'TestSecurity', with PathParam<int> parameter")]
+        public void InvokePathParam()
+        {
+            var pathParam = "1";
+
+            var mapping = new Mapping(new List<object> { this.controller });
+            var response = mapping.Invoke(Method.Delete, "/delete", null, null, pathParam);
+
+            Assert.NotNull(response);
+        }
+
         [Test, TestCase(TestName = "Make invalid invoke", Description =
              "Check if exception is thrown when an illegal parameter is used")]
         public void ExceptionThroughIllegalParam()
