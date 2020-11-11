@@ -31,7 +31,7 @@ namespace WebService_Test
             Assert.AreEqual(1, mapping.GetMappings[Method.Post].Count);
             Assert.AreEqual(1, mapping.GetMappings[Method.Put].Count);
             Assert.AreEqual(1, mapping.GetMappings[Method.Patch].Count);
-            Assert.AreEqual(1, mapping.GetMappings[Method.Delete].Count);
+            Assert.AreEqual(2, mapping.GetMappings[Method.Delete].Count);
         }
 
         [Test, TestCase(TestName = "Check endpoint paths", Description =
@@ -53,7 +53,7 @@ namespace WebService_Test
         public void InvokeNoParams()
         {
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Get, "/hi", null, null, null);
+            var response = mapping.Invoke(Method.Get, "/hi", null, null, null, null);
 
             Assert.NotNull(response);
         }
@@ -65,7 +65,7 @@ namespace WebService_Test
             var authDetails = new AuthDetails("test", "test");
 
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Get, "/secured", authDetails, null, null);
+            var response = mapping.Invoke(Method.Get, "/secured", authDetails, null, null, null);
 
             Assert.NotNull(response);
         }
@@ -78,7 +78,7 @@ namespace WebService_Test
             var plainText = "test";
 
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Post, "/secured2", authDetails, plainText, null);
+            var response = mapping.Invoke(Method.Post, "/secured2", authDetails, plainText, null, null);
 
             Assert.NotNull(response);
         }
@@ -90,7 +90,7 @@ namespace WebService_Test
             var json = new Dictionary<string, object> { ["test"] = 1 };
 
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Put, "/insert", null, json, null);
+            var response = mapping.Invoke(Method.Put, "/insert", null, json, null, null);
 
             Assert.NotNull(response);
         }
@@ -103,19 +103,31 @@ namespace WebService_Test
             var plainText = "test";
 
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Patch, "/patch", authDetails, plainText, null);
+            var response = mapping.Invoke(Method.Patch, "/patch", authDetails, plainText, null, null);
 
             Assert.NotNull(response);
         }
 
-        [Test, TestCase(TestName = "Invoke endpoint with one parameter (PathParam)", Description =
-             "Invoke DELETE endpoint '/delete', defined in 'TestSecurity', with PathParam<int> parameter")]
-        public void InvokePathParam()
+        [Test, TestCase(TestName = "Invoke endpoint with one parameter (PathVariable)", Description =
+             "Invoke DELETE endpoint '/delete', defined in 'TestSecurity', with PathVariable<int> parameter")]
+        public void InvokePathVariable()
         {
-            var pathParam = "1";
+            var pathVariable = "1";
 
             var mapping = new Mapping(new List<object> { this.controller });
-            var response = mapping.Invoke(Method.Delete, "/delete", null, null, pathParam);
+            var response = mapping.Invoke(Method.Delete, "/delete", null, null, pathVariable, null);
+
+            Assert.NotNull(response);
+        }
+        
+        [Test, TestCase(TestName = "Invoke endpoint with one parameter (RequestParam)", Description =
+             "Invoke DELETE endpoint '/delete2', defined in 'TestSecurity', with RequestParam parameter")]
+        public void InvokeRequestParam()
+        {
+            var requestParam = "id=1";
+
+            var mapping = new Mapping(new List<object> { this.controller });
+            var response = mapping.Invoke(Method.Delete, "/delete", null, null, null, requestParam);
 
             Assert.NotNull(response);
         }
@@ -129,7 +141,7 @@ namespace WebService_Test
 
             var mapping = new Mapping(new List<object> { this.controller });
 
-            Assert.Throws<InvokeInvalidParamException>(() => mapping.Invoke(Method.Patch, "/patch", authDetails, illegalParam, null));
+            Assert.Throws<InvokeInvalidParamException>(() => mapping.Invoke(Method.Patch, "/patch", authDetails, illegalParam, null, null));
         }
 
     }

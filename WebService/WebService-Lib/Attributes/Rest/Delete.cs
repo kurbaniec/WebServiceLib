@@ -6,12 +6,10 @@ namespace WebService_Lib.Attributes.Rest
     public class Delete : Attribute, IMethod
     {
         public string Path { get; }
-        public bool HasPathParam { get; }
 
-        public Delete(string path, bool hasPathParam = false)
+        public Delete(string path)
         {
             this.Path = path;
-            this.HasPathParam = hasPathParam;
         }
     }
 }
