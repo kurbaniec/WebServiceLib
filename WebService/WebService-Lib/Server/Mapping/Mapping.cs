@@ -83,9 +83,9 @@ namespace WebService_Lib.Server
                         // In order to check generic types you must compare the original generic type,
                         // not the concrete one
                         // See: https://stackoverflow.com/a/457708/12347616
-                        else if (parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof(PathParam<>))
+                        else if (parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof(PathVariable<>))
                         {
-                            mappingsParam.Add(MappingParams.PathParam);
+                            mappingsParam.Add(MappingParams.PathVariable);
                             pathParam = parameter.ParameterType.GenericTypeArguments[0];
                         }
                         else
@@ -169,10 +169,10 @@ namespace WebService_Lib.Server
                             if (payload is string) parameters.Add(payload);
                             else throw new InvokeInvalidParamException();
                             break;
-                        case MappingParams.PathParam:
+                        case MappingParams.PathVariable:
                             // Make generic path parameter instance
                             // See: https://stackoverflow.com/a/43921901/12347616
-                            var pathParamGenericType = typeof(PathParam<>);
+                            var pathParamGenericType = typeof(PathVariable<>);
                             var constructType = pathParamGenericType.MakeGenericType(pathParamType);
                             var pathParamObj = Activator.CreateInstance(constructType, pathParam);
                             parameters.Add(pathParamObj);
@@ -194,7 +194,8 @@ namespace WebService_Lib.Server
             Auth,
             Text,
             Json,
-            PathParam,
+            PathVariable,
+            RequestParam
         }
     }
 }

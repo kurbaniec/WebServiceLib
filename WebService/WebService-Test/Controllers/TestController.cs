@@ -54,7 +54,7 @@ namespace WebService_Test.Controllers
         }
 
         [Delete("/delete", hasPathParam: true)]
-        public Response DeleteId(PathParam<int> id)
+        public Response DeleteId(PathVariable<int> id)
         {
             return Response.Status(Status.Ok);
         }

@@ -32,6 +32,7 @@ namespace WebService_Lib
             }
 
             var mapping = new Mapping(container.GetObjects(result.Item2));
+
         }
     }
 }
