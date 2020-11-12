@@ -27,6 +27,6 @@ namespace MTCG.Cards.Monsters
             throw new System.NotImplementedException();
         }
 
-        
+
     }
 }
