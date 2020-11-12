@@ -16,6 +16,8 @@ namespace WebService_Lib.Server.RestServer.TcpClient
             return client.GetStream();
         }
         
+        
+        
         public void Dispose()
         {
             client.Close();
