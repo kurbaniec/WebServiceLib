@@ -5,6 +5,6 @@ namespace WebService_Lib.Server.RestServer.TcpClient
 {
     public interface ITcpClient : IDisposable
     {
-        Stream GetStream();
+        RequestContext? ReadRequest(in Mapping mapping);
     }
 }

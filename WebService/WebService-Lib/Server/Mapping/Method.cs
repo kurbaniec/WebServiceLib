@@ -21,17 +21,22 @@ namespace WebService_Lib.Server
             switch (method)
             {
                 case "get":
+                case "Get":
                     parsedMethod = Method.Get;
                     break;
                 case "post":
+                case "Post":
                     parsedMethod = Method.Post;
                     break;
                 case "put":
+                case "Put":
                     parsedMethod = Method.Put;
                     break;
                 case "delete":
+                case "Delete":
                     parsedMethod = Method.Delete;
                     break;
+                case "patch":
                 case "Patch":
                     parsedMethod = Method.Patch;
                     break;

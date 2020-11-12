@@ -52,81 +52,88 @@ namespace WebService_Lib.Server
                 // Get custom attribute 
                 // See: https://stackoverflow.com/a/6538438/12347616
                 var customAttribute = method.GetCustomAttribute(restMethod);
-                if (customAttribute is IMethod attribute)
+                if (!(customAttribute is IMethod attribute)) continue;
+                var parameters = method.GetParameters();
+                if (parameters.Length > 4)
                 {
-                    var parameters = method.GetParameters();
-                    if (parameters.Length > 4)
-                    {
-                        Console.Error.WriteLine("Err: Wrong endpoint method syntax - more than four parameters");
-                        Console.Error.WriteLine("Err: Please correct method " + method.Name + " from Class " +
-                                                controller.GetType().FullName + " to restore functionality");
-                        break;
-                    }
-
-                    var mappingsParam = new List<MappingParams>();
-                    var pathVariableType = (Type?)null;
-                    var error = false;
-                    foreach (var parameter in parameters)
-                    {
-                        if (parameter.ParameterType == typeof(AuthDetails))
-                        {
-                            mappingsParam.Add(MappingParams.Auth);
-                        }
-                        else if (parameter.ParameterType == typeof(string))
-                        {
-                            mappingsParam.Add(MappingParams.Text);
-                        }
-                        else if (parameter.ParameterType == typeof(Dictionary<string, object>))
-                        {
-                            mappingsParam.Add(MappingParams.Json);
-                        }
-                        // In order to check generic types you must compare the original generic type,
-                        // not the concrete one
-                        // See: https://stackoverflow.com/a/457708/12347616
-                        else if (parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof(PathVariable<>))
-                        {
-                            mappingsParam.Add(MappingParams.PathVariable);
-                            pathVariableType = parameter.ParameterType.GenericTypeArguments[0];
-                        }
-                        else if (parameter.ParameterType == typeof(RequestParam))
-                        {
-                            mappingsParam.Add(MappingParams.RequestParam);
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine("Err: Wrong endpoint method syntax - usage of not supported type " +
-                                                    mappingsParam.GetType());
-                            Console.Error.WriteLine("Err: Please correct method " + method.Name + " from Class " +
-                                                    controller.GetType().FullName + " to restore functionality");
-                            error = true;
-                            break;
-                        }
-                    }
-                    // Check if some parameters are duplicate
-                    // See: https://stackoverflow.com/a/972323/12347616
-                    var mappingCheck = Enum.GetValues(typeof(MappingParams)).Cast<MappingParams>();
-                    foreach (var mapping in mappingCheck)
-                    {
-                        // Count occurence
-                        // See: https://stackoverflow.com/a/21579086/12347616
-                        var count = mappingsParam.Count(c => c == mapping);
-                        if (count > 1)
-                        {
-                            Console.Error.WriteLine("Err: Duplicate parameter of for action " + mapping + " defined");
-                            Console.Error.WriteLine("Err: Please correct method " + method.Name + " from Class " +
-                                                    controller.GetType().FullName + " to restore functionality");
-                            error = true;
-                            break;
-                        }
-                    }
-                    if (error) break;
-
-                    var path = attribute.Path;
-                    var methodCaller = new MethodCaller(method, controller, mappingsParam, pathVariableType);
-                    mappings[MethodUtilities.GetMethod(restMethod)].Add(path, methodCaller);
+                    Console.Error.WriteLine("Err: Wrong endpoint method syntax - more than four parameters");
+                    Console.Error.WriteLine("Err: Please correct method " + method.Name + " from Class " +
+                                            controller.GetType().FullName + " to restore functionality");
                     break;
                 }
+
+                var mappingsParam = new List<MappingParams>();
+                var pathVariableType = (Type?)null;
+                var error = false;
+                foreach (var parameter in parameters)
+                {
+                    if (parameter.ParameterType == typeof(AuthDetails))
+                    {
+                        mappingsParam.Add(MappingParams.Auth);
+                    }
+                    else if (parameter.ParameterType == typeof(string))
+                    {
+                        mappingsParam.Add(MappingParams.Text);
+                    }
+                    else if (parameter.ParameterType == typeof(Dictionary<string, object>))
+                    {
+                        mappingsParam.Add(MappingParams.Json);
+                    }
+                    // In order to check generic types you must compare the original generic type,
+                    // not the concrete one
+                    // See: https://stackoverflow.com/a/457708/12347616
+                    else if (parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof(PathVariable<>))
+                    {
+                        mappingsParam.Add(MappingParams.PathVariable);
+                        pathVariableType = parameter.ParameterType.GenericTypeArguments[0];
+                    }
+                    else if (parameter.ParameterType == typeof(RequestParam))
+                    {
+                        mappingsParam.Add(MappingParams.RequestParam);
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("Err: Wrong endpoint method syntax - usage of not supported type " +
+                                                mappingsParam.GetType());
+                        Console.Error.WriteLine("Err: Please correct method " + method.Name + " from Class " +
+                                                controller.GetType().FullName + " to restore functionality");
+                        error = true;
+                        break;
+                    }
+                }
+                // Check if some parameters are duplicate
+                // See: https://stackoverflow.com/a/972323/12347616
+                var mappingCheck = Enum.GetValues(typeof(MappingParams)).Cast<MappingParams>();
+                foreach (var mapping in mappingCheck)
+                {
+                    // Count occurence
+                    // See: https://stackoverflow.com/a/21579086/12347616
+                    var count = mappingsParam.Count(c => c == mapping);
+                    if (count <= 1) continue;
+                    Console.Error.WriteLine("Err: Duplicate parameter of for action " + mapping + " defined");
+                    Console.Error.WriteLine("Err: Please correct method " + method.Name + " from Class " +
+                                            controller.GetType().FullName + " to restore functionality");
+                    error = true;
+                    break;
+                }
+                if (error) break;
+
+                var path = attribute.Path;
+                var methodCaller = new MethodCaller(method, controller, mappingsParam, pathVariableType);
+                mappings[MethodUtilities.GetMethod(restMethod)].Add(path, methodCaller);
+                break;
             }
+        }
+
+        /// <summary>
+        /// Checks if an endpoint for the given path exists.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <param name="path"></param>
+        /// <returns>True if an endpoint is mapped, else false.</returns>
+        public bool Contains(Method method, string path)
+        {
+            return mappings[method].ContainsKey(path);
         }
 
         /// <summary>
