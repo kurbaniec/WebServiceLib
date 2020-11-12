@@ -1,16 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using WebService_Lib.Server;
+using WebService_Lib.Server.RestServer;
+using WebService_Lib.Server.RestServer.TcpListener;
 
 namespace WebService_Lib
 {
     public class SimpleWebService
     {
-        private Scanner scanner;
-        private uint port;
+        private readonly Scanner scanner;
+        private Container container = null!;
+        private AuthCheck? authCheck;
+        private Mapping mapping = null!;
+        private RestServer? server;
+        private readonly uint port;
 
         public SimpleWebService(Assembly programAssembly, uint port = 8080)
         {
@@ -23,16 +27,23 @@ namespace WebService_Lib
         {
             Console.WriteLine("WebService has started...");
             var result = scanner.ScanAssembly();
-            var container = new Container(result.Item1);
-            var auth = (AuthCheck?)null;
+            container = new Container(result.Item1);
             if (result.Item3 != null)
             {
-                auth = new AuthCheck((ISecurity)container.GetContainer[result.Item3]);
-                container.Add(auth);
+                authCheck = new AuthCheck((ISecurity)container.GetContainer[result.Item3]);
+                container.Add(authCheck);
             }
+            mapping = new Mapping(container.GetObjects(result.Item2));
+            var listener = new RestListener(port);
+            server = new RestServer(listener, mapping, authCheck);
+            server.Start();
+        }
 
-            var mapping = new Mapping(container.GetObjects(result.Item2));
-
+        public void Stop()
+        {
+            if (server == null) return;
+            Console.WriteLine("Stopping WebService...");
+            server.Stop();
         }
     }
 }

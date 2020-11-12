@@ -78,7 +78,6 @@
         /// of your concrete <c>ISecurity</c> needs to build always the
         /// same token for the user.
         /// </summary>
-        /// <param name="token"></param>
         public void RevokeAuthenticationWithUsername(string username)
         {
             this.security.RevokeToken(this.security.GenerateToken(username));
