@@ -1,5 +1,5 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,42 +13,53 @@ namespace WebService_Lib.Server.RestServer
         private readonly ITcpListener server;
         private readonly Mapping mapping;
         private readonly AuthCheck? authCheck;
-        private ConcurrentBag<Task> tasks;
+        private readonly ConcurrentDictionary<string, Task> tasks;
         private bool listening;
+        private readonly CancellationTokenSource tokenSource;
 
         public RestServer(ITcpListener server, Mapping mapping, AuthCheck? authCheck)
         {
             this.server = server;
             this.mapping = mapping;
             this.authCheck = authCheck;
-            tasks = new ConcurrentBag<Task>();
+            tasks = new ConcurrentDictionary<string, Task>();
             listening = true;
+            // Generate cancellation token
+            // See: https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/how-to-cancel-a-task-and-its-children
+            tokenSource = new CancellationTokenSource();
         }
 
         public void Start()
         {
-            // Generate cancellation token
-            // See: https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/how-to-cancel-a-task-and-its-children
-            var tokenSource = new CancellationTokenSource();
-            var token = tokenSource.Token;
             server.Start();
-            
             // Wait for request and work through them
             // See: https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener?view=net-5.0#see-also
             while (listening)
             {
                 try
                 {
+                    // Get token
+                    var token = tokenSource.Token;
+                    // Generate GUID
+                    // See: https://stackoverflow.com/a/4421513/12347616
+                    var id = Guid.NewGuid().ToString();
                     var client = server.AcceptTcpClient();
-                    var task = Task.Run(() => Process(client, token), token);
-                    tasks.Add(task);
-
+                    var task = Task.Run(() => Process(client), token);
+                    tasks[id] = task;
+                    // Remove task from collection when finished
+                    // See: https://stackoverflow.com/a/6033036/12347616
+                    task.ContinueWith(t =>
+                    {
+                        if (t == null) return;
+                        tasks.TryRemove(id, out t);
+                        t.Dispose();
+                    }, token);
                 }
-                catch (SocketException e) { }
+                catch (SocketException) { }
             }
         }
 
-        private void Process(ITcpClient client, CancellationToken ct)
+        private void Process(ITcpClient client)
         {
             Response response;
             AuthDetails? auth = null;
@@ -71,7 +82,8 @@ namespace WebService_Lib.Server.RestServer
                     {
                         // If so, check credentials
                         var line = request.Header["Authorization"].Split(' ');
-                        string type = line[0], token = line[1];
+                        // string type = line[0]
+                        var token = line[1];
                         if (line.Length == 2)
                         {
                             if (authCheck.Authenticate(token))
@@ -99,7 +111,18 @@ namespace WebService_Lib.Server.RestServer
 
         public void Stop()
         {
-            // TODO clear tasks
+            // Stop listening
+            listening = false;
+            // Cleanup tasks
+            tokenSource.Cancel();
+            foreach (var task in tasks.Values)
+            {
+                if (!task.IsCompleted) task.Wait(100);
+                task.Dispose();
+            }
+            tasks.Clear();
+            // Stop listener
+            server.Stop();
         }
     }
 }
