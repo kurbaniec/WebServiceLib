@@ -14,22 +14,22 @@ namespace WebService_Lib.Server
         private bool isJSON;
 
         private uint status;
-        private string payload;
+        private string? payload;
 
-        public Response(uint status)
+        private Response(uint status)
         {
             this.isStatus = true;
             this.status = status;
         }
 
-        public Response(Status status)
+        private Response(Status status)
         {
             var code = (uint)status;
             this.isStatus = true;
             this.status = code;
         }
 
-        public Response(Dictionary<string, object> json)
+        private Response(Dictionary<string, object> json)
         {
             this.isJSON = true;
             // Deserialize json
@@ -37,7 +37,7 @@ namespace WebService_Lib.Server
             this.payload = JsonConvert.SerializeObject(json);
         }
 
-        public Response(string plainText)
+        private Response(string plainText)
         {
             this.isText = true;
             this.payload = plainText;

@@ -59,7 +59,7 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                         // Stop read process and Return null
                         if (!mapping.Contains((Method) method, path))
                         {
-                            reader.Close();
+                            //reader.Close();
                             return null;
                         }
                     }
@@ -78,7 +78,7 @@ namespace WebService_Lib.Server.RestServer.TcpClient
             
             if (path == null || version == null)
             {
-                reader.Close();
+                //reader.Close();
                 return null;
             }
             
@@ -100,11 +100,16 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                 RequestContext.ParsePayload(ref payload, header["Content-Type"]);
             }
 
-            reader.Close();
+            //reader.Close();
             return new RequestContext(method, path, version, header, payload, pathVariable, requestParam);
         }
-        
-        
+
+        public void SendResponse(in Response response)
+        {
+            
+        }
+
+
         public void Dispose()
         {
             client.Close();
