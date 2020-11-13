@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Net.Sockets;
 using System.Text;
 
 namespace WebService_Lib.Server.RestServer.TcpClient
@@ -51,17 +51,15 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                         path = path.Substring(0, path.LastIndexOf('?') - 1);
                     }
 
-                    if (!mapping.Contains((Method) method, path))
+                    if (!mapping.Contains(method, path))
                     {
                         pathVariable = path.Substring(path.LastIndexOf('/') + 1);
-                        path = path.Substring(0, path.LastIndexOf('/') - 1);
+                        // Use Math.Max to counter negative values in paths like '/'
+                        path = path.Substring(0, Math.Max(path.LastIndexOf('/') - 1, 0));
                         // No mapping for this endpoint found
                         // Stop read process and Return null
-                        if (!mapping.Contains((Method) method, path))
-                        {
-                            //reader.Close();
-                            return null;
-                        }
+                        if (!mapping.Contains(method, path)) return null;
+                        
                     }
                     first = false;
                 }
@@ -69,19 +67,11 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                 {
                     var info = line.Split(':');
                     header.Add(info[0], info[1]);
-                    if (info[0] == "Content-Length")
-                    {
-                        contentLength = int.Parse(info[1]);
-                    }
+                    if (info[0] == "Content-Length") contentLength = int.Parse(info[1]);
                 }
             }
             
-            if (path == null || version == null)
-            {
-                //reader.Close();
-                return null;
-            }
-            
+            if (path == null || version == null) return null;
             
             // Read http body (when existing)
             if (contentLength > 0 && header.ContainsKey("Content-Type"))
@@ -99,14 +89,39 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                 payload = data.ToString();
                 RequestContext.ParsePayload(ref payload, header["Content-Type"]);
             }
-
-            //reader.Close();
+            
             return new RequestContext(method, path, version, header, payload, pathVariable, requestParam);
         }
 
         public void SendResponse(in Response response)
         {
-            
+            StreamWriter writer = new StreamWriter(client.GetStream(), Encoding.UTF8) { AutoFlush = true};
+            writer.Write($"HTTP/1.1 {response.StatusCode} {response.StatusName}\r\n");
+            writer.Write("Server: WebService_Lib\r\n");
+            writer.Write("Connection: close\r\n");
+            if (response.IsStatus)
+            {
+                // Send no payload
+                writer.Write("\r\n");
+                writer.Close();
+            }
+            else
+            {
+                // Send payload
+                // See: https://riptutorial.com/dot-net/example/88/sending-a-post-request-with-a-string-payload-using-system-net-webclient
+                // And: https://stackoverflow.com/a/4414118/12347616
+                writer.Write($"Content-Type: {response.ContentType}\r\n");
+                //var data = Encoding.UTF8.GetBytes(response.Payload!);
+                //var payload = Encoding.UTF8.GetPreamble().Concat(data).ToArray();
+                var payload = Encoding.UTF8.GetBytes(response.Payload!);
+                var length = payload.Length;
+                writer.Write($"Content-Length: {length}\r\n");
+                writer.Write("\r\n");
+                // Send proper string (and not 'System.Byte[}')
+                // See: https://stackoverflow.com/a/10940923/12347616
+                writer.Write(Encoding.UTF8.GetString(payload));
+                writer.Close();
+            }
         }
 
 
