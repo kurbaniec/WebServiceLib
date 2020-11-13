@@ -132,17 +132,5 @@ namespace WebService_Test
             Assert.NotNull(response);
         }
 
-        [Test, TestCase(TestName = "Make invalid invoke", Description =
-             "Check if exception is thrown when an illegal parameter is used")]
-        public void ExceptionThroughIllegalParam()
-        {
-            var authDetails = new AuthDetails("test", "test");
-            var illegalParam = 42L;
-
-            var mapping = new Mapping(new List<object> { this.controller });
-
-            Assert.Throws<InvokeInvalidParamException>(() => mapping.Invoke(Method.Patch, "/patch", authDetails, illegalParam, null, null));
-        }
-
     }
 }

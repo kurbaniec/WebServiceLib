@@ -2,25 +2,32 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using WebService_Lib;
-using WebService_Test.Components;
+using WebService_Lib.Attributes;
 using WebService_Test.Controllers;
 
-namespace WebService_Test
+namespace WebService_Test.Unit
 {
     public class ContainerTests
     {
-        [SetUp]
-        public void Setup()
+
+        // Dummy classes to test functionality
+        [Component]
+        class DummyComponent {}
+
+        [Controller]
+        class DummyController
         {
+            [Autowired] private DummyComponent component;
+            public DummyComponent Component => component;
         }
 
         [Test, TestCase(TestName = "Count instances in Container", Description =
              "Counts instances initialized by the Container from the component list")]
         public void CountInstances()
         {
-            var logger = typeof(TestLogger);
-            var controller = typeof(TestController);
-            var components = new List<Type> { logger, controller };
+            var dummy = typeof(DummyComponent);
+            var controller = typeof(DummyController);
+            var components = new List<Type> { dummy, controller };
 
             var container = new Container(components).GetContainer;
 
@@ -31,14 +38,14 @@ namespace WebService_Test
              "Check if the instances initialized by the Container match the given components")]
         public void CheckTypes()
         {
-            var logger = typeof(TestLogger);
-            var controller = typeof(TestController);
-            var components = new List<Type> { logger, controller };
+            var dummy = typeof(DummyComponent);
+            var controller = typeof(DummyController);
+            var components = new List<Type> { dummy, controller };
 
             var container = new Container(components).GetContainer;
 
-            Assert.IsTrue(container.ContainsKey(logger));
-            Assert.AreEqual(logger, container[logger].GetType());
+            Assert.IsTrue(container.ContainsKey(dummy));
+            Assert.AreEqual(dummy, container[dummy].GetType());
             Assert.IsTrue(container.ContainsKey(controller));
             Assert.AreEqual(controller, container[controller].GetType());
         }
@@ -47,14 +54,14 @@ namespace WebService_Test
              "Check if field 'logger' in 'TestController' is automatically set to the instance of 'TestLogger'")]
         public void TestAutowiring()
         {
-            var logger = typeof(TestLogger);
-            var controller = typeof(TestController);
-            var components = new List<Type> { logger, controller };
+            var dummy = typeof(DummyComponent);
+            var controller = typeof(DummyController);
+            var components = new List<Type> { dummy, controller };
 
             var container = new Container(components).GetContainer;
 
-            var controllerInstance = (TestController)container[controller];
-            Assert.NotNull(controllerInstance.Logger);
+            var controllerInstance = (DummyController)container[controller];
+            Assert.NotNull(controllerInstance.Component);
         }
     }
 }

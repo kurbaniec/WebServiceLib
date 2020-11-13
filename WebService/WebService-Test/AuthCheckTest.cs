@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using WebService_Lib;
+using WebService_Lib.Attributes;
 using WebService_Test.Components;
 using WebService_Test.Controllers;
 using WebService_Test.Securities;
@@ -10,13 +11,29 @@ namespace WebService_Test
 {
     public class AuthCheckTest
     {
-        private ISecurity security;
+        // Dummy class to test functionality
+        [Security]
+        class DummySecurity : ISecurity
+        {
+            public AuthDetails AuthDetails(string token)
+            {
+                var username = token.Substring(0, token.Length - 6);
+                return new AuthDetails(token, username);
+            }
+            private readonly HashSet<string> tokens = new HashSet<string>();
+            public bool Authenticate(string token) => tokens.Contains(token);
+            public string GenerateToken(string username) => username + "-token";
+            public void AddToken(string token) => tokens.Add(token);
+            public void RevokeToken(string token) => tokens.Remove(token);
+            public List<string> SecurePaths() => new List<string> { "/secured" };
+            public bool CheckCredentials(string username, string password) => (username == "admin" && password == "admin");
+        }
+        
+        private ISecurity security = null!;
 
         [OneTimeSetUp]
-        public void Setup()
-        {
-            security = new TestSecurity();
-        }
+        public void Setup() => security = new TestSecurity();
+        
 
         [Test, TestCase(TestName = "Check secured path", Description =
              "Check if secured path, defined in 'TestSecurity', is really secured")]
@@ -44,8 +61,6 @@ namespace WebService_Test
              "Check if authentication, defined in 'TestSecurity', is correctly handled with correct credentials")]
         public void CheckAuthenticationCorrectCredentials()
         {
-            var correctCredentials = security.CheckCredentials("admin", "admin");
-
             var authCheck = new AuthCheck(security);
 
             var isAuthenticated = authCheck.Authenticate("admin", "admin");
