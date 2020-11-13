@@ -48,14 +48,14 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                     if (path.LastIndexOf('?') != -1)
                     {
                         requestParam = path.Substring(path.LastIndexOf('?') + 1);
-                        path = path.Substring(0, path.LastIndexOf('?') - 1);
+                        path = path.Substring(0, path.LastIndexOf('?'));
                     }
 
                     if (!mapping.Contains(method, path))
                     {
                         pathVariable = path.Substring(path.LastIndexOf('/') + 1);
                         // Use Math.Max to counter negative values in paths like '/'
-                        path = path.Substring(0, Math.Max(path.LastIndexOf('/') - 1, 0));
+                        path = path.Substring(0, Math.Max(path.LastIndexOf('/'), 0));
                         // No mapping for this endpoint found
                         // Stop read process and Return null
                         if (!mapping.Contains(method, path)) return null;
@@ -66,7 +66,7 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                 else
                 {
                     var info = line.Split(':');
-                    header.Add(info[0], info[1]);
+                    header.Add(info[0].Trim(), info[1].Trim());
                     if (info[0] == "Content-Length") contentLength = int.Parse(info[1]);
                 }
             }

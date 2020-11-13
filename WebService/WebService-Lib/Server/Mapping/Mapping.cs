@@ -186,7 +186,6 @@ namespace WebService_Lib.Server
             /// <param name="payload"></param>
             /// <param name="pathVariable"></param>
             /// <param name="requestParam"></param>
-            /// <exception>Throws an exception when invalid parameters are given</exception>
             /// <returns>Response as a Response object</returns>
             public Response Invoke(AuthDetails? authDetails, object? payload, string? pathVariable, string? requestParam)
             {
@@ -199,12 +198,10 @@ namespace WebService_Lib.Server
                             parameters.Add(authDetails);
                             break;
                         case MappingParams.Json:
-                            if (payload is Dictionary<string, object>) parameters.Add(payload);
-                            else throw new InvokeInvalidParamException();
+                            parameters.Add(payload is Dictionary<string, object> ? payload : null);
                             break;
                         case MappingParams.Text:
-                            if (payload is string) parameters.Add(payload);
-                            else throw new InvokeInvalidParamException();
+                            parameters.Add(payload is string ? payload : null);
                             break;
                         case MappingParams.PathVariable:
                             // Make generic path parameter instance

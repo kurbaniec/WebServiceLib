@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace WebService_Lib.Server.RestServer
@@ -60,7 +61,15 @@ namespace WebService_Lib.Server.RestServer
                     {
                         payload = "{}";
                     }
-                    payload = JsonConvert.DeserializeObject<Dictionary<string, object>>((string)payload);
+
+                    try
+                    {
+                        payload = JsonConvert.DeserializeObject<Dictionary<string, object>>((string) payload);
+                    }
+                    catch (Exception)
+                    {
+                        payload = null;
+                    }
                     break;
                 default:
                     payload = null;
