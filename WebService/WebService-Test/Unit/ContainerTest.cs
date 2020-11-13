@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using WebService_Lib;
 using WebService_Lib.Attributes;
-using WebService_Test.Controllers;
 
 namespace WebService_Test.Unit
 {

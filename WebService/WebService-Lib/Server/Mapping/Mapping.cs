@@ -169,14 +169,14 @@ namespace WebService_Lib.Server
             private readonly MethodInfo method;
             private readonly object instance;
             private readonly List<MappingParams> paramInfo;
-            private readonly Type? pathParamType;
+            private readonly Type? pathVariableType;
 
-            public MethodCaller(MethodInfo method, object instance, List<MappingParams> paramInfo, Type? pathParamType)
+            public MethodCaller(MethodInfo method, object instance, List<MappingParams> paramInfo, Type? pathVariableType)
             {
                 this.method = method;
                 this.instance = instance;
                 this.paramInfo = paramInfo;
-                this.pathParamType = pathParamType;
+                this.pathVariableType = pathVariableType;
             }
 
             /// <summary>
@@ -207,7 +207,7 @@ namespace WebService_Lib.Server
                             // Make generic path parameter instance
                             // See: https://stackoverflow.com/a/43921901/12347616
                             var pathParamGenericType = typeof(PathVariable<>);
-                            var constructType = pathParamGenericType.MakeGenericType(pathParamType);
+                            var constructType = pathParamGenericType.MakeGenericType(pathVariableType);
                             var pathParamObj = Activator.CreateInstance(constructType, pathVariable);
                             parameters.Add(pathParamObj);
                             break;

@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 using WebService_Lib;
 using WebService_Lib.Attributes;
-using WebService_Test.Components;
-using WebService_Test.Controllers;
-using WebService_Test.Securities;
 
-namespace WebService_Test
+namespace WebService_Test.Unit
 {
     public class AuthCheckTest
     {
         // Dummy class to test functionality
         [Security]
-        class DummySecurity : ISecurity
+        private class DummySecurity : ISecurity
         {
             public AuthDetails AuthDetails(string token)
             {
@@ -32,7 +28,7 @@ namespace WebService_Test
         private ISecurity security = null!;
 
         [OneTimeSetUp]
-        public void Setup() => security = new TestSecurity();
+        public void Setup() => security = new DummySecurity();
         
 
         [Test, TestCase(TestName = "Check secured path", Description =

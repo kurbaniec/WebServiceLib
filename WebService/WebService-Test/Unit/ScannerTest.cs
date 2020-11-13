@@ -1,29 +1,51 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using NUnit.Framework;
 using WebService_Lib;
-using WebService_Test.Components;
-using WebService_Test.Controllers;
-using WebService_Test.Dummy;
-using WebService_Test.Securities;
+using WebService_Lib.Attributes;
 
 namespace WebService_Test.Unit
 {
     public class ScannerTests
     {
+        // Dummy classes to simulate assembly
+        [Component]
+        private class DummyComponent {}
+        [Component]
+        private class AnotherDummyComponent {}
+        [Controller]
+        private class DummyController {}
+        [Security]
+        private class FaultySecurity {}
+
+        [Security]
+        private class DummySecurity : ISecurity
+        {
+            public AuthDetails AuthDetails(string token)
+            {
+                var username = token.Substring(0, token.Length - 6);
+                return new AuthDetails(token, username);
+            }
+            private readonly HashSet<string> tokens = new HashSet<string>();
+            public bool Authenticate(string token) => tokens.Contains(token);
+            public string GenerateToken(string username) => username + "-token";
+            public void AddToken(string token) => tokens.Add(token);
+            public void RevokeToken(string token) => tokens.Remove(token);
+            public List<string> SecurePaths() => new List<string> { "/secured" };
+            public bool CheckCredentials(string username, string password) => (username == "admin" && password == "admin");
+        }
+        
         private List<Type> assembly = null!;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            Type logger = typeof(TestLogger);
-            Type controller = typeof(TestController);
-            Type dummy = typeof(DummyClass);
-            Type wrongSecurity = typeof(WrongSecurity);
-            Type security = typeof(TestSecurity);
-            assembly = new List<Type> { logger, controller, dummy, wrongSecurity, security };
+            Type dummy = typeof(DummyComponent);
+            Type otherDummy = typeof(AnotherDummyComponent);
+            Type controller = typeof(DummyController);
+            Type faultySecurity = typeof(FaultySecurity);
+            Type security = typeof(DummySecurity);
+            assembly = new List<Type> { dummy, otherDummy, controller, faultySecurity, security };
         }
 
         [Test, TestCase(TestName = "Count components", Description =
@@ -34,7 +56,7 @@ namespace WebService_Test.Unit
 
             var result = scanner.ScanAssembly();
 
-            Assert.AreEqual(3, result.Item1.Count);
+            Assert.AreEqual(4, result.Item1.Count);
         }
 
         [Test, TestCase(TestName = "Check components types", Description =
@@ -45,9 +67,10 @@ namespace WebService_Test.Unit
 
             var result = scanner.ScanAssembly();
 
-            Assert.Contains(typeof(TestLogger), result.Item1);
-            Assert.Contains(typeof(TestController), result.Item1);
-            Assert.Contains(typeof(TestSecurity), result.Item1);
+            Assert.Contains(typeof(DummyComponent), result.Item1);
+            Assert.Contains(typeof(AnotherDummyComponent), result.Item1);
+            Assert.Contains(typeof(DummyController), result.Item1);
+            Assert.Contains(typeof(DummySecurity), result.Item1);
         }
 
         [Test, TestCase(TestName = "Count controllers", Description =
@@ -69,7 +92,7 @@ namespace WebService_Test.Unit
 
             var result = scanner.ScanAssembly();
 
-            Assert.Contains(typeof(TestController), result.Item1);
+            Assert.Contains(typeof(DummyController), result.Item1);
         }
 
         [Test, TestCase(TestName = "Security exists", Description =
@@ -92,7 +115,7 @@ namespace WebService_Test.Unit
 
             var result = scanner.ScanAssembly();
 
-            Assert.AreEqual(typeof(TestSecurity), result.Item3);
+            Assert.AreEqual(typeof(DummySecurity), result.Item3);
         }
     }
 }
