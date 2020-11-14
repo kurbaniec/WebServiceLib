@@ -8,16 +8,19 @@ using WebService_Lib.Server.RestServer.TcpListener;
 
 namespace WebService_Lib.Server.RestServer
 {
+    /// <summary>
+    /// <c>RestServer</c> listens for new request, invokes corresponding mappings and returns their response.
+    /// </summary>
     public class RestServer
     {
         private readonly ITcpListener server;
-        private readonly Mapping mapping;
+        private readonly IMapping mapping;
         private readonly AuthCheck? authCheck;
         private readonly ConcurrentDictionary<string, Task> tasks;
         private bool listening;
         private readonly CancellationTokenSource tokenSource;
 
-        public RestServer(ITcpListener server, Mapping mapping, AuthCheck? authCheck)
+        public RestServer(ITcpListener server, IMapping mapping, AuthCheck? authCheck)
         {
             this.server = server;
             this.mapping = mapping;
@@ -29,6 +32,10 @@ namespace WebService_Lib.Server.RestServer
             tokenSource = new CancellationTokenSource();
         }
 
+        /// <summary>
+        /// Starts the server.
+        /// For every request a new Task is spawned to work off multiple request at once.
+        /// </summary>
         public void Start()
         {
             server.Start();
@@ -59,6 +66,10 @@ namespace WebService_Lib.Server.RestServer
             }
         }
 
+        /// <summary>
+        /// Processes a new client request and returns a response to them.
+        /// </summary>
+        /// <param name="client"></param>
         private void Process(ITcpClient client)
         {
             Response response;
@@ -109,6 +120,10 @@ namespace WebService_Lib.Server.RestServer
             client.SendResponse(response);
         }
 
+        /// <summary>
+        /// Stops the server.
+        /// Disposes all created tasks and closes the socket.
+        /// </summary>
         public void Stop()
         {
             // Stop listening

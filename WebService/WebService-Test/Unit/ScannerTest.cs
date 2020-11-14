@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using NUnit.Framework;
 using WebService_Lib;
 using WebService_Lib.Attributes;
@@ -115,6 +117,25 @@ namespace WebService_Test.Unit
 
             var result = scanner.ScanAssembly();
 
+            Assert.AreEqual(typeof(DummySecurity), result.Item3);
+        }
+        
+        [Test, TestCase(TestName = "Check components, controllers and security config with extracted execution assembly", 
+             Description = "Check components, controllers and security config from extracted execution Assembly")]
+        public void UseRealAssembly()
+        {
+            // Use assembly of this class
+            var executionAssembly = Assembly.GetExecutingAssembly().GetTypes().ToList();
+            var scanner = new Scanner(executionAssembly);
+
+            var result = scanner.ScanAssembly();
+            
+            Assert.NotNull(result.Item3);
+            Assert.Contains(typeof(DummyComponent), result.Item1);
+            Assert.Contains(typeof(AnotherDummyComponent), result.Item1);
+            Assert.Contains(typeof(DummyController), result.Item1);
+            Assert.Contains(typeof(DummySecurity), result.Item1);
+            Assert.Contains(typeof(DummyController), result.Item2);
             Assert.AreEqual(typeof(DummySecurity), result.Item3);
         }
     }

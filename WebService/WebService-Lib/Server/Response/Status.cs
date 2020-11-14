@@ -1,5 +1,8 @@
 ﻿namespace WebService_Lib.Server
 {
+    /// <summary>
+    /// Enum consisting of all supported http status codes.
+    /// </summary>
     public enum Status
     {
         Ok = 200,

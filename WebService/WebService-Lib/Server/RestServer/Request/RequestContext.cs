@@ -10,14 +10,6 @@ namespace WebService_Lib.Server.RestServer
     /// </summary>
     public class RequestContext
     {
-        /**
-        Implement the HTTP format, so that you
-        can read the HTTP-Verb, the resource requested and the http-version
-        can read the further header values and manage it as a key-value pair
-        can read the payload correctly as plaintext (text/plain MIME-Type).
-        Create a class containing these values called RequestContext and make it available to
-        the endpoint-handlers.
-         */
         public Method Method;
         public string Path;
         public string Version;
@@ -61,7 +53,6 @@ namespace WebService_Lib.Server.RestServer
                     {
                         payload = "{}";
                     }
-
                     try
                     {
                         payload = JsonConvert.DeserializeObject<Dictionary<string, object>>((string) payload);

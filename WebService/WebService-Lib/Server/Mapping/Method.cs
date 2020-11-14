@@ -3,6 +3,9 @@ using WebService_Lib.Attributes.Rest;
 
 namespace WebService_Lib.Server
 {
+    /// <summary>
+    /// Enum that lists all possible REST methods.
+    /// </summary>
     public enum Method
     {
         Get,
@@ -12,8 +15,18 @@ namespace WebService_Lib.Server
         Patch,
     }
 
+    /// <summary>
+    /// Utility class to work with <c>Method</c> enums.
+    /// </summary>
     public static class MethodUtilities
     {
+        /// <summary>
+        /// Return the corresponding REST method through its name.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns>
+        /// Corresponding REST Method, defaults to GET in error case.
+        /// </returns>
         public static Method GetMethod(string method)
         {
             method = method.ToLower();
@@ -21,23 +34,18 @@ namespace WebService_Lib.Server
             switch (method)
             {
                 case "get":
-                case "Get":
                     parsedMethod = Method.Get;
                     break;
                 case "post":
-                case "Post":
                     parsedMethod = Method.Post;
                     break;
                 case "put":
-                case "Put":
                     parsedMethod = Method.Put;
                     break;
                 case "delete":
-                case "Delete":
                     parsedMethod = Method.Delete;
                     break;
                 case "patch":
-                case "Patch":
                     parsedMethod = Method.Patch;
                     break;
                 default:
@@ -48,6 +56,13 @@ namespace WebService_Lib.Server
             return parsedMethod;
         }
 
+        /// <summary>
+        /// Return the corresponding REST method through a given attribute.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns>
+        /// Corresponding REST Method, defaults to GET in error case.
+        /// </returns>
         public static Method GetMethod(Type method)
         {
             Method parsedMethod;

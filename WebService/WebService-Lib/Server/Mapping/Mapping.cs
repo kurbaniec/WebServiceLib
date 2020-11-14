@@ -11,7 +11,7 @@ namespace WebService_Lib.Server
     /// Maps the paths of the service endpoint to their corresponding methods.
     /// Is also responsible for their invocation.
     /// </summary>
-    public class Mapping
+    public class Mapping : IMapping
     {
         private Dictionary<Method, Dictionary<string, MethodCaller>> mappings;
         public Dictionary<Method, Dictionary<string, MethodCaller>> GetMappings => mappings;
@@ -146,8 +146,7 @@ namespace WebService_Lib.Server
         /// <param name="pathVariable"></param>
         /// <param name="requestParam"></param>
         /// <exception>
-        /// Throws an exception when invalid parameters are given or when the given endpoint
-        /// does not exist.
+        /// Throws an exception when the given endpoint does not exist.
         /// </exception>
         /// <returns>Response as a Response object</returns>
         public Response Invoke(

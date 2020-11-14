@@ -3,6 +3,9 @@ using WebService_Lib.Server.RestServer.TcpClient;
 
 namespace WebService_Lib.Server.RestServer.TcpListener
 {
+    /// <summary>
+    /// Custom TcpListener for usage with REST workloads.
+    /// </summary>
     public class RestListener : ITcpListener
     {
         private readonly System.Net.Sockets.TcpListener server;
@@ -13,16 +16,27 @@ namespace WebService_Lib.Server.RestServer.TcpListener
             server = new System.Net.Sockets.TcpListener(localAddr, (int) port);
         }
         
+        /// <summary>
+        /// Start listening for requests.
+        /// </summary>
         public void Start()
         {
             server.Start();
         }
 
+        /// <summary>
+        /// Return a new <c>ITcpClient</c> when a new connection
+        /// is made.
+        /// </summary>
+        /// <returns><c>ITcpClient</c> for the new connection</returns>
         public ITcpClient AcceptTcpClient()
         {
             return new RestClient(server.AcceptTcpClient());
         }
 
+        /// <summary>
+        /// Stop listening for requests.
+        /// </summary>
         public void Stop()
         {
             server.Stop();

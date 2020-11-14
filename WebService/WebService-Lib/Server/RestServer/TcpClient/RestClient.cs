@@ -5,6 +5,9 @@ using System.Text;
 
 namespace WebService_Lib.Server.RestServer.TcpClient
 {
+    /// <summary>
+    /// Custom TcpClient for usage with REST workloads.
+    /// </summary>
     public class RestClient : ITcpClient
     {
         private readonly System.Net.Sockets.TcpClient client;
@@ -14,7 +17,15 @@ namespace WebService_Lib.Server.RestServer.TcpClient
             this.client = client;
         }
 
-        public RequestContext? ReadRequest(in Mapping mapping)
+        /// <summary>
+        /// Read an incoming REST request.
+        /// </summary>
+        /// <param name="mapping"></param>
+        /// <returns>
+        /// The received request as a <c>RequestContext</c> or null
+        /// when given endpoint does not exists or an error occurs. 
+        /// </returns>
+        public RequestContext? ReadRequest(in IMapping mapping)
         {
             // Read request
             // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages
@@ -93,6 +104,10 @@ namespace WebService_Lib.Server.RestServer.TcpClient
             return new RequestContext(method, path, version, header, payload, pathVariable, requestParam);
         }
 
+        /// <summary>
+        /// Send a given REST response.
+        /// </summary>
+        /// <param name="response"></param>
         public void SendResponse(in Response response)
         {
             StreamWriter writer = new StreamWriter(client.GetStream(), Encoding.UTF8) { AutoFlush = true};
@@ -124,7 +139,9 @@ namespace WebService_Lib.Server.RestServer.TcpClient
             }
         }
 
-
+        /// <summary>
+        /// Dispose the client.
+        /// </summary>
         public void Dispose()
         {
             client.Close();

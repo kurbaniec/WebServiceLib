@@ -9,10 +9,10 @@ namespace WebService_Lib
 {
     public class SimpleWebService
     {
-        private readonly Scanner scanner;
-        private Container container = null!;
+        private readonly IScanner scanner;
+        private IContainer container = null!;
+        private IMapping mapping = null!;
         private AuthCheck? authCheck;
-        private Mapping mapping = null!;
         private RestServer? server;
         private readonly uint port;
 
