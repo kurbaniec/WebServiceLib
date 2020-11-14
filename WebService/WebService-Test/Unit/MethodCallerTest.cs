@@ -19,6 +19,9 @@ namespace WebService_Test.Unit
                 => Response.Status(Status.Ok);
             public Response MyMethod3B(RequestParam rv, object? payload, AuthDetails? auth)
                 => Response.Status(Status.Ok);
+            
+            public Response MyMethod3C(string? payload, AuthDetails? auth, PathVariable<int> pv)
+                => Response.Status(Status.Ok);
         }
         
         
@@ -108,6 +111,25 @@ namespace WebService_Test.Unit
 
             var response 
                 = methodCaller.Invoke(null, new Dictionary<string, object>() {["a"]="b"}, null, null);
+            
+            Assert.NotNull(response);
+            Assert.IsTrue(response.IsStatus);
+        }
+        
+        [Test, TestCase(TestName = "Invoke alternative endpoint with 3 parameter", Description =
+             "Invoke endpoint function 'MyMethod3C' defined in 'DummyEndpoint' that takes 3 parameter")]
+        public void InvokeWith3ParametersC()
+        {
+            var methodInfo = typeof(DummyEndpoint).GetMethods();
+            var method = methodInfo.Single(m => m.Name == "MyMethod3C");
+            var instance = new DummyEndpoint();
+            var mappingParams = new List<Mapping.MappingParams>() 
+                {Mapping.MappingParams.Text, Mapping.MappingParams.Auth, Mapping.MappingParams.PathVariable};
+            var pathVariableType = typeof(int);
+            var methodCaller = new Mapping.MethodCaller(method, instance, mappingParams, pathVariableType);
+
+            var response 
+                = methodCaller.Invoke(new AuthDetails("admin", "admin"), "payload!", "42", null);
             
             Assert.NotNull(response);
             Assert.IsTrue(response.IsStatus);

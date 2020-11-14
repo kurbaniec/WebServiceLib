@@ -30,28 +30,15 @@ namespace WebService_Lib.Server
         public static Method GetMethod(string method)
         {
             method = method.ToLower();
-            Method parsedMethod;
-            switch (method)
+            Method parsedMethod = method switch
             {
-                case "get":
-                    parsedMethod = Method.Get;
-                    break;
-                case "post":
-                    parsedMethod = Method.Post;
-                    break;
-                case "put":
-                    parsedMethod = Method.Put;
-                    break;
-                case "delete":
-                    parsedMethod = Method.Delete;
-                    break;
-                case "patch":
-                    parsedMethod = Method.Patch;
-                    break;
-                default:
-                    parsedMethod = Method.Get;
-                    break;
-            }
+                "get" => Method.Get,
+                "post" => Method.Post,
+                "put" => Method.Put,
+                "delete" => Method.Delete,
+                "patch" => Method.Patch,
+                _ => Method.Get
+            };
 
             return parsedMethod;
         }
@@ -70,7 +57,8 @@ namespace WebService_Lib.Server
             {
                 return Method.Get;
             }
-            else if (method == typeof(Post))
+
+            if (method == typeof(Post))
             {
                 return Method.Post;
             }
