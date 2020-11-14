@@ -112,7 +112,7 @@ namespace WebService_Lib.Server.RestServer.TcpClient
         /// <param name="response"></param>
         public void SendResponse(in Response response)
         {
-            StreamWriter writer = new StreamWriter(client.GetStream(), Encoding.UTF8) { AutoFlush = true};
+            StreamWriter writer = new StreamWriter(client.GetStream()) { AutoFlush = true};
             writer.Write($"HTTP/1.1 {response.StatusCode} {response.StatusName}\r\n");
             writer.Write("Server: WebService_Lib\r\n");
             writer.Write("Connection: close\r\n");

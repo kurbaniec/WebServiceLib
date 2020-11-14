@@ -1,12 +1,10 @@
-﻿using System;
-using System.Reflection;
-using WebService_Lib;
+﻿using WebService_Lib;
 
 namespace WebService
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             var service = new SimpleWebService();
             service.Start();
