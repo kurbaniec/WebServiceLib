@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace WebService_Lib.Server.RestServer
@@ -66,6 +68,51 @@ namespace WebService_Lib.Server.RestServer
                     payload = null;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Return RequestContext in a loggable form.
+        /// </summary>
+        /// <returns>String with a beautified RequestContext</returns>
+        public override string ToString()
+        {
+            var output = new StringBuilder();
+            var header = new StringBuilder();
+            foreach (KeyValuePair<string, string> entry in Header)
+            {
+                header.AppendLine($"|| {entry.Key}: {entry.Value}");
+            }
+            output.AppendLine("//==========");
+            output.AppendLine($"|| {Method} {Path} {Version}");
+            if (PathVariable != null || RequestParam != null)
+            {
+                output.AppendLine("||----------");
+                if (PathVariable != null) output.AppendLine($"|| PathVariable: {PathVariable}");
+                else if (RequestParam != null) output.AppendLine($"|| RequestParam: {RequestParam}");
+            }
+            output.AppendLine("||----------");
+            if (header.Length != 0)
+            {
+                output.AppendLine("|| Header:");
+                output.Append(header);
+            }
+            if (Payload != null)
+            {
+                output.AppendLine("||----------");
+                output.AppendLine("||Payload:");
+                switch (Payload)
+                {
+                    case string plaintext:
+                        output.AppendLine(plaintext);
+                        break;
+                    case Dictionary<string, object> json:
+                        output.AppendLine(
+                            "{" + string.Join(",", json.Select(kv => kv.Key + "=" + kv.Value).ToArray()) + "}");
+                        break;
+                }
+            }
+            output.AppendLine("\\\\==========");
+            return output.ToString();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace WebService
     {
         static void Main(string[] args)
         {
-            var service = new SimpleWebService(Assembly.GetExecutingAssembly());
+            var service = new SimpleWebService();
             service.Start();
         }
     }

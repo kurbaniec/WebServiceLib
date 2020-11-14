@@ -44,6 +44,7 @@ namespace WebService_Lib.Server.RestServer.TcpClient
             string? line;
             var contentLength = 0;
             bool first = true;
+            bool noMapping = false;
             // Read http header information until blank line before payload (when existing)
             while (!string.IsNullOrWhiteSpace(line = reader.ReadLine()))
             {
@@ -68,8 +69,7 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                         // Use Math.Max to counter negative values in paths like '/'
                         path = path.Substring(0, Math.Max(path.LastIndexOf('/'), 0));
                         // No mapping for this endpoint found
-                        // Stop read process and Return null
-                        if (!mapping.Contains(method, path)) return null;
+                        if (!mapping.Contains(method, path)) noMapping = true;
                         
                     }
                     first = false;
@@ -81,7 +81,7 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                     if (info[0] == "Content-Length") contentLength = int.Parse(info[1]);
                 }
             }
-            
+
             if (path == null || version == null) return null;
             
             // Read http body (when existing)
@@ -100,8 +100,10 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                 payload = data.ToString();
                 RequestContext.ParsePayload(ref payload, header["Content-Type"]);
             }
-            
-            return new RequestContext(method, path, version, header, payload, pathVariable, requestParam);
+            // Log request and return RequestContext if the requested endpoint exists
+            var request = new RequestContext(method, path, version, header, payload, pathVariable, requestParam);
+            Console.Out.WriteLine(request);
+            return noMapping ? null : request;
         }
 
         /// <summary>
