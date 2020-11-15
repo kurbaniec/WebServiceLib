@@ -11,7 +11,7 @@ namespace WebService_Lib
     /// by <c>WebService_Lib</c>. Can also autowire (=set field values) components
     /// with each other.
     /// </summary>
-    public class Container
+    public class Container : IContainer
     {
         private Dictionary<Type, object> container = new Dictionary<Type, object>();
 

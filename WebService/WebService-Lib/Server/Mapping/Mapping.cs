@@ -11,7 +11,7 @@ namespace WebService_Lib.Server
     /// Maps the paths of the service endpoint to their corresponding methods.
     /// Is also responsible for their invocation.
     /// </summary>
-    public class Mapping
+    public class Mapping : IMapping
     {
         private Dictionary<Method, Dictionary<string, MethodCaller>> mappings;
         public Dictionary<Method, Dictionary<string, MethodCaller>> GetMappings => mappings;
@@ -146,8 +146,7 @@ namespace WebService_Lib.Server
         /// <param name="pathVariable"></param>
         /// <param name="requestParam"></param>
         /// <exception>
-        /// Throws an exception when invalid parameters are given or when the given endpoint
-        /// does not exist.
+        /// Throws an exception when the given endpoint does not exist.
         /// </exception>
         /// <returns>Response as a Response object</returns>
         public Response Invoke(
@@ -169,14 +168,14 @@ namespace WebService_Lib.Server
             private readonly MethodInfo method;
             private readonly object instance;
             private readonly List<MappingParams> paramInfo;
-            private readonly Type? pathParamType;
+            private readonly Type? pathVariableType;
 
-            public MethodCaller(MethodInfo method, object instance, List<MappingParams> paramInfo, Type? pathParamType)
+            public MethodCaller(MethodInfo method, object instance, List<MappingParams> paramInfo, Type? pathVariableType)
             {
                 this.method = method;
                 this.instance = instance;
                 this.paramInfo = paramInfo;
-                this.pathParamType = pathParamType;
+                this.pathVariableType = pathVariableType;
             }
 
             /// <summary>
@@ -186,7 +185,6 @@ namespace WebService_Lib.Server
             /// <param name="payload"></param>
             /// <param name="pathVariable"></param>
             /// <param name="requestParam"></param>
-            /// <exception>Throws an exception when invalid parameters are given</exception>
             /// <returns>Response as a Response object</returns>
             public Response Invoke(AuthDetails? authDetails, object? payload, string? pathVariable, string? requestParam)
             {
@@ -199,18 +197,16 @@ namespace WebService_Lib.Server
                             parameters.Add(authDetails);
                             break;
                         case MappingParams.Json:
-                            if (payload is Dictionary<string, object>) parameters.Add(payload);
-                            else throw new InvokeInvalidParamException();
+                            parameters.Add(payload is Dictionary<string, object> ? payload : null);
                             break;
                         case MappingParams.Text:
-                            if (payload is string) parameters.Add(payload);
-                            else throw new InvokeInvalidParamException();
+                            parameters.Add(payload is string ? payload : null);
                             break;
                         case MappingParams.PathVariable:
                             // Make generic path parameter instance
                             // See: https://stackoverflow.com/a/43921901/12347616
                             var pathParamGenericType = typeof(PathVariable<>);
-                            var constructType = pathParamGenericType.MakeGenericType(pathParamType);
+                            var constructType = pathParamGenericType.MakeGenericType(pathVariableType);
                             var pathParamObj = Activator.CreateInstance(constructType, pathVariable);
                             parameters.Add(pathParamObj);
                             break;

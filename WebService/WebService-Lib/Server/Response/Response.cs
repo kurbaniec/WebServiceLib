@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.Serialization.Json;
 using Newtonsoft.Json;
 
 namespace WebService_Lib.Server
@@ -9,38 +8,48 @@ namespace WebService_Lib.Server
     /// </summary>
     public class Response
     {
-        private bool isStatus;
-        private bool isText;
-        private bool isJSON;
+        public bool IsStatus;
+        public bool IsText;
+        public bool IsJson;
 
-        private uint status;
-        private string payload;
+        public uint StatusCode;
+        public string StatusName;
+        public string? Payload;
+        public string? ContentType;
 
-        public Response(uint status)
+        private Response(uint status)
         {
-            this.isStatus = true;
-            this.status = status;
+            this.IsStatus = true;
+            this.StatusCode = status;
+            this.StatusName = ((Status) this.StatusCode).ToString().ToUpper();
         }
 
-        public Response(Status status)
+        private Response(Status status)
         {
             var code = (uint)status;
-            this.isStatus = true;
-            this.status = code;
+            this.IsStatus = true;
+            this.StatusCode = code;
+            this.StatusName = status.ToString().ToUpper();
         }
 
-        public Response(Dictionary<string, object> json)
+        private Response(Dictionary<string, object> json)
         {
-            this.isJSON = true;
+            this.StatusCode = 200;
+            this.StatusName = ((Status) this.StatusCode).ToString().ToUpper();
+            this.IsJson = true;
             // Deserialize json
             // See: https://www.newtonsoft.com/json/help/html/SerializeDictionary.htm
-            this.payload = JsonConvert.SerializeObject(json);
+            this.Payload = JsonConvert.SerializeObject(json);
+            this.ContentType = "application/json";
         }
 
-        public Response(string plainText)
+        private Response(string plainText)
         {
-            this.isText = true;
-            this.payload = plainText;
+            this.StatusCode = 200;
+            this.StatusName = ((Status) this.StatusCode).ToString().ToUpper();
+            this.IsText = true;
+            this.Payload = plainText;
+            this.ContentType = "text/plain; charset=utf-8";
         }
 
         public static Response Status(Status status)

@@ -5,8 +5,8 @@
     /// </summary>
     public class AuthDetails
     {
-        private string username;
-        private string token;
+        private readonly string username;
+        private readonly string token;
         public string Username => username;
         public string Token => token;
 

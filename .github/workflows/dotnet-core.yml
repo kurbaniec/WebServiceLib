@@ -24,7 +24,7 @@ jobs:
     - name: Build WebService_Lib
       run: dotnet build --configuration Release --no-restore
     - name: Test WebService_Lib
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test --no-restore --verbosity normal --filter 'FullyQualifiedName!~RestServerTest'
 
   build_mtcg:
 

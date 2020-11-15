@@ -3,6 +3,9 @@ using WebService_Lib.Attributes.Rest;
 
 namespace WebService_Lib.Server
 {
+    /// <summary>
+    /// Enum that lists all possible REST methods.
+    /// </summary>
     public enum Method
     {
         Get,
@@ -12,42 +15,41 @@ namespace WebService_Lib.Server
         Patch,
     }
 
+    /// <summary>
+    /// Utility class to work with <c>Method</c> enums.
+    /// </summary>
     public static class MethodUtilities
     {
+        /// <summary>
+        /// Return the corresponding REST method through its name.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns>
+        /// Corresponding REST Method, defaults to GET in error case.
+        /// </returns>
         public static Method GetMethod(string method)
         {
             method = method.ToLower();
-            Method parsedMethod;
-            switch (method)
+            Method parsedMethod = method switch
             {
-                case "get":
-                case "Get":
-                    parsedMethod = Method.Get;
-                    break;
-                case "post":
-                case "Post":
-                    parsedMethod = Method.Post;
-                    break;
-                case "put":
-                case "Put":
-                    parsedMethod = Method.Put;
-                    break;
-                case "delete":
-                case "Delete":
-                    parsedMethod = Method.Delete;
-                    break;
-                case "patch":
-                case "Patch":
-                    parsedMethod = Method.Patch;
-                    break;
-                default:
-                    parsedMethod = Method.Get;
-                    break;
-            }
+                "get" => Method.Get,
+                "post" => Method.Post,
+                "put" => Method.Put,
+                "delete" => Method.Delete,
+                "patch" => Method.Patch,
+                _ => Method.Get
+            };
 
             return parsedMethod;
         }
 
+        /// <summary>
+        /// Return the corresponding REST method through a given attribute.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns>
+        /// Corresponding REST Method, defaults to GET in error case.
+        /// </returns>
         public static Method GetMethod(Type method)
         {
             Method parsedMethod;
@@ -55,7 +57,8 @@ namespace WebService_Lib.Server
             {
                 return Method.Get;
             }
-            else if (method == typeof(Post))
+
+            if (method == typeof(Post))
             {
                 return Method.Post;
             }

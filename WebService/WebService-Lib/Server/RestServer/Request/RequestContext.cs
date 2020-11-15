@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace WebService_Lib.Server.RestServer
@@ -9,14 +12,6 @@ namespace WebService_Lib.Server.RestServer
     /// </summary>
     public class RequestContext
     {
-        /**
-        Implement the HTTP format, so that you
-        can read the HTTP-Verb, the resource requested and the http-version
-        can read the further header values and manage it as a key-value pair
-        can read the payload correctly as plaintext (text/plain MIME-Type).
-        Create a class containing these values called RequestContext and make it available to
-        the endpoint-handlers.
-         */
         public Method Method;
         public string Path;
         public string Version;
@@ -60,12 +55,64 @@ namespace WebService_Lib.Server.RestServer
                     {
                         payload = "{}";
                     }
-                    payload = JsonConvert.DeserializeObject<Dictionary<string, object>>((string)payload);
+                    try
+                    {
+                        payload = JsonConvert.DeserializeObject<Dictionary<string, object>>((string) payload);
+                    }
+                    catch (Exception)
+                    {
+                        payload = null;
+                    }
                     break;
                 default:
                     payload = null;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Return RequestContext in a loggable form.
+        /// </summary>
+        /// <returns>String with a beautified RequestContext</returns>
+        public override string ToString()
+        {
+            var output = new StringBuilder();
+            var header = new StringBuilder();
+            foreach (KeyValuePair<string, string> entry in Header)
+            {
+                header.AppendLine($"|| {entry.Key}: {entry.Value}");
+            }
+            output.AppendLine("//==========");
+            output.AppendLine($"|| {Method} {Path} {Version}");
+            if (PathVariable != null || RequestParam != null)
+            {
+                output.AppendLine("||----------");
+                if (PathVariable != null) output.AppendLine($"|| PathVariable: {PathVariable}");
+                else if (RequestParam != null) output.AppendLine($"|| RequestParam: {RequestParam}");
+            }
+            output.AppendLine("||----------");
+            if (header.Length != 0)
+            {
+                output.AppendLine("|| Header:");
+                output.Append(header);
+            }
+            if (Payload != null)
+            {
+                output.AppendLine("||----------");
+                output.AppendLine("||Payload:");
+                switch (Payload)
+                {
+                    case string plaintext:
+                        output.AppendLine(plaintext);
+                        break;
+                    case Dictionary<string, object> json:
+                        output.AppendLine(
+                            "{" + string.Join(",", json.Select(kv => kv.Key + "=" + kv.Value).ToArray()) + "}");
+                        break;
+                }
+            }
+            output.AppendLine("\\\\==========");
+            return output.ToString();
         }
     }
 }
