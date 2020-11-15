@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Sockets;
 using WebService_Lib.Server.RestServer.TcpClient;
 
 namespace WebService_Lib.Server.RestServer.TcpListener
@@ -39,7 +40,9 @@ namespace WebService_Lib.Server.RestServer.TcpListener
         /// </summary>
         public void Stop()
         {
-            server.Stop();
+            try {
+                server.Stop();
+            } catch(SocketException) {}
         }
     }
 }

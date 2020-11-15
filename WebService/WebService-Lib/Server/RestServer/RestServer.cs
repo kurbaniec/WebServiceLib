@@ -59,10 +59,12 @@ namespace WebService_Lib.Server.RestServer
                     {
                         if (t == null) return;
                         tasks.TryRemove(id, out t);
-                        t.Dispose();
                     }, token);
                 }
-                catch (SocketException) { }
+                catch (Exception)
+                {
+                    // ignored
+                }
             }
         }
 
@@ -132,8 +134,7 @@ namespace WebService_Lib.Server.RestServer
             tokenSource.Cancel();
             foreach (var task in tasks.Values)
             {
-                if (!task.IsCompleted) task.Wait();
-                task.Dispose();
+                if (!task.IsCompleted) task.Wait(500);
             }
             tasks.Clear();
             // Stop listener
