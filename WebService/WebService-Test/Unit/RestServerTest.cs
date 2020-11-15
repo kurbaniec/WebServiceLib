@@ -36,7 +36,7 @@ namespace WebService_Test.Unit
             var restServer = new RestServer(listener.Object, mapping.Object, null);
             
             Task t = Task.Run(() => restServer.Start());
-            Thread.Sleep(10);
+            Thread.Sleep(100);
             restServer.Stop();
             t.Wait();
             
@@ -59,7 +59,7 @@ namespace WebService_Test.Unit
             var restServer = new RestServer(listener.Object, mapping.Object, null);
             
             Task t = Task.Run(() => restServer.Start());
-            Thread.Sleep(10);
+            Thread.Sleep(100);
             restServer.Stop();
             t.Wait();
             
@@ -87,7 +87,7 @@ namespace WebService_Test.Unit
             var restServer = new RestServer(listener.Object, mapping.Object, null);
             
             Task t = Task.Run(() => restServer.Start());
-            Thread.Sleep(10);
+            Thread.Sleep(100);
             restServer.Stop();
             t.Wait();
             

@@ -132,7 +132,7 @@ namespace WebService_Lib.Server.RestServer
             tokenSource.Cancel();
             foreach (var task in tasks.Values)
             {
-                if (!task.IsCompleted) task.Wait(100);
+                if (!task.IsCompleted) task.Wait();
                 task.Dispose();
             }
             tasks.Clear();
