@@ -49,7 +49,7 @@ namespace WebService_Lib.Server
             this.StatusName = ((Status) this.StatusCode).ToString().ToUpper();
             this.IsText = true;
             this.Payload = plainText;
-            this.ContentType = "text/plain";
+            this.ContentType = "text/plain; charset=utf-8";
         }
 
         public static Response Status(Status status)

@@ -40,48 +40,56 @@ namespace WebService_Lib.Server.RestServer.TcpClient
             string? requestParam = null;
             string? pathVariable = null;
             
+            // Set timeout
+            // See: https://stackoverflow.com/a/17216265/12347616
+            client.ReceiveTimeout = 5000;
             StreamReader reader = new StreamReader(client.GetStream());
             string? line;
             var contentLength = 0;
             bool first = true;
             bool noMapping = false;
             // Read http header information until blank line before payload (when existing)
-            while (!string.IsNullOrWhiteSpace(line = reader.ReadLine()))
+            try
             {
-                if (line == null) continue;
-                line = line.Trim();
-                if (first)
+                while (!string.IsNullOrWhiteSpace(line = reader.ReadLine()))
                 {
-                    var info = line.Split(' ');
-                    method = MethodUtilities.GetMethod(info[0]);
-                    path = info[1];
-                    version = info[2];
-                    // Check path
-                    if (path.LastIndexOf('?') != -1)
+                    if (line == null) continue;
+                    line = line.Trim();
+                    if (first)
                     {
-                        requestParam = path.Substring(path.LastIndexOf('?') + 1);
-                        path = path.Substring(0, path.LastIndexOf('?'));
-                    }
+                        var info = line.Split(' ');
+                        method = MethodUtilities.GetMethod(info[0]);
+                        path = info[1];
+                        version = info[2];
+                        // Check path
+                        if (path.LastIndexOf('?') != -1)
+                        {
+                            requestParam = path.Substring(path.LastIndexOf('?') + 1);
+                            path = path.Substring(0, path.LastIndexOf('?'));
+                        }
 
-                    if (!mapping.Contains(method, path))
-                    {
-                        pathVariable = path.Substring(path.LastIndexOf('/') + 1);
-                        // Use Math.Max to counter negative values in paths like '/'
-                        path = path.Substring(0, Math.Max(path.LastIndexOf('/'), 0));
-                        // No mapping for this endpoint found
-                        if (!mapping.Contains(method, path)) noMapping = true;
-                        
+                        if (!mapping.Contains(method, path))
+                        {
+                            pathVariable = path.Substring(path.LastIndexOf('/') + 1);
+                            // Use Math.Max to counter negative values in paths like '/'
+                            path = path.Substring(0, Math.Max(path.LastIndexOf('/'), 0));
+                            // No mapping for this endpoint found
+                            if (!mapping.Contains(method, path)) noMapping = true;
+
+                        }
+
+                        first = false;
                     }
-                    first = false;
-                }
-                else
-                {
-                    var info = line.Split(':');
-                    header.Add(info[0].Trim(), info[1].Trim());
-                    if (info[0] == "Content-Length") contentLength = int.Parse(info[1]);
+                    else
+                    {
+                        var info = line.Split(':');
+                        header.Add(info[0].Trim(), info[1].Trim());
+                        if (info[0] == "Content-Length") contentLength = int.Parse(info[1]);
+                    }
                 }
             }
-
+            catch (IOException) { return null; }
+            
             if (path == null || version == null) return null;
             
             // Read http body (when existing)
@@ -92,10 +100,18 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                 int bytesReadTotal = 0;
                 while (bytesReadTotal < contentLength)
                 {
-                    var bytesRead = reader.Read(buffer, 0, 1024);
-                    bytesReadTotal += bytesRead;
-                    if (bytesRead == 0) break;
-                    data.Append(buffer, 0, bytesRead);
+                    try
+                    {
+                        var bytesRead = reader.Read(buffer, 0, 1024);
+                        bytesReadTotal += bytesRead;
+                        if (bytesRead == 0) break;
+                        data.Append(buffer, 0, bytesRead);
+                    }
+                    // IOException can occur when there is a mismatch of the 'Content-Length'
+                    // because a different encoding is used
+                    // Sending a 'plain/text' payload with special characters (äüö...) is
+                    // an example of this
+                    catch (IOException) { break; }
                 }
                 payload = data.ToString();
                 RequestContext.ParsePayload(ref payload, header["Content-Type"]);
