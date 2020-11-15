@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using WebService_Lib.Attributes;
 
 namespace WebService_Lib
@@ -11,7 +9,7 @@ namespace WebService_Lib
     /// <c>Component</c>s, <c>Controller</c>s and <c>Security</c> configs
     /// for the <c>WebService_Lib</c>.
     /// </summary>
-    public class Scanner
+    public class Scanner : IScanner
     {
         private readonly List<Type> programAssembly;
         public Scanner(List<Type> programAssembly)
@@ -19,6 +17,15 @@ namespace WebService_Lib
             this.programAssembly = programAssembly;
         }
 
+        /// <summary>
+        /// Scan the assembly for <c>Component</c>, <c>Controller</c> and <c>Security</c> attributes.
+        /// </summary>
+        /// <returns>
+        /// Tuple consisting of
+        ///     1. All matching types
+        ///     2. All matching types that are controllers
+        ///     3. Last matching security type 
+        /// </returns>
         public (List<Type>, List<Type>, Type?) ScanAssembly()
         {
             var components = new List<Type>();

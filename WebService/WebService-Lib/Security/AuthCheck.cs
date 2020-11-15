@@ -8,7 +8,7 @@
     /// </summary>
     public class AuthCheck
     {
-        private ISecurity security;
+        private readonly ISecurity security;
 
         public AuthCheck(ISecurity security)
         {

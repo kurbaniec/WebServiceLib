@@ -7,12 +7,16 @@ using WebService_Lib.Server.RestServer.TcpListener;
 
 namespace WebService_Lib
 {
+    /// <summary>
+    /// Core class of <c>WebService_Lib</c>.
+    /// Used to start the library with its service.
+    /// </summary>
     public class SimpleWebService
     {
-        private readonly Scanner scanner;
-        private Container container = null!;
+        private readonly IScanner scanner;
+        private IContainer container = null!;
+        private IMapping mapping = null!;
         private AuthCheck? authCheck;
-        private Mapping mapping = null!;
         private RestServer? server;
         private readonly uint port;
 
@@ -22,7 +26,18 @@ namespace WebService_Lib
             this.scanner = new Scanner(programAssembly.GetTypes().ToList());
             this.port = port;
         }
+        
+        public SimpleWebService(uint port = 8080)
+        {
+            // Get Assembly from caller
+            Assembly programAssembly = Assembly.GetCallingAssembly();
+            this.scanner = new Scanner(programAssembly.GetTypes().ToList());
+            this.port = port;
+        }
 
+        /// <summary>
+        /// Start the SimpleWebService.
+        /// </summary>
         public void Start()
         {
             Console.WriteLine("WebService has started...");
@@ -39,6 +54,9 @@ namespace WebService_Lib
             server.Start();
         }
 
+        /// <summary>
+        /// Stop the SimpleWebService.
+        /// </summary>
         public void Stop()
         {
             if (server == null) return;
