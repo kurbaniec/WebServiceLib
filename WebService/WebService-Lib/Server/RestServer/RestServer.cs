@@ -134,7 +134,16 @@ namespace WebService_Lib.Server.RestServer
             tokenSource.Cancel();
             foreach (var task in tasks.Values)
             {
-                if (!task.IsCompleted) task.Wait(500);
+                if (task.IsCompleted) continue;
+                try
+                {
+                    task.Wait(500);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                    // Prevent TaskCanceledException
+                }
             }
             tasks.Clear();
             // Stop listener
