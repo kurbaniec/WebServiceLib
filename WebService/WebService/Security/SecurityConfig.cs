@@ -18,12 +18,14 @@ namespace WebService.Security
         {
             if (users.ContainsKey(username)) return (false, "");
             users[username] = password;
-            return (true, GenerateToken(username));
+            var token = GenerateToken(username);
+            AddToken(token);
+            return (true, token);
         }
         public string GenerateToken(string username) => username + "-token";
         public void AddToken(string token) => tokens.Add(token);
         public void RevokeToken(string token) => tokens.Remove(token);
-        public List<string> SecurePaths() => new List<string> { "/secured" };
+        public List<string> SecurePaths() => new List<string> { "/secret" };
         public bool CheckCredentials(string username, string password) 
             => users.ContainsKey(username) && users[username] == password;
     }

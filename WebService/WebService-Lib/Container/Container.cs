@@ -99,7 +99,9 @@ namespace WebService_Lib
                             // See: https://stackoverflow.com/a/619788/12347616
                             field.SetValue(instance, instanceToWire);
                         }
-                        else
+                        // Omit error message for auth autowiring
+                        // Happens later on
+                        else if (fType != typeof(AuthCheck))
                         {
                             Console.Error.WriteLine("Err: Can not find property of type " + fType.FullName +
                                                     " to autowire field " + field.Name + " in Class " + component.FullName);

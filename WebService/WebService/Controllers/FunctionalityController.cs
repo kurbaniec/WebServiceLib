@@ -27,5 +27,11 @@ namespace WebService.Controllers
                 = auth.Register((payload["username"] as string)!, (payload["password"] as string)!);
             return !result.Item1 ? Response.Status(Status.Conflict) : Response.PlainText(result.Item2, Status.Created);
         }
+
+        [Get("/secret")]
+        public Response SecretToEverything()
+        {
+            return Response.PlainText("42");
+        }
     }
 }
