@@ -38,6 +38,23 @@
         }
 
         /// <summary>
+        /// Is used to register new users. When the registration is completed
+        /// without errors, the methods <c>Authenticate</c> and <c>CheckDetails</c>
+        /// should return <c>True</c>.
+        /// Call it manually on your register endpoints.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns>
+        /// A tuple returning the registration status (successful/not successful) and the
+        /// generated access token or <c>""</c> in an error case.
+        /// </returns>
+        public (bool, string) Register(string username, string password)
+        {
+            return this.security.Register(username, password);
+        }
+
+        /// <summary>
         /// Authenticate the user through its credentials.
         /// This method is NOT called when a payload with credentials is 
         /// send to a secured path.

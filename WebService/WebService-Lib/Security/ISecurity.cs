@@ -18,6 +18,19 @@ namespace WebService_Lib
         public bool Authenticate(string token);
 
         /// <summary>
+        /// Is used to register new users. When the registration is completed
+        /// without errors, the methods <c>Authenticate</c> and <c>CheckDetails</c>
+        /// should return <c>True</c>.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns>
+        /// A tuple returning the registration status (successful/not successful) and the
+        /// generated access token or <c>""</c> in an error case.
+        /// </returns>
+        public (bool, string) Register(string username, string password);
+
+        /// <summary>
         /// Generate a token that can be used to access secured resources through
         /// the Authorization header.
         /// </summary>
