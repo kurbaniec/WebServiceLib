@@ -33,5 +33,16 @@ namespace WebService.Controllers
         {
             return Response.PlainText("42");
         }
+
+        [Get("/json")]
+        public Response SomeJson()
+        {
+            return Response.Json(new Dictionary<string, object>()
+            {
+                {"int", 1},
+                {"float", 1.1},
+                {"string", "Hi"}
+            });
+        }
     }
 }

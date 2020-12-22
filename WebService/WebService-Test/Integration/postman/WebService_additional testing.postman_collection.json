@@ -6,6 +6,54 @@
 	},
 	"item": [
 		{
+			"name": "Test JSON Response",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "943f275f-f956-4347-bdc5-ef5aed27acdb",
+						"exec": [
+							"pm.test(\"Status test\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Payload test\", function () {\r",
+							"    pm.response.to.be.json;\r",
+							"    let data = pm.response.json()\r",
+							"    pm.expect(data.int).to.equal(1)\r",
+							"    pm.expect(data.float).to.equal(1.1)\r",
+							"    pm.expect(data.string).to.equal(\"Hi\")\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Basic test-token",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/json",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"json"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Unauthorized access",
 			"event": [
 				{
