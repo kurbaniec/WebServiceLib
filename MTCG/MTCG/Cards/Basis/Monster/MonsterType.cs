@@ -5,6 +5,7 @@ namespace MTCG.Cards.Basis.Monster
     public enum MonsterType
     {
         Goblin,
+        Troll,
         Dragon,
         Wizzard,
         Ork,

@@ -12,11 +12,11 @@ namespace MTCG.Cards.Basis.Spell
         public decimal Damage { get; set; }
         public DamageType Type { get; }
         public IEnumerable<ISpeciality> Specialities { get; }
-        public BattleLog Log { get; }
+        public IBattleLog Log { get; }
 
         public SpellCard(
             uint damage, DamageType damageType, IEnumerable<ISpeciality> specialities,  
-            BattleLog log
+            IBattleLog log
         )
         {
             Damage = damage;

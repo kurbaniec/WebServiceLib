@@ -13,11 +13,11 @@ namespace MTCG.Cards.Basis.Monster
         public MonsterType MonsterType { get; }
         public IEnumerable<ISpeciality> Specialities { get; }
         public IEnumerable<IEffect> Effects { get; }
-        public BattleLog Log { get; }
+        public IBattleLog Log { get; }
 
         public MonsterCard(
             uint damage, DamageType damageType, MonsterType monsterType,
-            IEnumerable<ISpeciality> specialities, IEnumerable<IEffect> effects, BattleLog log
+            IEnumerable<ISpeciality> specialities, IEnumerable<IEffect> effects, IBattleLog log
         )
         {
             Damage = damage;
