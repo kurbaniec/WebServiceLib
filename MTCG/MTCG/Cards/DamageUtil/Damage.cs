@@ -1,25 +1,37 @@
-﻿namespace MTCG.Cards.DamageUtil
+﻿using System;
+
+namespace MTCG.Cards.DamageUtil
 {
     public class Damage : IDamage
     {
         private bool infty;
-        private uint value;
+        private decimal value;
         public bool IsInfty => infty;
-        public uint Value => value;
+        public decimal Value => value;
 
-        private Damage(bool infty, uint value)
+        private Damage(bool infty, decimal value)
         {
             this.infty = infty;
             this.value = value;
         }
 
-        public static IDamage Normal(uint value) => new Damage(false, value);
+        public static IDamage Normal(decimal value) => new Damage(false, value);
         
         public static IDamage Infty() => new Damage(true, 0);
 
-        public void Add(uint damage)
+        public void Add(decimal addition)
         {
-            value += damage;
+            value += addition;
+        }
+        
+        public void Multiply(decimal multiplier)
+        {
+            value *= multiplier;
+        }
+        
+        public void Divide(decimal divider)
+        {
+            value /= divider;
         }
 
         public void SetInfty()

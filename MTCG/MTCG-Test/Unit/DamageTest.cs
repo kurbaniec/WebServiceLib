@@ -89,6 +89,30 @@ namespace MTCG_Test.Unit
             Assert.AreEqual(110, result);
         }
         
+        [Test, TestCase(TestName = "Multiply Value", Description =
+             "Multiply Damage a by 5")]
+        public void MultiplyDamage()
+        {
+            var a = Damage.Normal(10);
+
+            a.Multiply(5);
+            var result = a.Value;
+            
+            Assert.AreEqual(50, result);
+        }
+        
+        [Test, TestCase(TestName = "Divide Value", Description =
+             "Half Damage by 2")]
+        public void DivideDamage()
+        {
+            var a = Damage.Normal(5);
+
+            a.Divide(2);
+            var result = a.Value;
+            
+            Assert.AreEqual(2.5, result);
+        }
+        
         [Test, TestCase(TestName = "Apply Infinity modifier", Description =
              "Apply Infinity modifier to Damage a")]
         public void SetInfty()

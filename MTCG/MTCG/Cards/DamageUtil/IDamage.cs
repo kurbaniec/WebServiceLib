@@ -5,8 +5,10 @@ namespace MTCG.Cards.DamageUtil
     public interface IDamage : IComparable<IDamage>
     {
         bool IsInfty { get; }
-        uint Value { get; }
-        void Add(uint damage);
+        Decimal Value { get; }
+        void Add(Decimal addition);
+        void Multiply(Decimal multiplier);
+        void Divide(Decimal divider);
         void SetInfty();
         void SetNoDamage();
     }

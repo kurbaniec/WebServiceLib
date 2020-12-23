@@ -9,8 +9,4 @@
     <ProjectReference Include="..\..\WebService\WebService-Lib\WebService-Lib.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Battles" />
-  </ItemGroup>
-
 </Project>
