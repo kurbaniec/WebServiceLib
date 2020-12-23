@@ -18,6 +18,7 @@ namespace WebService_Test.Unit
             }
             private readonly HashSet<string> tokens = new HashSet<string>();
             public bool Authenticate(string token) => tokens.Contains(token);
+            public (bool, string) Register(string username, string password) => (true, GenerateToken("admin"));
             public string GenerateToken(string username) => username + "-token";
             public void AddToken(string token) => tokens.Add(token);
             public void RevokeToken(string token) => tokens.Remove(token);

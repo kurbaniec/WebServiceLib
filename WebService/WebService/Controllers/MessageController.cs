@@ -43,7 +43,7 @@ namespace WebService.Controllers
         {
             if (payload == null) return Response.Status(Status.BadRequest);
             var id = messages.AddMessage(payload);
-            return Response.PlainText(id);
+            return Response.PlainText(id, Status.Created);
         }
 
         /// <summary>

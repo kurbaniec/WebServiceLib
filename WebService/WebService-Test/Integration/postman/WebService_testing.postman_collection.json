@@ -51,7 +51,7 @@
 						"id": "e81724ef-87a0-4d17-9d00-581a280cb958",
 						"exec": [
 							"pm.test(\"Status test\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.status(201);\r",
 							"});\r",
 							"\r",
 							"pm.test(\"Payload test\", function () {\r",
@@ -253,7 +253,7 @@
 						"id": "893d98ef-9c91-4fcf-a2a4-7f39235b7c5d",
 						"exec": [
 							"pm.test(\"Status test\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.status(201);\r",
 							"});\r",
 							"\r",
 							"pm.test(\"Payload test\", function () {\r",

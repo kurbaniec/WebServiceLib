@@ -95,10 +95,10 @@ namespace WebService_Lib.Server.RestServer
                     {
                         // If so, check credentials
                         var line = request.Header["Authorization"].Split(' ');
-                        // string type = line[0]
-                        var token = line[1];
                         if (line.Length == 2)
                         {
+                            // string type = line[0]
+                            var token = line[1];
                             if (authCheck.Authenticate(token))
                             {
                                 auth = authCheck.AuthDetails(token);
