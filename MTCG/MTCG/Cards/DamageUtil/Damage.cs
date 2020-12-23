@@ -13,13 +13,13 @@
             this.value = value;
         }
 
-        public static Damage Normal(uint value) => new Damage(false, value);
+        public static IDamage Normal(uint value) => new Damage(false, value);
         
-        public static Damage Infty() => new Damage(true, 0);
+        public static IDamage Infty() => new Damage(true, 0);
 
         public void Add(uint damage)
         {
-            if (!infty) value += damage;
+            value += damage;
         }
 
         public void SetInfty()
