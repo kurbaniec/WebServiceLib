@@ -9,31 +9,38 @@ namespace MTCG.Cards.Basis.Monster
     public class MonsterCard : ICard, IMonsterCard
     {
         public decimal Damage { get; set; }
-        
         public DamageType Type { get; }
-        
+        public MonsterType MonsterType { get; }
         public IEnumerable<ISpeciality> Specialities { get; }
+        public IEnumerable<IEffect> Effects { get; }
         public BattleLog Log { get; }
 
-        public MonsterType MonsterType { get; }
-        public IEnumerable<IEffect> Effects { get; }
-
-        public IDamage CalculateDamage(ICard other)
+        public MonsterCard(
+            uint damage, DamageType damageType, MonsterType monsterType,
+            IEnumerable<ISpeciality> specialities, IEnumerable<IEffect> effects, BattleLog log
+        )
         {
-            var roundDamage = (this as ICard).CalculateDamage(other);
-
-            return roundDamage;
+            Damage = damage;
+            Type = damageType;
+            MonsterType = monsterType;
+            Specialities = specialities;
+            Effects = effects;
+            Log = log;
         }
 
-        
-        public void ApplyEffect(ICard self)
+        public void ApplyEffects()
         {
-            throw new System.NotImplementedException();
+            foreach (var effect in Effects) effect?.Apply(this);
         }
 
-        public void DropEffect(ICard self)
+        public void DropEffects()
         {
-            throw new System.NotImplementedException();
+            foreach (var effect in Effects) effect?.Drop(this);
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(Type)} {MonsterType.GetString()}";
         }
     }
 }

@@ -6,7 +6,7 @@ namespace MTCG.Cards.Effects
 {
     public interface IEffect
     {
-        Damage Apply(ICard self, ICard other, IDamage damage);
+        Damage Apply(ICard self);
         void Drop(ICard self);
     }
 }

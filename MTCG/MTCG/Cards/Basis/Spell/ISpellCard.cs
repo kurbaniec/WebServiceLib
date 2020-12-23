@@ -1,7 +1,4 @@
 ﻿namespace MTCG.Cards.Basis.Spell
 {
-    public interface ISpellCard
-    {
-        
-    }
+    public interface ISpellCard { }
 }

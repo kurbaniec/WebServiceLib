@@ -7,7 +7,7 @@ namespace MTCG.Cards.Basis.Monster
     {
         MonsterType MonsterType { get; }
         IEnumerable<IEffect> Effects { get; }
-        void ApplyEffect(ICard self);
-        void DropEffect(ICard self);
+        void ApplyEffects();
+        void DropEffects();
     }
 }

@@ -14,6 +14,8 @@ namespace MTCG.Cards.Basis.Monster
         SpaceMarine,
     }
 
+    // Extension class for enum
+    // See: https://stackoverflow.com/a/5985710/12347616
     static class MonsterTypeMethods
     {
         public static string GetString(this MonsterType mt)
