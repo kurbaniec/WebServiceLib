@@ -9,8 +9,8 @@ namespace MTCG.Cards.Specialities.Concrete
         public void Apply(ICard self, ICard other, IDamage damage)
         {
             // Used for: "Goblins are too afraid of Dragons to attack"
-            if (self is MonsterCard selfMonster && selfMonster.MonsterType == MonsterType.Goblin &&
-                other is MonsterCard otherMonster && otherMonster.MonsterType == MonsterType.Dragon)
+            if (self is IMonsterCard selfMonster && selfMonster.MonsterType == MonsterType.Goblin &&
+                other is IMonsterCard otherMonster && otherMonster.MonsterType == MonsterType.Dragon)
             {
                 damage.SetNoDamage();
             }

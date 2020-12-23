@@ -9,8 +9,8 @@ namespace MTCG.Cards.Specialities.Concrete
         public void Apply(ICard self, ICard other, IDamage damage)
         {
             // Used for: "Wizzard can control Orks so they are not able to damage them"
-            if (self is MonsterCard selfMonster && selfMonster.MonsterType == MonsterType.Ork &&
-                other is MonsterCard otherMonster && otherMonster.MonsterType == MonsterType.Wizzard)
+            if (self is IMonsterCard selfMonster && selfMonster.MonsterType == MonsterType.Ork &&
+                other is IMonsterCard otherMonster && otherMonster.MonsterType == MonsterType.Wizard)
             {
                 damage.SetNoDamage();
             }

@@ -27,6 +27,7 @@ namespace MTCG.Cards.Basis.Spell
 
         public override string ToString()
         {
+            // TODO nameof
             return $"{nameof(Type)} Spell";
         }
     }

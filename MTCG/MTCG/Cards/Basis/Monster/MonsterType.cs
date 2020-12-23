@@ -7,11 +7,11 @@ namespace MTCG.Cards.Basis.Monster
         Goblin,
         Troll,
         Dragon,
-        Wizzard,
+        Wizard,
         Ork,
         Knight,
         Kraken,
-        Elve,
+        Elf,
         SpaceMarine,
     }
 

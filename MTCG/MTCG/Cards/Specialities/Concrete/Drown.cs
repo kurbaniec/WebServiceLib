@@ -10,8 +10,8 @@ namespace MTCG.Cards.Specialities.Concrete
         public void Apply(ICard self, ICard other, IDamage damage)
         {
             // Used for: "The armor of Knights is so heavy that WaterSpells make them drown them instantly."
-            if (self is SpellCard selfSpell && selfSpell.Type == DamageType.Water &&
-                other is MonsterCard otherMonster && otherMonster.MonsterType == MonsterType.Knight)
+            if (self is ISpellCard && self.Type == DamageType.Water &&
+                other is IMonsterCard otherMonster && otherMonster.MonsterType == MonsterType.Knight)
             {
                 damage.SetInfty();
             }
