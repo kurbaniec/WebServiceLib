@@ -10,6 +10,8 @@ namespace MTCG.Cards.Effects.Types.DamageModifier
         
         public void Apply(ICard self)
         {
+            // Get random value
+            // See: https://stackoverflow.com/a/15325580/12347616
             var value = (rng.Next(0, 2) > 0) ? 2 : -2;
             if (self.Damage + value > 0) damageAdded += value;
             else damageAdded = 0;

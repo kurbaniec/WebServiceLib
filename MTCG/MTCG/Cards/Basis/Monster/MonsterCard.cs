@@ -40,8 +40,7 @@ namespace MTCG.Cards.Basis.Monster
 
         public override string ToString()
         {
-            // TODO nameof Normal => Regular or skip it entirely
-            return $"{nameof(Type)} {MonsterType.GetString()}";
+            return $"{Type.GetString()} {MonsterType.GetString()}";
         }
     }
 }
