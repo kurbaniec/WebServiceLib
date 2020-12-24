@@ -5,7 +5,8 @@ using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.Basis.Spell;
 using MTCG.Cards.DamageUtil;
 using MTCG.Cards.Specialities;
-using MTCG.Cards.Specialities.Concrete;
+using MTCG.Cards.Specialities.Types.Destruction;
+using MTCG.Cards.Specialities.Types.Miss;
 using NUnit.Framework;
 
 namespace MTCG_Test.Unit
@@ -32,9 +33,9 @@ namespace MTCG_Test.Unit
             dragonMock.Setup(card => card.MonsterType).Returns(MonsterType.Dragon);
             var dragon = dragonMock.As<ICard>().Object;
             var damage = Damage.Normal(10);
-            ISpeciality speciality = new Afraid();
+            ISpeciality speciality = new AfraidFromDragons();
             
-            speciality.Apply(goblin, dragon, damage);
+            speciality.Apply(dragon, damage);
             var result = damage.Value;
             
             Assert.AreEqual(0, result);
@@ -53,9 +54,9 @@ namespace MTCG_Test.Unit
             wizardMock.Setup(card => card.MonsterType).Returns(MonsterType.Wizard);
             var wizard = wizardMock.As<ICard>().Object;
             var damage = Damage.Normal(10);
-            ISpeciality speciality = new Controllable();
+            ISpeciality speciality = new ControllableByWizzard();
             
-            speciality.Apply(ork, wizard, damage);
+            speciality.Apply(wizard, damage);
             var result = damage.Value;
             
             Assert.AreEqual(0, result);
@@ -75,9 +76,9 @@ namespace MTCG_Test.Unit
             knightMock.Setup(card => card.MonsterType).Returns(MonsterType.Knight);
             var knight = knightMock.As<ICard>().Object;
             var damage = Damage.Normal(10);
-            ISpeciality speciality = new Drown();
+            ISpeciality speciality = new DrownKnight();
             
-            speciality.Apply(waterSpell, knight, damage);
+            speciality.Apply(knight, damage);
             var result = damage.IsInfty;
             
             Assert.IsTrue(result);
@@ -95,9 +96,9 @@ namespace MTCG_Test.Unit
             krakenMock.Setup(card => card.MonsterType).Returns(MonsterType.Kraken);
             var kraken = krakenMock.As<ICard>().Object;
             var damage = Damage.Normal(10);
-            ISpeciality speciality = new Miss();
+            ISpeciality speciality = new MissKrakenBecauseOfImmunity();
             
-            speciality.Apply(spell, kraken, damage);
+            speciality.Apply(kraken, damage);
             var result = damage.Value;
             
             Assert.AreEqual(0, result);
@@ -118,9 +119,9 @@ namespace MTCG_Test.Unit
             fireElfMock.Setup(card => card.Type).Returns(DamageType.Fire);
             var fireElf = fireElfMock.Object;
             var damage = Damage.Normal(10);
-            ISpeciality speciality = new Miss();
+            ISpeciality speciality = new MissFireElfBecauseOfEvasion();
             
-            speciality.Apply(dragon, fireElf, damage);
+            speciality.Apply(fireElf, damage);
             var result = damage.Value;
             
             Assert.AreEqual(0, result);

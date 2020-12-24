@@ -19,7 +19,7 @@ namespace MTCG.Cards.Basis
             var roundDamage = DamageUtil.Damage.Normal(Damage);
             if (this is ISpellCard || other is ISpellCard)
                 WeaponTriangle.EffectiveDamage(Type, other.Type, roundDamage);
-            foreach (var speciality in Specialities) speciality?.Apply(this, other, roundDamage);
+            foreach (var speciality in Specialities) speciality?.Apply(other, roundDamage);
             return roundDamage;
         }
     }
