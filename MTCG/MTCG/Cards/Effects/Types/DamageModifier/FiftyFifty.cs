@@ -11,7 +11,8 @@ namespace MTCG.Cards.Effects.Types.DamageModifier
         public void Apply(ICard self)
         {
             var value = (rng.Next(0, 2) > 0) ? 2 : -2;
-            damageAdded += value;
+            if (self.Damage + value > 0) damageAdded += value;
+            else damageAdded = 0;
             (this as IDamageModifier).AddDamage(self, value);
         }
 
