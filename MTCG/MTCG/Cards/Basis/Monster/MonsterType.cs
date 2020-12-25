@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace MTCG.Cards.Basis.Monster
 {
@@ -28,6 +29,12 @@ namespace MTCG.Cards.Basis.Monster
             // See: https://stackoverflow.com/a/36147193/12347616
             var prettified = Regex.Split(name, @"(?<!^)(?=[A-Z])").ToString();
             return prettified ?? name;
+        }
+        
+        public static MonsterType? GetType(string type)
+        {
+            if (Enum.TryParse(type, out MonsterType enumType)) return enumType;
+            return null;
         }
     }
 }
