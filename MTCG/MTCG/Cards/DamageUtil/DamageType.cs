@@ -20,6 +20,7 @@ namespace MTCG.Cards.DamageUtil
 
         public static DamageType? GetType(string type)
         {
+            if (type == "Regular") return DamageType.Normal;
             if (Enum.TryParse(type, out DamageType enumType)) return enumType;
             return null;
         }
