@@ -1,4 +1,5 @@
 ﻿using System;
+using WebService_Lib;
 
 namespace MTCG
 {
@@ -6,7 +7,8 @@ namespace MTCG
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var service = new SimpleWebService();
+            service.Start();
         }
     }
 }

@@ -24,5 +24,6 @@ namespace MTCG.DataManagement.DB
         bool AddTradingDeal(string username, StoreSchema deal);
         bool Trade(string username, string myDeal, string otherDeal);
 
+        
     }
 }

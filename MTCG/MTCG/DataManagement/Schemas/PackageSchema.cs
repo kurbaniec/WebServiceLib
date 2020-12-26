@@ -2,9 +2,9 @@
 {
     public class PackageSchema
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
 
-        public PackageSchema(string id)
+        public PackageSchema(int id)
         {
             Id = id;
         }
