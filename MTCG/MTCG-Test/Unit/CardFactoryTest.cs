@@ -7,6 +7,7 @@ using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.Basis.Spell;
 using MTCG.Cards.DamageUtil;
 using MTCG.Cards.Effects;
+using MTCG.Cards.Effects.Types.DamageModifier;
 using MTCG.Cards.Factory;
 using MTCG.Cards.Specialities;
 using MTCG.Cards.Specialities.Types.Destruction;
@@ -105,6 +106,45 @@ namespace MTCG_Test.Unit
             Assert.IsTrue(waterGoblin is IMonsterCard);
             Assert.IsTrue((waterGoblin as IMonsterCard)!.MonsterType == MonsterType.Goblin);
             Assert.IsTrue(waterGoblin.Specialities.OfType<AfraidFromDragons>().Any());
+        }
+        
+        [Test, TestCase(TestName = "Print RegularTroll", Description =
+             "Print RegularTroll"
+         )]
+        public void PrintRegularTroll()
+        {
+            var regularTroll = CardFactory.Print("RegularTroll", 10, log);
+            
+            Assert.NotNull(regularTroll);
+            Assert.IsTrue(regularTroll!.Type == DamageType.Normal);
+            Assert.IsTrue(regularTroll is IMonsterCard);
+            Assert.IsTrue((regularTroll as IMonsterCard)!.MonsterType == MonsterType.Troll);
+        }
+        
+        [Test, TestCase(TestName = "Print FireTroll", Description =
+             "Print FireTroll"
+         )]
+        public void PrintFireTroll()
+        {
+            var fireTroll = CardFactory.Print("FireTroll", 10, log);
+            
+            Assert.NotNull(fireTroll);
+            Assert.IsTrue(fireTroll!.Type == DamageType.Fire);
+            Assert.IsTrue(fireTroll is IMonsterCard);
+            Assert.IsTrue((fireTroll as IMonsterCard)!.MonsterType == MonsterType.Troll);
+        }
+        
+        [Test, TestCase(TestName = "Print WaterTroll", Description =
+             "Print WaterTroll"
+         )]
+        public void PrintWaterTroll()
+        {
+            var waterTroll = CardFactory.Print("WaterTroll", 10, log);
+            
+            Assert.NotNull(waterTroll);
+            Assert.IsTrue(waterTroll!.Type == DamageType.Water);
+            Assert.IsTrue(waterTroll is IMonsterCard);
+            Assert.IsTrue((waterTroll as IMonsterCard)!.MonsterType == MonsterType.Troll);
         }
         
         [Test, TestCase(TestName = "Print RegularDragon", Description =
@@ -227,6 +267,173 @@ namespace MTCG_Test.Unit
             Assert.IsTrue((waterKraken as IMonsterCard)!.MonsterType == MonsterType.Kraken);
         }
         
+        [Test, TestCase(TestName = "Print RegularElf", Description =
+             "Print RegularElf"
+         )]
+        public void PrintRegularElf()
+        {
+            var regularElf = CardFactory.Print("RegularElf", 10, log);
+            
+            Assert.NotNull(regularElf);
+            Assert.IsTrue(regularElf!.Type == DamageType.Normal);
+            Assert.IsTrue(regularElf is IMonsterCard);
+            Assert.IsTrue((regularElf as IMonsterCard)!.MonsterType == MonsterType.Elf);
+        }
+        
+        [Test, TestCase(TestName = "Print FireElf", Description =
+             "Print FireElf"
+         )]
+        public void PrintFireElf()
+        {
+            var fireElf = CardFactory.Print("FireElf", 10, log);
+            
+            Assert.NotNull(fireElf);
+            Assert.IsTrue(fireElf!.Type == DamageType.Fire);
+            Assert.IsTrue(fireElf is IMonsterCard);
+            Assert.IsTrue((fireElf as IMonsterCard)!.MonsterType == MonsterType.Elf);
+        }
+        
+        [Test, TestCase(TestName = "Print WaterElf", Description =
+             "Print WaterElf"
+         )]
+        public void PrintWaterElf()
+        {
+            var waterElf = CardFactory.Print("WaterElf", 10, log);
+            
+            Assert.NotNull(waterElf);
+            Assert.IsTrue(waterElf!.Type == DamageType.Water);
+            Assert.IsTrue(waterElf is IMonsterCard);
+            Assert.IsTrue((waterElf as IMonsterCard)!.MonsterType == MonsterType.Elf);
+        }
+        
+        [Test, TestCase(TestName = "Print RegularWizard", Description =
+             "Print RegularWizard"
+         )]
+        public void PrintRegularWizard()
+        {
+            var regularWizard = CardFactory.Print("RegularWizard", 10, log);
+            
+            Assert.NotNull(regularWizard);
+            Assert.IsTrue(regularWizard!.Type == DamageType.Normal);
+            Assert.IsTrue(regularWizard is IMonsterCard);
+            Assert.IsTrue((regularWizard as IMonsterCard)!.MonsterType == MonsterType.Wizard);
+        }
+        
+        [Test, TestCase(TestName = "Print FireWizard", Description =
+             "Print FireWizard"
+         )]
+        public void PrintFireWizard()
+        {
+            var fireWizard = CardFactory.Print("FireWizard", 10, log);
+            
+            Assert.NotNull(fireWizard);
+            Assert.IsTrue(fireWizard!.Type == DamageType.Fire);
+            Assert.IsTrue(fireWizard is IMonsterCard);
+            Assert.IsTrue((fireWizard as IMonsterCard)!.MonsterType == MonsterType.Wizard);
+        }
+        
+        [Test, TestCase(TestName = "Print WaterWizard", Description =
+             "Print WaterWizard"
+         )]
+        public void PrintWaterWizard()
+        {
+            var waterWizard = CardFactory.Print("WaterWizard", 10, log);
+            
+            Assert.NotNull(waterWizard);
+            Assert.IsTrue(waterWizard!.Type == DamageType.Water);
+            Assert.IsTrue(waterWizard is IMonsterCard);
+            Assert.IsTrue((waterWizard as IMonsterCard)!.MonsterType == MonsterType.Wizard);
+        }
+        
+        [Test, TestCase(TestName = "Print RegularOrk", Description =
+             "Print RegularOrk which misses Wizards because of Control and " +
+             "has the \"FiftyFifty\" Effect"
+         )]
+        public void PrintRegularOrk()
+        {
+            var regularOrk = CardFactory.Print("RegularOrk", 10, log);
+            
+            Assert.NotNull(regularOrk);
+            Assert.IsTrue(regularOrk!.Type == DamageType.Normal);
+            Assert.IsTrue(regularOrk is IMonsterCard);
+            Assert.IsTrue((regularOrk as IMonsterCard)!.MonsterType == MonsterType.Ork);
+            Assert.IsTrue(regularOrk.Specialities.OfType<ControllableByWizzard>().Any());
+            Assert.IsTrue((regularOrk as IMonsterCard)!.Effects.OfType<FiftyFifty>().Any());
+        }
+        
+        [Test, TestCase(TestName = "Print FireOrk", Description =
+             "Print FireOrk which misses Wizards because of Control and " +
+             "has the \"FiftyFifty\" Effect"
+         )]
+        public void PrintFireOrk()
+        {
+            var fireOrk = CardFactory.Print("FireOrk", 10, log);
+            
+            Assert.NotNull(fireOrk);
+            Assert.IsTrue(fireOrk!.Type == DamageType.Fire);
+            Assert.IsTrue(fireOrk is IMonsterCard);
+            Assert.IsTrue((fireOrk as IMonsterCard)!.MonsterType == MonsterType.Ork);
+            Assert.IsTrue(fireOrk.Specialities.OfType<ControllableByWizzard>().Any());
+            Assert.IsTrue((fireOrk as IMonsterCard)!.Effects.OfType<FiftyFifty>().Any());
+        }
+        
+        [Test, TestCase(TestName = "Print WaterOrk", Description =
+             "Print WaterOrk which misses Wizards because of Control and " +
+             "has the \"FiftyFifty\" Effect"
+         )]
+        public void PrintWaterOrk()
+        {
+            var waterOrk = CardFactory.Print("WaterOrk", 10, log);
+            
+            Assert.NotNull(waterOrk);
+            Assert.IsTrue(waterOrk!.Type == DamageType.Water);
+            Assert.IsTrue(waterOrk is IMonsterCard);
+            Assert.IsTrue((waterOrk as IMonsterCard)!.MonsterType == MonsterType.Ork);
+            Assert.IsTrue(waterOrk.Specialities.OfType<ControllableByWizzard>().Any());
+            Assert.IsTrue((waterOrk as IMonsterCard)!.Effects.OfType<FiftyFifty>().Any());
+        }
+        
+        [Test, TestCase(TestName = "Print RegularSpaceMarine", Description =
+             "Print RegularSpaceMarine which has a \"Boost\" Effect"
+         )]
+        public void PrintRegularSpaceMarine()
+        {
+            var regularSpaceMarine = CardFactory.Print("RegularSpaceMarine", 10, log);
+            
+            Assert.NotNull(regularSpaceMarine);
+            Assert.IsTrue(regularSpaceMarine!.Type == DamageType.Normal);
+            Assert.IsTrue(regularSpaceMarine is IMonsterCard);
+            Assert.IsTrue((regularSpaceMarine as IMonsterCard)!.MonsterType == MonsterType.SpaceMarine);
+            Assert.IsTrue((regularSpaceMarine as IMonsterCard)!.Effects.OfType<Boost>().Any());
+        }
+        
+        [Test, TestCase(TestName = "Print FireSpaceMarine", Description =
+             "Print FireSpaceMarine which has a \"Boost\" Effect"
+         )]
+        public void PrintFireSpaceMarine()
+        {
+            var fireSpaceMarine = CardFactory.Print("FireSpaceMarine", 10, log);
+            
+            Assert.NotNull(fireSpaceMarine);
+            Assert.IsTrue(fireSpaceMarine!.Type == DamageType.Fire);
+            Assert.IsTrue(fireSpaceMarine is IMonsterCard);
+            Assert.IsTrue((fireSpaceMarine as IMonsterCard)!.MonsterType == MonsterType.SpaceMarine);
+            Assert.IsTrue((fireSpaceMarine as IMonsterCard)!.Effects.OfType<Boost>().Any());
+        }
+        
+        [Test, TestCase(TestName = "Print WaterSpaceMarine", Description =
+             "Print WaterSpaceMarine which has a \"Boost\" Effect"
+         )]
+        public void PrintWaterSpaceMarine()
+        {
+            var waterSpaceMarine = CardFactory.Print("WaterSpaceMarine", 10, log);
+            
+            Assert.NotNull(waterSpaceMarine);
+            Assert.IsTrue(waterSpaceMarine!.Type == DamageType.Water);
+            Assert.IsTrue(waterSpaceMarine is IMonsterCard);
+            Assert.IsTrue((waterSpaceMarine as IMonsterCard)!.MonsterType == MonsterType.SpaceMarine);
+            Assert.IsTrue((waterSpaceMarine as IMonsterCard)!.Effects.OfType<Boost>().Any());
+        }
 
         [Test, TestCase(TestName = "Check invalid Card behaviour", Description =
              "Check invalid Card behaviour with unimplemented Card"
