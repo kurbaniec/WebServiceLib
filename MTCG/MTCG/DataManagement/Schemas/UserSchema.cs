@@ -15,7 +15,7 @@
 
         private static Role UserRoleStringToEnum(string role)
         {
-            return role == "Admin" ? Role.Admin : Role.User;
+            return role.ToLower() == "admin" ? Role.Admin : Role.User;
         }
     }
 

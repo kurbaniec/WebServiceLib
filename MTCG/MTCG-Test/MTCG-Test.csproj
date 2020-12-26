@@ -19,4 +19,8 @@
     <ProjectReference Include="..\MTCG\MTCG.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Integration\postman" />
+  </ItemGroup>
+
 </Project>

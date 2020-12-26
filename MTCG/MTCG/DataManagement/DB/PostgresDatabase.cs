@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -34,7 +35,11 @@ namespace MTCG.DataManagement.DB
             packageCmd.ExecuteNonQuery();
             int packageId;
             if (packageCmd.Parameters[0].Value is int value) packageId = value;
-            else return false;
+            else
+            {
+                transaction.Rollback();
+                return false;
+            }
 
             foreach (var card in cards)
             {
@@ -47,6 +52,7 @@ namespace MTCG.DataManagement.DB
                 cardCmd.Parameters.AddWithValue("p3", card.Damage);
                 cardCmd.Parameters.AddWithValue("p4", packageId);
                 cardCmd.Parameters.AddWithValue("p5", false);
+                cardCmd.Prepare();
                 cardCmd.ExecuteNonQuery();
             }
             
@@ -61,12 +67,53 @@ namespace MTCG.DataManagement.DB
 
         public bool AddUser(UserSchema user)
         {
-            throw new NotImplementedException();
+            var transaction = BeginTransaction();
+            if (transaction == null) return false;
+            using var cmd = new NpgsqlCommand(
+                "INSERT INTO userSchema (username, password, roleStr) " +
+                "VALUES(@p1, @p2, @p3)",
+            conn);
+
+            cmd.Parameters.AddWithValue("p1", user.Username);
+            cmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
+            cmd.Parameters.AddWithValue("p2", user.Password);
+            cmd.Parameters[1].NpgsqlDbType = NpgsqlDbType.Varchar;
+            cmd.Parameters.AddWithValue("p3", user.Role.ToString());
+            cmd.Parameters[2].NpgsqlDbType = NpgsqlDbType.Varchar;
+            
+            cmd.ExecuteNonQuery();
+            transaction.Commit();
+            return true;
         }
 
         public UserSchema? GetUser(string username)
         {
-            throw new System.NotImplementedException();
+            using var cmd = new NpgsqlCommand(
+                "SELECT * FROM userSchema WHERE username=@p1",
+                conn);
+            
+            cmd.Parameters.AddWithValue("p1", username);
+            cmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
+            
+            cmd.Parameters.Add(new NpgsqlParameter("username", NpgsqlDbType.Varchar)
+                {Direction = ParameterDirection.Output});
+            cmd.Parameters.Add(new NpgsqlParameter("password", NpgsqlDbType.Varchar)
+                {Direction = ParameterDirection.Output});
+            cmd.Parameters.Add(new NpgsqlParameter("roleStr", NpgsqlDbType.Varchar)
+                {Direction = ParameterDirection.Output});
+            
+            cmd.ExecuteNonQuery();
+            if (cmd.Parameters[1].Value != null &&
+                cmd.Parameters[2].Value != null &&
+                cmd.Parameters[3].Value != null)
+            {
+                return new UserSchema(
+                    (string) cmd.Parameters[1].Value!, 
+                    (string) cmd.Parameters[2].Value!, 
+                    (string) cmd.Parameters[3].Value!);
+            }
+
+            return null;
         }
 
         public StatsSchema? GetUserStats(string username)
@@ -154,15 +201,18 @@ namespace MTCG.DataManagement.DB
             conn = new NpgsqlConnection(connString);
             // Open General connection
             conn.Open();
-            
-            // TODO Remove for debug only
-            using var reset = new NpgsqlCommand("DROP DATABASE mtcg", conn);
-            reset.ExecuteNonQuery();
-            
             using var cmdChek = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname='mtcg'", conn);
             var dbExists = cmdChek.ExecuteScalar() != null;
             
-            if (dbExists) return;
+            if (dbExists)
+            {
+                // Close general connection and build new one to database
+                conn.Close();
+                connString += ";Database=mtcg";
+                conn = new NpgsqlConnection(connString);
+                conn.Open();
+                return;
+            };
             
             // Database does not exist; Create database and tables 
             // See: https://stackoverflow.com/a/17840078/12347616
@@ -298,6 +348,19 @@ namespace MTCG.DataManagement.DB
                 }
             }
             return null;
+        }
+
+        // TODO Remove for debug only
+        public void DropMTCG()
+        {
+            string connString = $"Server={conn.Host};Port={conn.Port};User Id=postgres;Password=postgres;";
+            conn.Close();
+            conn = new NpgsqlConnection(connString);
+            // Open General connection
+            conn.Open();
+            using var reset = new NpgsqlCommand("DROP DATABASE mtcg", conn);
+            reset.ExecuteNonQuery();
+            Environment.Exit(1);
         }
     }
 }

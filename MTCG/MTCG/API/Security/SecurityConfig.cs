@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using MTCG.DataManagement.DB;
@@ -30,7 +31,7 @@ namespace MTCG.API.Security
             var check = db.GetUser(username);
             if (check != null) return (false, "");
             var hashPassword = GenerateHash(password);
-            if (!db.AddUser(username != "admin"
+            if (!db.AddUser(username.ToLower() != "admin"
                 ? new UserSchema(username, hashPassword, "User")
                 : new UserSchema(username, hashPassword, "Admin")))
                 return (false, "");
@@ -58,8 +59,13 @@ namespace MTCG.API.Security
             // Calculate hash
             // See: https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.sha512?view=net-5.0
             // And: https://stackoverflow.com/a/11654825/12347616
-            var hashBuffer = hasher.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Encoding.UTF8.GetString(hashBuffer, 0, hashBuffer.Length);
+            // And: https://stackoverflow.com/a/11654597/12347616
+            // And: https://stackoverflow.com/a/14709940/12347616
+            string hash = string.Empty;
+            var hashBuffer = hasher.ComputeHash(Encoding.ASCII.GetBytes(password));
+            foreach (var b in hashBuffer) hash += b.ToString("x2");
+            //return Encoding.ASCII.GetString(hashBuffer, 0, hashBuffer.Length);
+            return hash;
         }
     }
 }

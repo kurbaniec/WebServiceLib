@@ -13,7 +13,7 @@ namespace MTCG.Cards.DamageUtil
     {
         public static string GetString(this DamageType dt)
         {
-            var name = nameof(dt);
+            var name = dt.ToString();
             if (name == "Normal") name = "Regular";
             return name;
         }
