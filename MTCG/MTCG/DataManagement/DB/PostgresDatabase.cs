@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using MTCG.DataManagement.Schemas;
 using Newtonsoft.Json;
 using Npgsql;
+using NpgsqlTypes;
 using WebService_Lib.Attributes;
 
 namespace MTCG.DataManagement.DB
@@ -20,12 +23,45 @@ namespace MTCG.DataManagement.DB
         
         public bool AddPackage(string admin, List<CardSchema> cards)
         {
-            throw new System.NotImplementedException();
+            var transaction = BeginTransaction();
+            if (transaction == null) return false;
+            // Generate new package and return id
+            // See: https://stackoverflow.com/a/5765441/12347616
+            using var packageCmd = new NpgsqlCommand(
+                "INSERT INTO packageSchema DEFAULT VALUES RETURNING id",
+            conn);
+            packageCmd.Parameters.Add("id", NpgsqlDbType.Integer);
+            packageCmd.ExecuteNonQuery();
+            int packageId;
+            if (packageCmd.Parameters[0].Value is int value) packageId = value;
+            else return false;
+
+            foreach (var card in cards)
+            {
+                using var cardCmd = new NpgsqlCommand(
+                    "INSERT INTO cardSchema (id, cardname, damage, package, deck) " + 
+                    "VALUES(@p1, @p2, @p3, @p4, @p5)"
+                , conn);
+                cardCmd.Parameters.AddWithValue("p1", card.Id);
+                cardCmd.Parameters.AddWithValue("p2", card.Name);
+                cardCmd.Parameters.AddWithValue("p3", card.Damage);
+                cardCmd.Parameters.AddWithValue("p4", packageId);
+                cardCmd.Parameters.AddWithValue("p5", false);
+                cardCmd.ExecuteNonQuery();
+            }
+            
+            transaction.Commit();
+            return true;
         }
 
         public bool AcquirePackage(string username)
         {
             throw new System.NotImplementedException();
+        }
+
+        public bool AddUser(UserSchema user)
+        {
+            throw new NotImplementedException();
         }
 
         public UserSchema? GetUser(string username)
@@ -233,6 +269,32 @@ namespace MTCG.DataManagement.DB
             {
                 cmd.ExecuteNonQuery();
             }
+        }
+
+        /// <summary>
+        /// Try to start a new transaction.
+        /// </summary>
+        /// <returns>
+        /// Returns a <c>NpgsqlTransaction</c> when a new transaction can be started or
+        /// null when not.
+        /// </returns>
+        private NpgsqlTransaction? BeginTransaction()
+        {
+            // Try to start new transaction
+            for (var i = 0; i < 15; i++)
+            {
+                try
+                {
+                    var transaction = conn.BeginTransaction();
+                    return transaction;
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // Try again later...
+                    Thread.Sleep(50);
+                }
+            }
+            return null;
         }
     }
 }

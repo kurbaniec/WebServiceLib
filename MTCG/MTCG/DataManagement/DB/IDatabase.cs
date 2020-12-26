@@ -9,7 +9,8 @@ namespace MTCG.DataManagement.DB
         
         bool AddPackage(string admin, List<CardSchema> cards);
         bool AcquirePackage(string username);
-        
+
+        bool AddUser(UserSchema user);
         UserSchema? GetUser(string username);
         StatsSchema? GetUserStats(string username);
         
