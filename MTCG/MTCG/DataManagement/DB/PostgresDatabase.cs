@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using MTCG.DataManagement.Schemas;
+using Newtonsoft.Json;
 using Npgsql;
 using WebService_Lib.Attributes;
 
@@ -8,126 +11,13 @@ namespace MTCG.DataManagement.DB
     [Component]
     public class PostgresDatabase : IDatabase
     {
+        private NpgsqlConnection conn = null!;
+        
         public PostgresDatabase()
         {
-            // TODO connect using Resources
             CreateDatabaseIfNotExists();
         }
         
-        public void CreateDatabaseIfNotExists()
-        {
-            // Check if database exists
-            // See: https://stackoverflow.com/a/20032567/12347616
-            string connStr = "Server=localhost;Port=5432;User Id=postgres;Password=postgres;";
-            var conn = new NpgsqlConnection(connStr);
-            conn.Open();
-            string cmdText = "SELECT 1 FROM pg_database WHERE datname='mtcg'";
-            using var cmd = new NpgsqlCommand(cmdText, conn);
-            var dbExists = cmd.ExecuteScalar() != null;
-            
-            
-            if (dbExists) return;
-            // Create database and tables (if not already exists)
-            // See: https://stackoverflow.com/a/17840078/12347616
-
-            var m_createdb_cmd = new NpgsqlCommand(@"
-    CREATE DATABASE mtcg
-        WITH OWNER = postgres
-        ENCODING = 'UTF8'
-        CONNECTION LIMIT = -1;
-    ", conn);
-             
-            m_createdb_cmd.ExecuteNonQuery();
-            
-            connStr = "Server=localhost;Port=5432;User Id=postgres;Password=postgres;Database=mtcg";
-            conn = new NpgsqlConnection(connStr);
-            conn.Open();
-            
-            var createUserSchema = new NpgsqlCommand(@"
-    CREATE TABLE IF NOT EXISTS userSchema(
-        username VARCHAR(256),
-        password VARCHAR(256),
-        roleStr VARCHAR(256),
-        PRIMARY KEY(username)
-    )", conn);
-            // Autoincrement 
-            // See: https://stackoverflow.com/a/787774/12347616
-            var createPackageSchema = new NpgsqlCommand(@"
-    CREATE TABLE IF NOT EXISTS packageSchema(
-        id SERIAL,
-        PRIMARY KEY(id)
-    )", conn);
-            
-            
-            // Foreign Keys
-            // See: https://www.postgresqltutorial.com/postgresql-foreign-key/
-            var createCardSchema = new NpgsqlCommand(@"
-    CREATE TABLE IF NOT EXISTS cardSchema(
-        id VARCHAR(256),
-        cardname VARCHAR(256),
-        damage INTEGER,
-        package INTEGER,
-        username VARCHAR(256),
-        deck BOOLEAN,
-        store VARCHAR(256),
-        PRIMARY KEY(id),
-        CONSTRAINT fk_package
-            FOREIGN KEY(package)
-                REFERENCES packageSchema(id)
-                ON DELETE SET NULL,
-        CONSTRAINT fk_user
-            FOREIGN KEY(username)
-                REFERENCES userSchema(username)
-    )", conn);
-            
-            var createStoreSchema = new NpgsqlCommand(@"
-    CREATE TABLE IF NOT EXISTS storeSchema(
-        id VARCHAR(256),
-        trade VARCHAR(256),
-        wanted VARCHAR(256),
-        damage INTEGER,
-        PRIMARY KEY(id),
-        CONSTRAINT fk_trade
-            FOREIGN KEY(trade)
-                REFERENCES cardSchema(id)
-    )", conn);
-            
-            
-            
-            // Add Constraint later on
-            // See: https://kb.objectrocket.com/postgresql/alter-table-add-constraint-how-to-use-constraints-sql-621
-            var alterCardSchema = new NpgsqlCommand(@"
-    ALTER TABLE cardSchema ADD
-    CONSTRAINT fk_store
-        FOREIGN KEY(store)
-            REFERENCES storeSchema(id)
-            ON DELETE SET NULL
-    ", conn);
-            
-            var createStatsSchema = new NpgsqlCommand(@"
-    CREATE TABLE IF NOT EXISTS statsSchema(
-        username VARCHAR(256),
-        elo INTEGER,
-        wins INTEGER,
-        looses INTEGER,
-        coins INTEGER,
-        bio VARCHAR(256),
-        image VARCHAR(256),
-        PRIMARY KEY(username),
-        CONSTRAINT fk_user
-            FOREIGN KEY(username)
-                REFERENCES userSchema(username)
-    )", conn);
-
-            createUserSchema.ExecuteNonQuery();
-            createPackageSchema.ExecuteNonQuery();
-            createCardSchema.ExecuteNonQuery();
-            createStoreSchema.ExecuteNonQuery();
-            alterCardSchema.ExecuteNonQuery();
-            createStatsSchema.ExecuteNonQuery();
-            conn.Close();
-        }
-
         public bool AddPackage(string admin, List<CardSchema> cards)
         {
             throw new System.NotImplementedException();
@@ -181,6 +71,168 @@ namespace MTCG.DataManagement.DB
         public bool Trade(string username, string myDeal, string otherDeal)
         {
             throw new System.NotImplementedException();
+        }
+        
+        public void CreateDatabaseIfNotExists()
+        {
+            // Get DB config and read it
+            // See: https://stackoverflow.com/a/41021476/12347616
+            // And: https://docs.microsoft.com/en-us/dotnet/api/system.io.file.exists?view=net-5.0
+            string user, password, ip;
+            long port;
+
+            try
+            {
+                string runningPath = AppDomain.CurrentDomain.BaseDirectory!;
+                string configPath =
+                    $"{Path.GetFullPath(Path.Combine(runningPath!, @"..\..\..\"))}Resources\\dbConfig.json";
+                if (!File.Exists(configPath)) throw new FileNotFoundException("dbConfig.json not found in Resources folder");
+                
+                string config = File.ReadAllText(configPath);
+                // Deserialize with JSON.NET
+                // See: https://www.newtonsoft.com/json/help/html/DeserializeDictionary.htm
+                var parsedConfig = JsonConvert.DeserializeObject<Dictionary<string, object>>(config);
+                
+                if (parsedConfig["user"] == null || parsedConfig["password"] == null || parsedConfig["ip"] == null ||
+                    parsedConfig["port"] == null) throw new ArgumentException("Malformed dbConfig.json");
+                user = (string) parsedConfig["user"];
+                password = (string) parsedConfig["password"];
+                ip = (string) parsedConfig["ip"];
+                port = (long) parsedConfig["port"];
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Something went wrong reading database config:");
+                Console.Error.WriteLine(ex.ToString());
+                Console.Error.WriteLine("Using default config.");
+                user = "postgres";
+                password = "postgres";
+                ip = "localhost";
+                port = 5432;
+            }
+            
+            // Check if database exists
+            // See: https://stackoverflow.com/a/20032567/12347616
+            // And: https://www.npgsql.org/doc/index.html
+            string connString = $"Server={ip};Port={port};User Id={user};Password={password};";
+            conn = new NpgsqlConnection(connString);
+            // Open General connection
+            conn.Open();
+            
+            using var cmdChek = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname='mtcg'", conn);
+            var dbExists = cmdChek.ExecuteScalar() != null;
+            
+            if (dbExists) return;
+            
+            // Database does not exist; Create database and tables 
+            // See: https://stackoverflow.com/a/17840078/12347616
+            using (var cmd = new NpgsqlCommand(@"
+    CREATE DATABASE mtcg
+        WITH OWNER = postgres
+        ENCODING = 'UTF8'
+        CONNECTION LIMIT = -1;
+    ", conn))
+            {
+                cmd.ExecuteNonQuery();
+            }
+            // Close general connection and build new one to database
+            conn.Close();
+            connString += ";Database=mtcg";
+            conn = new NpgsqlConnection(connString);
+            conn.Open();
+            
+            // Build tables
+            using (var cmd = new NpgsqlCommand(@"
+    CREATE TABLE IF NOT EXISTS userSchema(
+        username VARCHAR(256),
+        password VARCHAR(256),
+        roleStr VARCHAR(256),
+        PRIMARY KEY(username)
+    )", conn))
+            {
+                cmd.ExecuteNonQuery();
+            }
+            
+            // Autoincrement 
+            // See: https://stackoverflow.com/a/787774/12347616
+            using (var cmd = new NpgsqlCommand(@"
+    CREATE TABLE IF NOT EXISTS packageSchema(
+        id SERIAL,
+        PRIMARY KEY(id)
+    )", conn))
+            {
+                cmd.ExecuteNonQuery();
+            }
+            
+            // Foreign Keys
+            // See: https://www.postgresqltutorial.com/postgresql-foreign-key/
+            using (var cmd = new NpgsqlCommand(@"
+    CREATE TABLE IF NOT EXISTS cardSchema(
+        id VARCHAR(256),
+        cardname VARCHAR(256),
+        damage INTEGER,
+        package INTEGER,
+        username VARCHAR(256),
+        deck BOOLEAN,
+        store VARCHAR(256),
+        PRIMARY KEY(id),
+        CONSTRAINT fk_package
+            FOREIGN KEY(package)
+                REFERENCES packageSchema(id)
+                ON DELETE SET NULL,
+        CONSTRAINT fk_user
+            FOREIGN KEY(username)
+                REFERENCES userSchema(username)
+    )", conn))
+            {
+                cmd.ExecuteNonQuery();
+            }
+
+            using (var cmd = new NpgsqlCommand(@"
+    CREATE TABLE IF NOT EXISTS storeSchema(
+        id VARCHAR(256),
+        trade VARCHAR(256),
+        wanted VARCHAR(256),
+        damage INTEGER,
+        PRIMARY KEY(id),
+        CONSTRAINT fk_trade
+            FOREIGN KEY(trade)
+                REFERENCES cardSchema(id)
+    )", conn))
+            {
+                cmd.ExecuteNonQuery();
+            }
+            
+            // Add Constraint later on
+            // See: https://kb.objectrocket.com/postgresql/alter-table-add-constraint-how-to-use-constraints-sql-621
+            using (var cmd = new NpgsqlCommand(@"
+    ALTER TABLE cardSchema ADD
+    CONSTRAINT fk_store
+        FOREIGN KEY(store)
+            REFERENCES storeSchema(id)
+            ON DELETE SET NULL
+    ", conn))
+            {
+                cmd.ExecuteNonQuery();
+            }
+
+            using (var cmd = new NpgsqlCommand(@"
+    CREATE TABLE IF NOT EXISTS statsSchema(
+        username VARCHAR(256),
+        elo INTEGER,
+        wins INTEGER,
+        looses INTEGER,
+        coins INTEGER,
+        bio VARCHAR(256),
+        image VARCHAR(256),
+        PRIMARY KEY(username),
+        CONSTRAINT fk_user
+            FOREIGN KEY(username)
+                REFERENCES userSchema(username)
+    )", conn))
+            {
+                cmd.ExecuteNonQuery();
+            }
         }
     }
 }
