@@ -155,6 +155,10 @@ namespace MTCG.DataManagement.DB
             // Open General connection
             conn.Open();
             
+            // TODO Remove for debug only
+            using var reset = new NpgsqlCommand("DROP DATABASE mtcg", conn);
+            reset.ExecuteNonQuery();
+            
             using var cmdChek = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname='mtcg'", conn);
             var dbExists = cmdChek.ExecuteScalar() != null;
             
@@ -166,7 +170,6 @@ namespace MTCG.DataManagement.DB
     CREATE DATABASE mtcg
         WITH OWNER = postgres
         ENCODING = 'UTF8'
-        CONNECTION LIMIT = -1;
     ", conn))
             {
                 cmd.ExecuteNonQuery();
