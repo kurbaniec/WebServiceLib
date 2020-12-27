@@ -14,7 +14,7 @@ namespace MTCG.Cards.Factory
 {
     public class CardFactory
     {
-        public static ICard? Print(string fullCardName, uint damage, IBattleLog log)
+        public static ICard? Print(string fullCardName, double damage, IBattleLog log)
         {
             fullCardName = InferType(fullCardName);
             var processedName = Split(fullCardName);
@@ -36,7 +36,7 @@ namespace MTCG.Cards.Factory
             return PrintMonster(damage, (DamageType) type, (MonsterType) monsterType, log);
         }
 
-        private static ICard PrintSpell(uint damage, DamageType damageType, IBattleLog log)
+        private static ICard PrintSpell(double damage, DamageType damageType, IBattleLog log)
         {
             // All spells can't pierce Krakens
             var specialities = new List<ISpeciality>() { new MissKrakenBecauseOfImmunity() };
@@ -56,7 +56,7 @@ namespace MTCG.Cards.Factory
         }
 
         private static ICard PrintMonster(
-            uint damage, DamageType damageType, MonsterType monsterType, IBattleLog log
+            double damage, DamageType damageType, MonsterType monsterType, IBattleLog log
         )
         {
             var specialities = new List<ISpeciality>();

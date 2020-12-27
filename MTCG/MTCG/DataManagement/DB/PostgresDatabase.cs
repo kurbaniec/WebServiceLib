@@ -72,6 +72,7 @@ namespace MTCG.DataManagement.DB
         {
             var transaction = BeginTransaction();
             if (transaction == null) return false;
+            NpgsqlDataReader? dr = null;
             try
             {
                 // Check if user has enough coins
@@ -107,7 +108,7 @@ namespace MTCG.DataManagement.DB
                 // Read results with DataReader
                 // See: http://www.sqlines.com/postgresql/npgsql_cs_result_sets
                 // And: https://docs.microsoft.com/de-de/dotnet/framework/data/adonet/retrieving-data-using-a-datareader
-                var dr = cardQueryCmd.ExecuteReader();
+                dr = cardQueryCmd.ExecuteReader();
                 var cards = new List<CardSchema>();
                 while (dr.Read())
                 {
@@ -145,6 +146,7 @@ namespace MTCG.DataManagement.DB
             }
             catch (Exception ex)
             {
+                dr?.Close();
                 return Rollback(transaction);
             }
         }
@@ -300,7 +302,38 @@ namespace MTCG.DataManagement.DB
 
         public List<CardSchema> GetUserCards(string username)
         {
-            throw new System.NotImplementedException();
+            NpgsqlDataReader? dr = null;
+            try
+            {
+                using var cardQueryCmd = new NpgsqlCommand(
+                    "SELECT * from cardSchema WHERE username = @p1",
+                    conn);
+                cardQueryCmd.Parameters.AddWithValue("p1", username);
+                cardQueryCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
+                dr = cardQueryCmd.ExecuteReader();
+                var cards = new List<CardSchema>();
+                while (dr.Read())
+                {
+                    var id = dr.GetString(0);
+                    var name = dr.GetString(1);
+                    var damage = dr.GetDouble(2);
+                    var packageId = (string?) null;
+                    var storeId = dr[6] == DBNull.Value ? null : dr.GetString(6);
+                    var deck = dr.GetBoolean(5);
+
+                    cards.Add(new CardSchema(
+                        id, name, damage, packageId, username, storeId, deck
+                    ));
+                }
+
+                dr.Close();
+                return cards;
+            }
+            catch (Exception ex)
+            {
+                dr?.Close();
+                return new List<CardSchema>();
+            }
         }
 
         public List<StatsSchema> GetScoreboard()

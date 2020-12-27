@@ -44,7 +44,7 @@ namespace MTCG.API.Security
         public void RevokeToken(string token) => tokens.Remove(token);
         public List<string> SecurePaths() => new List<string>
         {
-            "/packages"
+            "/packages", "/cards", "/deck"
         };
 
         public bool CheckCredentials(string username, string password)
