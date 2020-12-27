@@ -21,19 +21,23 @@ namespace MTCG.API.Controllers
         [Post("/packages")]
         public Response AddPackages(AuthDetails? user, Dictionary<string, object>? payload)
         {
+            // Check parameters
             if (!(user is { } userDetails) || !(payload is { } json))
                 return Response.Status(Status.BadRequest);
             // Package needs to consists of 5 cards
             if (!(json["array"] is JArray rawCards) || rawCards.Count != 5)
                 return Response.Status(Status.BadRequest);
+            // Get user and check if its an admin account
             var userSchema = db.GetUser(userDetails.Username);
             if (userSchema is null) return Response.Status(Status.BadRequest);
-            
-            if (userSchema.Role == Role.Admin)
-            {
-                        
-            } else return Response.Status(Status.Forbidden);
-            return Response.Status(Status.BadRequest);
+            if (userSchema.Role != Role.Admin) return Response.Status(Status.Forbidden);
+            // Parse given cards
+            var cards = CardSchema.ParseRequest(rawCards);
+            // Check if all cards were correctly parsed
+            if (cards.Count != 5) return Response.Status(Status.BadRequest);
+            // Add package and return corresponding response
+            var result = db.AddPackage(cards);
+            return Response.Status(result ? Status.Created : Status.Conflict);
         }
     }
 }

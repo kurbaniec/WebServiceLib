@@ -7,7 +7,7 @@ namespace MTCG.DataManagement.DB
     {
         void CreateDatabaseIfNotExists();
         
-        bool AddPackage(string admin, List<CardSchema> cards);
+        bool AddPackage(List<CardSchema> cards);
         bool AcquirePackage(string username);
 
         bool AddUser(UserSchema user);

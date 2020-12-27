@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -14,6 +15,14 @@ namespace MTCG.DataManagement.Schemas
         public string? StoreId { get; set; }
         public bool InDeck { get; set; }
 
+        // Used when inserting new cards
+        public CardSchema(string id, string name, double damage)
+        {
+            Id = id;
+            Name = name;
+            Damage = damage;
+        }
+        
         public CardSchema(string id, string name, double damage, string? packageId, string? userId, string? storeId, bool inDeck)
         {
             Id = id;
@@ -30,13 +39,21 @@ namespace MTCG.DataManagement.Schemas
             // Parse Cards
             // See: https://stackoverflow.com/a/41810862/12347616
             var cards = new List<CardSchema>();
-            foreach (var arrayToken in array)
+            foreach (var jToken in array)
             {
-                var rawCard = (JArray) arrayToken;
-                foreach (var itemToken in rawCard)
+                if (!(jToken is JObject item)) continue;
+                if (item["Id"] == null || item["Name"] == null || item["Damage"] == null) continue;
+                try
                 {
-                    var item = (JObject) itemToken;
-                    
+                    // Convert values
+                    var id = item.GetValue("Id").ToObject<string>();
+                    var name = item.GetValue("Name").ToObject<string>();
+                    var damage = item.GetValue("Damage").ToObject<double>();
+                    cards.Add(new CardSchema(id, name, damage));
+                }
+                catch (Exception)
+                {
+                    // ignored
                 }
             }
 

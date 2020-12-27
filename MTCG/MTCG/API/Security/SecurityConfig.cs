@@ -20,7 +20,7 @@ namespace MTCG.API.Security
         public AuthDetails AuthDetails(string token)
         {
             var username = token.Substring(0, token.Length - 10);
-            return new AuthDetails(token, username);
+            return new AuthDetails(username, token);
         }
         
         private readonly HashSet<string> tokens = new HashSet<string>();

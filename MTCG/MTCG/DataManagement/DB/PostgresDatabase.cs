@@ -22,7 +22,7 @@ namespace MTCG.DataManagement.DB
             CreateDatabaseIfNotExists();
         }
         
-        public bool AddPackage(string admin, List<CardSchema> cards)
+        public bool AddPackage(List<CardSchema> cards)
         {
             var transaction = BeginTransaction();
             if (transaction == null) return false;
@@ -333,7 +333,7 @@ namespace MTCG.DataManagement.DB
         id VARCHAR(256),
         trade VARCHAR(256),
         wanted VARCHAR(256),
-        damage INTEGER,
+        damage DOUBLE PRECISION ,
         PRIMARY KEY(id),
         CONSTRAINT fk_trade
             FOREIGN KEY(trade)
