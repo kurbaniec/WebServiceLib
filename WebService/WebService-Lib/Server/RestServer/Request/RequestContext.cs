@@ -55,6 +55,11 @@ namespace WebService_Lib.Server.RestServer
                     {
                         payload = "{}";
                     }
+                    // Support for arrays
+                    if ((payload as string)!.StartsWith("["))
+                    {
+                        payload = "{\"array\":" + payload + "}";
+                    }
                     try
                     {
                         payload = JsonConvert.DeserializeObject<Dictionary<string, object>>((string) payload);

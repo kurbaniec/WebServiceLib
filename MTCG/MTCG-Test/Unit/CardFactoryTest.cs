@@ -435,6 +435,47 @@ namespace MTCG_Test.Unit
             Assert.IsTrue((waterSpaceMarine as IMonsterCard)!.Effects.OfType<Boost>().Any());
         }
 
+        [Test, TestCase(TestName = "Print default Spell Card", Description =
+             "Print default Spell Card when no Damage Type is given"
+         )]
+        public void PrintDefaultSpell()
+        {
+            var spell = CardFactory.Print("Spell", 10, log);
+            
+            Assert.IsTrue(spell!.Type == DamageType.Normal);
+        }
+
+
+        [Test, TestCase(TestName = "Print default Monster Cards", Description =
+             "Print default Monster Cards when no Damage Type is given"
+         )]
+        public void PrintDefaultMonsters()
+        {
+            // Default to Normal
+            var goblin = CardFactory.Print("Goblin", 10, log);
+            var troll = CardFactory.Print("Troll", 10, log);
+            var elf = CardFactory.Print("Elf", 10, log);
+            var wizard = CardFactory.Print("Wizard", 10, log);
+            var ork = CardFactory.Print("Ork", 10, log);
+            var knight = CardFactory.Print("Knight", 10, log);
+            var spaceMarine = CardFactory.Print("SpaceMarine", 10, log);
+            // Default NOT to Normal
+            var dragon = CardFactory.Print("Dragon", 10, log);
+            var kraken = CardFactory.Print("Kraken", 10, log);
+            
+            Assert.IsTrue(goblin!.Type == DamageType.Normal);
+            Assert.IsTrue(troll!.Type == DamageType.Normal);
+            Assert.IsTrue(elf!.Type == DamageType.Normal);
+            Assert.IsTrue(wizard!.Type == DamageType.Normal);
+            Assert.IsTrue(ork!.Type == DamageType.Normal);
+            Assert.IsTrue(knight!.Type == DamageType.Normal);
+            Assert.IsTrue(spaceMarine!.Type == DamageType.Normal);
+            
+            Assert.IsTrue(dragon!.Type == DamageType.Fire);
+            Assert.IsTrue(kraken!.Type == DamageType.Water);
+        }
+        
+
         [Test, TestCase(TestName = "Check invalid Card behaviour", Description =
              "Check invalid Card behaviour with unimplemented Card"
          )]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using MTCG.Cards.DamageUtil;
 
 namespace MTCG.Cards.Basis.Monster
 {
@@ -15,7 +16,7 @@ namespace MTCG.Cards.Basis.Monster
         Elf,
         SpaceMarine,
     }
-
+    
     // Extension class for enum
     // See: https://stackoverflow.com/a/5985710/12347616
     static class MonsterTypeMethods
@@ -30,6 +31,34 @@ namespace MTCG.Cards.Basis.Monster
             // See: https://stackoverflow.com/a/36147193/12347616
             var prettified = Regex.Split(name, @"(?<!^)(?=[A-Z])").ToString();
             return prettified ?? name;
+        }
+
+        public static string GetDefaultDamageType(this MonsterType mt)
+        {
+            string damageType;
+            switch (mt)
+            {
+                case MonsterType.Goblin:
+                case MonsterType.Troll:
+                case MonsterType.Elf:
+                case MonsterType.Wizard:
+                case MonsterType.Ork:
+                case MonsterType.Knight:
+                case MonsterType.SpaceMarine:
+                    damageType = DamageType.Normal.ToString();
+                    break;
+                case MonsterType.Dragon:
+                    damageType = DamageType.Fire.ToString();
+                    break;
+                case MonsterType.Kraken:
+                    damageType = DamageType.Water.ToString();
+                    break;
+                default:
+                    damageType = DamageType.Normal.ToString();
+                    break;
+            }
+
+            return damageType;
         }
         
         public static MonsterType? GetType(string type)

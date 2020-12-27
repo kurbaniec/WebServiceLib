@@ -16,6 +16,7 @@ namespace MTCG.Cards.Factory
     {
         public static ICard? Print(string fullCardName, uint damage, IBattleLog log)
         {
+            fullCardName = InferType(fullCardName);
             var processedName = Split(fullCardName);
             if (processedName == null) return null;
             var procType = processedName.Value.Item1;
@@ -88,6 +89,21 @@ namespace MTCG.Cards.Factory
             }
             ICard card = new MonsterCard(damage, damageType, monsterType, specialities, effects, log);
             return card;
+        }
+
+        private static string InferType(string fullCardName)
+        {
+            if (fullCardName.StartsWith("Normal") || fullCardName.StartsWith("Regular") ||
+                fullCardName.StartsWith("Fire") || fullCardName.StartsWith("Water")) return fullCardName;
+            if (fullCardName.EndsWith("Spell")) fullCardName = "Regular" + fullCardName;
+            // Pattern matching
+            // See: https://stackoverflow.com/a/51449576/12347616
+            else if (MonsterTypeMethods.GetType(fullCardName) is { } type)
+            {
+                fullCardName = type.GetDefaultDamageType() + fullCardName;
+            }
+
+            return fullCardName;
         }
         
 
