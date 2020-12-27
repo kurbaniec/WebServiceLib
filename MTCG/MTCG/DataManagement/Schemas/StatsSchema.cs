@@ -23,8 +23,8 @@
         }
         
         public StatsSchema(
-            string username, string bio, string image,
-            uint elo, uint wins, uint looses, uint coins
+            string username, long elo, long wins, long looses, long coins,
+            string bio, string image
         )
         {
             Username = username;

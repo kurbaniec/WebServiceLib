@@ -38,11 +38,7 @@ namespace MTCG.DataManagement.DB
                 packageCmd.ExecuteNonQuery();
                 int packageId;
                 if (packageCmd.Parameters[0].Value is int value) packageId = value;
-                else
-                {
-                    transaction.Rollback();
-                    return false;
-                }
+                else return Rollback(transaction);
 
                 foreach (var card in cards)
                 {
@@ -68,14 +64,89 @@ namespace MTCG.DataManagement.DB
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
-                return false;
+                return Rollback(transaction);
             }
         }
 
-        public bool AcquirePackage(string username)
+        public bool AcquirePackage(string username, long packageCost)
         {
-            throw new System.NotImplementedException();
+            var transaction = BeginTransaction();
+            if (transaction == null) return false;
+            try
+            {
+                // Check if user has enough coins
+                var userStats = GetUserStats(username);
+                if (userStats is null) return Rollback(transaction);
+                if (userStats.Coins - packageCost < 0) return Rollback(transaction);
+
+                using var purchaseCmd = new NpgsqlCommand(
+                    "UPDATE statsSchema " +
+                    "SET coins=@p1 WHERE username=@p2"
+                    , conn);
+                purchaseCmd.Parameters.AddWithValue("p1", userStats.Coins - packageCost);
+                purchaseCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Bigint;
+                purchaseCmd.Parameters.AddWithValue("p2", username);
+                purchaseCmd.Parameters[1].NpgsqlDbType = NpgsqlDbType.Varchar;
+                purchaseCmd.ExecuteNonQuery();
+                
+                using var packageQueryCmd = new NpgsqlCommand(
+                    "SELECT * from packageSchema LIMIT 1", 
+                    conn);
+                packageQueryCmd.Parameters.Add(new NpgsqlParameter("id", NpgsqlDbType.Integer)
+                    {Direction = ParameterDirection.Output});
+                packageQueryCmd.ExecuteNonQuery();
+                int packageId;
+                if (packageQueryCmd.Parameters[0].Value is int value) packageId = value;
+                else return Rollback(transaction);
+                
+                using var cardQueryCmd = new NpgsqlCommand(
+                    "SELECT * from cardSchema WHERE package = @p1", 
+                    conn);
+                cardQueryCmd.Parameters.AddWithValue("p1", packageId);
+                cardQueryCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Integer;
+                // Read results with DataReader
+                // See: http://www.sqlines.com/postgresql/npgsql_cs_result_sets
+                // And: https://docs.microsoft.com/de-de/dotnet/framework/data/adonet/retrieving-data-using-a-datareader
+                var dr = cardQueryCmd.ExecuteReader();
+                var cards = new List<CardSchema>();
+                while (dr.Read())
+                {
+                    cards.Add(new CardSchema(
+                        dr.GetString(0), dr.GetString(1), dr.GetDouble(2),
+                        null, username, null, false
+                    ));
+                }
+                dr.Close();
+
+                using var cardUpdateCmd = new NpgsqlCommand(
+                    "UPDATE cardSchema " +
+                    "SET username = @p1 WHERE id = @p2 AND package = @p3", 
+                    conn);
+                cardUpdateCmd.Parameters.AddWithValue("p1", username);
+                cardUpdateCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
+                cardUpdateCmd.Parameters.Add("p2", NpgsqlDbType.Varchar);
+                cardUpdateCmd.Parameters.AddWithValue("p3", packageId);
+                cardUpdateCmd.Parameters[2].NpgsqlDbType = NpgsqlDbType.Integer;
+                foreach (var card in cards)
+                {
+                    cardUpdateCmd.Parameters[1].Value = card.Id;
+                    cardUpdateCmd.ExecuteNonQuery();
+                }
+                
+                using var packageDeleteCmd = new NpgsqlCommand(
+                    "DELETE FROM packageSchema WHERE id=@p1",
+                    conn);
+                packageDeleteCmd.Parameters.AddWithValue("p1", packageId);
+                packageDeleteCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Integer;
+                packageDeleteCmd.ExecuteNonQuery();
+                
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return Rollback(transaction);
+            }
         }
 
         public bool AddUser(UserSchema user)
@@ -105,13 +176,13 @@ namespace MTCG.DataManagement.DB
                 statsSchemaCmd.Parameters.AddWithValue("p1", stats.Username);
                 statsSchemaCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
                 statsSchemaCmd.Parameters.AddWithValue("p2", stats.Elo);
-                statsSchemaCmd.Parameters[1].NpgsqlDbType = NpgsqlDbType.Integer;
+                statsSchemaCmd.Parameters[1].NpgsqlDbType = NpgsqlDbType.Bigint;
                 statsSchemaCmd.Parameters.AddWithValue("p3", stats.Wins);
-                statsSchemaCmd.Parameters[2].NpgsqlDbType = NpgsqlDbType.Integer;
+                statsSchemaCmd.Parameters[2].NpgsqlDbType = NpgsqlDbType.Bigint;
                 statsSchemaCmd.Parameters.AddWithValue("p4", stats.Looses);
-                statsSchemaCmd.Parameters[3].NpgsqlDbType = NpgsqlDbType.Integer;
+                statsSchemaCmd.Parameters[3].NpgsqlDbType = NpgsqlDbType.Bigint;
                 statsSchemaCmd.Parameters.AddWithValue("p5", stats.Coins);
-                statsSchemaCmd.Parameters[4].NpgsqlDbType = NpgsqlDbType.Integer;
+                statsSchemaCmd.Parameters[4].NpgsqlDbType = NpgsqlDbType.Bigint;
                 statsSchemaCmd.Parameters.AddWithValue("p6", stats.Bio);
                 statsSchemaCmd.Parameters[5].NpgsqlDbType = NpgsqlDbType.Varchar;
                 statsSchemaCmd.Parameters.AddWithValue("p7", stats.Image);
@@ -169,7 +240,52 @@ namespace MTCG.DataManagement.DB
 
         public StatsSchema? GetUserStats(string username)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                using var cmd = new NpgsqlCommand(
+                    "SELECT * FROM statsSchema WHERE username=@p1",
+                    conn);
+
+                cmd.Parameters.AddWithValue("p1", username);
+                cmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
+
+                cmd.Parameters.Add(new NpgsqlParameter("elo", NpgsqlDbType.Bigint)
+                    {Direction = ParameterDirection.Output});
+                cmd.Parameters.Add(new NpgsqlParameter("wins", NpgsqlDbType.Bigint)
+                    {Direction = ParameterDirection.Output});
+                cmd.Parameters.Add(new NpgsqlParameter("looses", NpgsqlDbType.Bigint)
+                    {Direction = ParameterDirection.Output});
+                cmd.Parameters.Add(new NpgsqlParameter("coins", NpgsqlDbType.Bigint)
+                    {Direction = ParameterDirection.Output});
+                cmd.Parameters.Add(new NpgsqlParameter("bio", NpgsqlDbType.Bigint)
+                    {Direction = ParameterDirection.Output});
+                cmd.Parameters.Add(new NpgsqlParameter("image", NpgsqlDbType.Bigint)
+                    {Direction = ParameterDirection.Output});
+
+                cmd.ExecuteNonQuery();
+                if (cmd.Parameters[1].Value != null &&
+                    cmd.Parameters[2].Value != null &&
+                    cmd.Parameters[3].Value != null &&
+                    cmd.Parameters[4].Value != null &&
+                    cmd.Parameters[5].Value != null &&
+                    cmd.Parameters[6].Value != null)
+                {
+                    return new StatsSchema(
+                        username,
+                        (long) cmd.Parameters[1].Value!,
+                        (long) cmd.Parameters[2].Value!,
+                        (long) cmd.Parameters[3].Value!,
+                        (long) cmd.Parameters[4].Value!,
+                        (string) cmd.Parameters[5].Value!,
+                        (string) cmd.Parameters[6].Value!);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         public bool EditUserProfile(string username, string bio, string image)
@@ -310,7 +426,7 @@ namespace MTCG.DataManagement.DB
     CREATE TABLE IF NOT EXISTS cardSchema(
         id VARCHAR(256),
         cardname VARCHAR(256),
-        damage INTEGER,
+        damage DOUBLE PRECISION,
         package INTEGER,
         username VARCHAR(256),
         deck BOOLEAN,
@@ -333,7 +449,7 @@ namespace MTCG.DataManagement.DB
         id VARCHAR(256),
         trade VARCHAR(256),
         wanted VARCHAR(256),
-        damage DOUBLE PRECISION ,
+        damage DOUBLE PRECISION,
         PRIMARY KEY(id),
         CONSTRAINT fk_trade
             FOREIGN KEY(trade)
@@ -359,10 +475,10 @@ namespace MTCG.DataManagement.DB
             using (var cmd = new NpgsqlCommand(@"
     CREATE TABLE IF NOT EXISTS statsSchema(
         username VARCHAR(256),
-        elo INTEGER,
-        wins INTEGER,
-        looses INTEGER,
-        coins INTEGER,
+        elo BIGINT,
+        wins BIGINT,
+        looses BIGINT,
+        coins BIGINT,
         bio VARCHAR(256),
         image VARCHAR(256),
         PRIMARY KEY(username),
@@ -412,6 +528,12 @@ namespace MTCG.DataManagement.DB
             using var reset = new NpgsqlCommand("DROP DATABASE mtcg", conn);
             reset.ExecuteNonQuery();
             Environment.Exit(1);
+        }
+        
+        private static bool Rollback(NpgsqlTransaction transaction)
+        {
+            transaction.Rollback();
+            return false;
         }
     }
 }
