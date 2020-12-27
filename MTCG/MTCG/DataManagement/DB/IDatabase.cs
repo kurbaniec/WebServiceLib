@@ -15,7 +15,8 @@ namespace MTCG.DataManagement.DB
         StatsSchema? GetUserStats(string username);
         
         bool EditUserProfile(string username, string bio, string image);
-        
+
+        bool ConfigureDeck(string username, List<string> cardIds);
         List<CardSchema> GetUserDeck(string username);
         List<CardSchema> GetUserCards(string username);
         

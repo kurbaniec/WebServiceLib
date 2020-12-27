@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MTCG.DataManagement.DB;
+using Newtonsoft.Json.Linq;
 using WebService_Lib;
 using WebService_Lib.Attributes;
 using WebService_Lib.Attributes.Rest;
@@ -43,7 +44,7 @@ namespace MTCG.API.Controllers
         }
 
         [Get("/cards")]
-        public Response Cards(AuthDetails? user)
+        public Response GetCards(AuthDetails? user)
         {
             if (user is null) return Response.Status(Status.BadRequest);
             var cards = db.GetUserCards(user.Username);
@@ -57,10 +58,44 @@ namespace MTCG.API.Controllers
             return Response.Json(response); 
         }
         
-        [Post("/deck")]
-        public Response Deck()
+        [Get("/deck")]
+        public Response GetDeck(AuthDetails? user)
         {
-            throw new NotImplementedException();
+            if (user is null) return Response.Status(Status.BadRequest);
+            var cards = db.GetUserDeck(user.Username);
+            var response = new Dictionary<string, object>();
+            var cardsResponse
+                = cards.Select(card => new Dictionary<string, object>
+                {
+                    ["Id"] = card.Id, ["Name"] = card.Name, ["Damage"] = card.Damage
+                }).ToList();
+            response["deck"] = cardsResponse; 
+            return Response.Json(response); 
+        }
+
+        [Post("/deck")]
+        public Response ConfigureDeck(AuthDetails? user, Dictionary<string, object>? payload)
+        {
+            if (user is null) return Response.Status(Status.BadRequest);
+            Status status;
+            // Deck consists of 4 cards
+            if (!(payload?["array"] is JArray rawIds) || rawIds.Count != 4)
+                status = Status.BadRequest;
+            else
+            {
+                var cardIds = rawIds.ToObject<List<string>>();
+                status = db.ConfigureDeck(user.Username, cardIds) 
+                    ? Status.Created : Status.BadRequest;
+            }
+            var cards = db.GetUserDeck(user.Username);
+            var response = new Dictionary<string, object>();
+            var cardsResponse
+                = cards.Select(card => new Dictionary<string, object>
+                {
+                    ["Id"] = card.Id, ["Name"] = card.Name, ["Damage"] = card.Damage
+                }).ToList();
+            response["deck"] = cardsResponse; 
+            return Response.Json(response, status);
         }
     }
 }
