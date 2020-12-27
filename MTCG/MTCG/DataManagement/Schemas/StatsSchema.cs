@@ -23,6 +23,15 @@
             Bio = "No Bio";
             Image = "No Image";
         }
+
+        // Used for scoreboard
+        public StatsSchema(string username, long elo, long wins, long looses)
+        {
+            Username = username;
+            Elo = elo;
+            Wins = wins;
+            Looses = looses;
+        }
         
         public StatsSchema(
             string username, long elo, long wins, long looses, long coins,

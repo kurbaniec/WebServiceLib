@@ -422,7 +422,31 @@ namespace MTCG.DataManagement.DB
 
         public List<StatsSchema> GetScoreboard()
         {
-            throw new System.NotImplementedException();
+            NpgsqlDataReader? dr = null;
+            try
+            {
+                using var cmd = new NpgsqlCommand(
+                    "SELECT * FROM statsSchema ORDER BY elo DESC LIMIT 10",
+                    conn);
+                dr = cmd.ExecuteReader();
+                var stats = new List<StatsSchema>();
+                while (dr.Read())
+                {
+                    var username = dr.GetString(0);
+                    var elo = dr.GetInt64(1);
+                    var wins = dr.GetInt64(2);
+                    var looses = dr.GetInt64(3);
+                    stats.Add(new StatsSchema(username, elo, wins, looses));
+                }
+                dr.Close();
+                
+                return stats;
+            }
+            catch (Exception)
+            {
+                dr?.Close();
+                return new List<StatsSchema>();;
+            }
         }
 
         public List<StoreSchema> GetTradingDeals()

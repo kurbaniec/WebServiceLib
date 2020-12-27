@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MTCG.DataManagement.DB;
+using MTCG.DataManagement.Schemas;
 using Newtonsoft.Json.Linq;
 using WebService_Lib;
 using WebService_Lib.Attributes;
@@ -96,6 +97,34 @@ namespace MTCG.API.Controllers
                 }).ToList();
             response["deck"] = cardsResponse; 
             return Response.Json(response, status);
+        }
+
+        [Get("/stats")]
+        public Response GetStats(AuthDetails? user)
+        {
+            if (user is null) return Response.Status(Status.BadRequest);
+            var stats = db.GetUserStats(user.Username);
+            if (stats is null) return Response.Status(Status.BadRequest);
+            var response = new Dictionary<string, object>
+            {
+                ["Elo"] = stats.Elo, ["Wins"] = stats.Wins, ["Looses"] = stats.Looses
+            };
+            return Response.Json(response);
+        }
+
+        [Get("/score")]
+        public Response GetScoreboard()
+        {
+            var stats = db.GetScoreboard();
+            var response = new Dictionary<string, object>();
+            var users
+                = stats.Select(stat => new Dictionary<string, object>
+                {
+                    ["Username"] = stat.Username, ["Elo"] = stat.Elo,
+                    ["Wins"] = stat.Wins, ["Looses"] = stat.Looses
+                }).ToList();
+            response["scoreboard"] = users;
+            return Response.Json(response);
         }
     }
 }
