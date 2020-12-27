@@ -19,7 +19,7 @@ namespace MTCG.API.Security
         
         public AuthDetails AuthDetails(string token)
         {
-            var username = token.Substring(0, token.Length - 6);
+            var username = token.Substring(0, token.Length - 10);
             return new AuthDetails(token, username);
         }
         
@@ -39,12 +39,12 @@ namespace MTCG.API.Security
             AddToken(token);
             return (true, token);
         }
-        public string GenerateToken(string username) => username + "-token";
+        public string GenerateToken(string username) => username + "-mtcgToken";
         public void AddToken(string token) => tokens.Add(token);
         public void RevokeToken(string token) => tokens.Remove(token);
         public List<string> SecurePaths() => new List<string>
         {
-            "/secret"
+            "/packages"
         };
 
         public bool CheckCredentials(string username, string password)

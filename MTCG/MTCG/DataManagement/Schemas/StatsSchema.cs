@@ -5,15 +5,26 @@
         public string Username { get; set; }
         public string Bio { get; set; }
         public string Image { get; set; }
-        public string Elo { get; set; }
-        public uint Wins { get; set; }
-        public uint Looses { get; set; }
-        public uint GamesPlayed => Wins + Looses;
-        public uint Coins { get; set; }
+        public long Elo { get; set; }
+        public long Wins { get; set; }
+        public long Looses { get; set; }
+        public long GamesPlayed => Wins + Looses;
+        public long Coins { get; set; }
 
+        public StatsSchema(string username)
+        {
+            Username = username;
+            Bio = "No Bio";
+            Image = "No Image";
+            Elo = 1000;
+            Wins = 0;
+            Looses = 0;
+            Coins = 20;
+        }
+        
         public StatsSchema(
             string username, string bio, string image,
-            string elo, uint wins, uint looses, uint coins
+            uint elo, uint wins, uint looses, uint coins
         )
         {
             Username = username;

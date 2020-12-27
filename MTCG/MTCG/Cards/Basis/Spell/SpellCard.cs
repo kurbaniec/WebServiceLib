@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MTCG.Battles;
 using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.DamageUtil;
@@ -15,11 +16,11 @@ namespace MTCG.Cards.Basis.Spell
         public IBattleLog Log { get; }
 
         public SpellCard(
-            uint damage, DamageType damageType, IEnumerable<ISpeciality> specialities,  
+            double damage, DamageType damageType, IEnumerable<ISpeciality> specialities,  
             IBattleLog log
         )
         {
-            Damage = damage;
+            Damage = Convert.ToDecimal(damage);
             Type = damageType;
             Specialities = specialities;
             Log = log;

@@ -26,38 +26,51 @@ namespace MTCG.DataManagement.DB
         {
             var transaction = BeginTransaction();
             if (transaction == null) return false;
-            // Generate new package and return id
-            // See: https://stackoverflow.com/a/5765441/12347616
-            using var packageCmd = new NpgsqlCommand(
-                "INSERT INTO packageSchema DEFAULT VALUES RETURNING id",
-            conn);
-            packageCmd.Parameters.Add("id", NpgsqlDbType.Integer);
-            packageCmd.ExecuteNonQuery();
-            int packageId;
-            if (packageCmd.Parameters[0].Value is int value) packageId = value;
-            else
+            try
+            {
+                // Generate new package and return id
+                // See: https://stackoverflow.com/a/5765441/12347616
+                using var packageCmd = new NpgsqlCommand(
+                    "INSERT INTO packageSchema DEFAULT VALUES RETURNING id",
+                    conn);
+                packageCmd.Parameters.Add(new NpgsqlParameter("id", NpgsqlDbType.Integer)
+                    {Direction = ParameterDirection.Output});
+                packageCmd.ExecuteNonQuery();
+                int packageId;
+                if (packageCmd.Parameters[0].Value is int value) packageId = value;
+                else
+                {
+                    transaction.Rollback();
+                    return false;
+                }
+
+                foreach (var card in cards)
+                {
+                    using var cardCmd = new NpgsqlCommand(
+                        "INSERT INTO cardSchema (id, cardname, damage, package, deck) " +
+                        "VALUES(@p1, @p2, @p3, @p4, @p5)"
+                        , conn);
+                    cardCmd.Parameters.AddWithValue("p1", card.Id);
+                    cardCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
+                    cardCmd.Parameters.AddWithValue("p2", card.Name);
+                    cardCmd.Parameters[1].NpgsqlDbType = NpgsqlDbType.Varchar;
+                    cardCmd.Parameters.AddWithValue("p3", card.Damage);
+                    cardCmd.Parameters[2].NpgsqlDbType = NpgsqlDbType.Double;
+                    cardCmd.Parameters.AddWithValue("p4", packageId);
+                    cardCmd.Parameters[3].NpgsqlDbType = NpgsqlDbType.Integer;
+                    cardCmd.Parameters.AddWithValue("p5", false);
+                    cardCmd.Parameters[4].NpgsqlDbType = NpgsqlDbType.Boolean;
+                    cardCmd.ExecuteNonQuery();
+                }
+
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception ex)
             {
                 transaction.Rollback();
                 return false;
             }
-
-            foreach (var card in cards)
-            {
-                using var cardCmd = new NpgsqlCommand(
-                    "INSERT INTO cardSchema (id, cardname, damage, package, deck) " + 
-                    "VALUES(@p1, @p2, @p3, @p4, @p5)"
-                , conn);
-                cardCmd.Parameters.AddWithValue("p1", card.Id);
-                cardCmd.Parameters.AddWithValue("p2", card.Name);
-                cardCmd.Parameters.AddWithValue("p3", card.Damage);
-                cardCmd.Parameters.AddWithValue("p4", packageId);
-                cardCmd.Parameters.AddWithValue("p5", false);
-                cardCmd.Prepare();
-                cardCmd.ExecuteNonQuery();
-            }
-            
-            transaction.Commit();
-            return true;
         }
 
         public bool AcquirePackage(string username)
@@ -69,51 +82,89 @@ namespace MTCG.DataManagement.DB
         {
             var transaction = BeginTransaction();
             if (transaction == null) return false;
-            using var cmd = new NpgsqlCommand(
-                "INSERT INTO userSchema (username, password, roleStr) " +
-                "VALUES(@p1, @p2, @p3)",
-            conn);
+            try
+            {
+                using var userSchemaCmd = new NpgsqlCommand(
+                    "INSERT INTO userSchema (username, password, roleStr) " +
+                    "VALUES(@p1, @p2, @p3)",
+                    conn);
 
-            cmd.Parameters.AddWithValue("p1", user.Username);
-            cmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
-            cmd.Parameters.AddWithValue("p2", user.Password);
-            cmd.Parameters[1].NpgsqlDbType = NpgsqlDbType.Varchar;
-            cmd.Parameters.AddWithValue("p3", user.Role.ToString());
-            cmd.Parameters[2].NpgsqlDbType = NpgsqlDbType.Varchar;
-            
-            cmd.ExecuteNonQuery();
-            transaction.Commit();
-            return true;
+                userSchemaCmd.Parameters.AddWithValue("p1", user.Username);
+                userSchemaCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
+                userSchemaCmd.Parameters.AddWithValue("p2", user.Password);
+                userSchemaCmd.Parameters[1].NpgsqlDbType = NpgsqlDbType.Varchar;
+                userSchemaCmd.Parameters.AddWithValue("p3", user.Role.ToString());
+                userSchemaCmd.Parameters[2].NpgsqlDbType = NpgsqlDbType.Varchar;
+
+                var stats = new StatsSchema(user.Username);
+                using var statsSchemaCmd = new NpgsqlCommand(
+                    "INSERT INTO statsSchema " +
+                    "VALUES(@p1, @p2, @p3, @p4, @p5, @p6, @p7)",
+                    conn);
+
+                statsSchemaCmd.Parameters.AddWithValue("p1", stats.Username);
+                statsSchemaCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
+                statsSchemaCmd.Parameters.AddWithValue("p2", stats.Elo);
+                statsSchemaCmd.Parameters[1].NpgsqlDbType = NpgsqlDbType.Integer;
+                statsSchemaCmd.Parameters.AddWithValue("p3", stats.Wins);
+                statsSchemaCmd.Parameters[2].NpgsqlDbType = NpgsqlDbType.Integer;
+                statsSchemaCmd.Parameters.AddWithValue("p4", stats.Looses);
+                statsSchemaCmd.Parameters[3].NpgsqlDbType = NpgsqlDbType.Integer;
+                statsSchemaCmd.Parameters.AddWithValue("p5", stats.Coins);
+                statsSchemaCmd.Parameters[4].NpgsqlDbType = NpgsqlDbType.Integer;
+                statsSchemaCmd.Parameters.AddWithValue("p6", stats.Bio);
+                statsSchemaCmd.Parameters[5].NpgsqlDbType = NpgsqlDbType.Varchar;
+                statsSchemaCmd.Parameters.AddWithValue("p7", stats.Image);
+                statsSchemaCmd.Parameters[6].NpgsqlDbType = NpgsqlDbType.Varchar;
+
+                userSchemaCmd.ExecuteNonQuery();
+                statsSchemaCmd.ExecuteNonQuery();
+                transaction.Commit();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                return false;
+            }
         }
 
         public UserSchema? GetUser(string username)
         {
-            using var cmd = new NpgsqlCommand(
-                "SELECT * FROM userSchema WHERE username=@p1",
-                conn);
-            
-            cmd.Parameters.AddWithValue("p1", username);
-            cmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
-            
-            cmd.Parameters.Add(new NpgsqlParameter("username", NpgsqlDbType.Varchar)
-                {Direction = ParameterDirection.Output});
-            cmd.Parameters.Add(new NpgsqlParameter("password", NpgsqlDbType.Varchar)
-                {Direction = ParameterDirection.Output});
-            cmd.Parameters.Add(new NpgsqlParameter("roleStr", NpgsqlDbType.Varchar)
-                {Direction = ParameterDirection.Output});
-            
-            cmd.ExecuteNonQuery();
-            if (cmd.Parameters[1].Value != null &&
-                cmd.Parameters[2].Value != null &&
-                cmd.Parameters[3].Value != null)
+            try
             {
-                return new UserSchema(
-                    (string) cmd.Parameters[1].Value!, 
-                    (string) cmd.Parameters[2].Value!, 
-                    (string) cmd.Parameters[3].Value!);
-            }
+                using var cmd = new NpgsqlCommand(
+                    "SELECT * FROM userSchema WHERE username=@p1",
+                    conn);
 
-            return null;
+                cmd.Parameters.AddWithValue("p1", username);
+                cmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
+
+                cmd.Parameters.Add(new NpgsqlParameter("username", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
+                cmd.Parameters.Add(new NpgsqlParameter("password", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
+                cmd.Parameters.Add(new NpgsqlParameter("roleStr", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
+
+                cmd.ExecuteNonQuery();
+                if (cmd.Parameters[1].Value != null &&
+                    cmd.Parameters[2].Value != null &&
+                    cmd.Parameters[3].Value != null)
+                {
+                    return new UserSchema(
+                        (string) cmd.Parameters[1].Value!,
+                        (string) cmd.Parameters[2].Value!,
+                        (string) cmd.Parameters[3].Value!);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         public StatsSchema? GetUserStats(string username)

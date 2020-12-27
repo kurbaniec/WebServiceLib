@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MTCG.Battles;
 using MTCG.Cards.DamageUtil;
 using MTCG.Cards.Effects;
@@ -16,11 +17,13 @@ namespace MTCG.Cards.Basis.Monster
         public IBattleLog Log { get; }
 
         public MonsterCard(
-            uint damage, DamageType damageType, MonsterType monsterType,
+            double damage, DamageType damageType, MonsterType monsterType,
             IEnumerable<ISpeciality> specialities, IEnumerable<IEffect> effects, IBattleLog log
         )
         {
-            Damage = damage;
+            // Convert to decimal (easier calculations)
+            // See: https://docs.microsoft.com/en-us/dotnet/api/system.convert.todecimal?view=net-5.0
+            Damage = Convert.ToDecimal(damage);
             Type = damageType;
             MonsterType = monsterType;
             Specialities = specialities;
