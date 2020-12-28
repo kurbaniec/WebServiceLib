@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using MTCG.DataManagement.DB;
-using MTCG.DataManagement.Schemas;
 using Newtonsoft.Json.Linq;
 using WebService_Lib;
 using WebService_Lib.Attributes;
@@ -60,18 +58,31 @@ namespace MTCG.API.Controllers
         }
         
         [Get("/deck")]
-        public Response GetDeck(AuthDetails? user)
+        public Response GetDeck(RequestParam param, AuthDetails? user)
         {
             if (user is null) return Response.Status(Status.BadRequest);
             var cards = db.GetUserDeck(user.Username);
-            var response = new Dictionary<string, object>();
+            // Send in requested format
+            if (!param.Empty && param.Value["format"] == "plain")
+            {
+                // Send in plaintext
+                var plainResponse 
+                    = cards.Aggregate("Id,Name,Damage\r\n", (current, card) 
+                        => current + $"{card.Id},{card.Name},{card.Damage}\r\n");
+                // Trim last newline
+                // See: https://stackoverflow.com/a/1038062/12347616
+                plainResponse = plainResponse.TrimEnd( '\r', '\n' );
+                return Response.PlainText(plainResponse);
+            }
+            // Send in JSON
+            var jsonResponse = new Dictionary<string, object>();
             var cardsResponse
                 = cards.Select(card => new Dictionary<string, object>
                 {
                     ["Id"] = card.Id, ["Name"] = card.Name, ["Damage"] = card.Damage
                 }).ToList();
-            response["deck"] = cardsResponse; 
-            return Response.Json(response); 
+            jsonResponse["deck"] = cardsResponse; 
+            return Response.Json(jsonResponse); 
         }
 
         [Post("/deck")]
