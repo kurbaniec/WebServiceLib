@@ -27,9 +27,11 @@ namespace MTCG_Test.Unit
         {
             // Mock of multiple interfaces
             // See: https://stackoverflow.com/a/28145338/12347616
-            var goblinMock = new Mock<IMonsterCard>();
-            goblinMock.Setup(card => card.MonsterType).Returns(MonsterType.Goblin);
-            var goblin = goblinMock.As<ICard>().Object;
+            var tmpGoblinMock = new Mock<IMonsterCard>();
+            tmpGoblinMock.Setup(card => card.MonsterType).Returns(MonsterType.Goblin);
+            var goblinMock = tmpGoblinMock.As<ICard>();
+            goblinMock.SetupProperty(card => card.Log, log);
+            var goblin = goblinMock.Object;
             goblin.Log = log;
             var dragonMock = new Mock<IMonsterCard>();
             dragonMock.Setup(card => card.MonsterType).Returns(MonsterType.Dragon);
@@ -49,9 +51,11 @@ namespace MTCG_Test.Unit
          )]
         public void WizzardControlOrks()
         {
-            var orkMock = new Mock<IMonsterCard>();
-            orkMock.Setup(card => card.MonsterType).Returns(MonsterType.Ork);
-            var ork = orkMock.As<ICard>().Object;
+            var tmpOrkMock = new Mock<IMonsterCard>();
+            tmpOrkMock.Setup(card => card.MonsterType).Returns(MonsterType.Ork);
+            var orkMock = tmpOrkMock.As<ICard>();
+            orkMock.SetupProperty(card => card.Log, log);
+            var ork = orkMock.Object;
             var wizardMock = new Mock<IMonsterCard>();
             wizardMock.Setup(card => card.MonsterType).Returns(MonsterType.Wizard);
             var wizard = wizardMock.As<ICard>().Object;
@@ -73,6 +77,7 @@ namespace MTCG_Test.Unit
             var tmpWaterSpellMock = new Mock<ISpellCard>();
             var waterSpellMock = tmpWaterSpellMock.As<ICard>();
             waterSpellMock.Setup(card => card.Type).Returns(DamageType.Water);
+            waterSpellMock.SetupProperty(card => card.Log, log);
             var waterSpell = waterSpellMock.Object;
             var knightMock = new Mock<IMonsterCard>();
             knightMock.Setup(card => card.MonsterType).Returns(MonsterType.Knight);
@@ -92,8 +97,10 @@ namespace MTCG_Test.Unit
          )]
         public void KrakenImmuneToSpells()
         {
-            var spellMock = new Mock<ISpellCard>();
-            var spell = spellMock.As<ICard>().Object;
+            var tmpSpellMock = new Mock<ISpellCard>();
+            var spellMock = tmpSpellMock.As<ICard>();
+            spellMock.SetupProperty(card => card.Log, log);
+            var spell = spellMock.Object;
             var krakenMock = new Mock<IMonsterCard>();
             krakenMock.Setup(card => card.MonsterType).Returns(MonsterType.Kraken);
             var kraken = krakenMock.As<ICard>().Object;
@@ -112,9 +119,11 @@ namespace MTCG_Test.Unit
          )]
         public void FireElfEvadesDragon()
         {
-            var dragonMock = new Mock<IMonsterCard>();
-            dragonMock.Setup(card => card.MonsterType).Returns(MonsterType.Dragon);
-            var dragon = dragonMock.As<ICard>().Object;
+            var tmpDragonMock = new Mock<IMonsterCard>();
+            tmpDragonMock.Setup(card => card.MonsterType).Returns(MonsterType.Dragon);
+            var dragonMock = tmpDragonMock.As<ICard>();
+            dragonMock.SetupProperty(card => card.Log, log);
+            var dragon = dragonMock.Object;
             var tmpFireElfMock = new Mock<IMonsterCard>();
             tmpFireElfMock.Setup(card => card.MonsterType).Returns(MonsterType.Elf);
             var fireElfMock = tmpFireElfMock.As<ICard>();
