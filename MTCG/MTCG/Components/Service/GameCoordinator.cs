@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MTCG.Battles.Basis;
 using MTCG.Battles.Logging;
 using MTCG.Battles.Player;
+using MTCG.Cards.Basis;
+using MTCG.Cards.Factory;
 using MTCG.Components.DataManagement.DB;
 using WebService_Lib.Attributes;
 
@@ -70,12 +74,30 @@ namespace MTCG.Components.Service
 
         private void Process(IPlayer playerA, IPlayer playerB)
         {
+            // Get loggers
             IBattleLog battleLog = new BattleLog();
-            IPlayerLog playerLogA, playerLogB;
-            var playerLogs = battleLog.GetPlayerLogs(playerA.Username, playerB.Username);
+            var (playerLogA, playerLogB) = battleLog.GetPlayerLogs(playerA.Username, playerB.Username);
+            // Get cards
+            var rawDeckA = db.GetUserDeck(playerA.Username);
+            var rawDeckB = db.GetUserDeck(playerB.Username);
+            // Convert card data schema to functional card
+            var deckA = rawDeckA.Select(
+                rawCard => CardFactory.Print(rawCard.Name, rawCard.Damage, playerLogA)).
+                    Where(card => card != null).ToList()!;
+            var deckB = rawDeckB.Select(
+                rawCard => CardFactory.Print(rawCard.Name, rawCard.Damage, playerLogB)).
+                    Where(card => card != null).ToList()!;
+            playerA.AddDeck(deckA!);
+            playerB.AddDeck(deckB!);
+            // Let's get ready to rumble
+            var battle = new Battle(playerA, playerB, battleLog);
+            var result = battle.ProcessBattle();
+            // TODO db update
+            playerA.BattleResult = result.Log;
+            playerB.BattleResult = result.Log;
         }
 
-        private Dictionary<string, object>? Play(string username)
+        public Dictionary<string, object>? Play(string username)
         {
             var deck = db.GetUserDeck(username);
             if (deck.Count == 0) return null;
