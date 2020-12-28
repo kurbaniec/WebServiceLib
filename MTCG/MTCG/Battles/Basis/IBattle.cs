@@ -1,7 +1,7 @@
 ﻿namespace MTCG.Battles.Basis
 {
-    public class IBattle
+    public interface IBattle
     {
-        
+        BattleResult ProcessBattle();
     }
 }

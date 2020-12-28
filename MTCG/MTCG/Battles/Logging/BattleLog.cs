@@ -34,19 +34,28 @@ namespace MTCG.Battles.Logging
             if (playerADamage.CompareTo(playerBDamage) == 0)
             {
                 result.Add("Result: Draw");
+                result.Add($"Remaining Cards: {cardsLeftA} VS {cardsLeftB}");
             } else if (playerADamage.CompareTo(playerBDamage) > 0)
             {
                 result.Add($"Result: {a.Username} Win");
+                result.Add($"Remaining Cards: {cardsLeftA} VS {cardsLeftB}");
                 if (a.EffectLog is {} effect) result.Add(effect);
             }
             else
             {
                 result.Add($"Result: {b.Username} Win");
+                result.Add($"Remaining Cards: {cardsLeftA} VS {cardsLeftB}");
                 if (b.EffectLog is {} effect) result.Add(effect);
             }
             round["result"] = result;
             log[$"round {counter}"] = round;
             counter++;
+        }
+
+        public void ResultLog(bool draw, string winner = "")
+        {
+            if (draw) log["result"] = "Draw";
+            else log["result"] = $"{winner} Victory";
         }
 
         public Dictionary<string, object> GetLog()
