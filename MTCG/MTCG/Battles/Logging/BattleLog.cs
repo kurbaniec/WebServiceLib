@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using MTCG.Cards.DamageUtil;
 
 namespace MTCG.Battles.Logging
@@ -24,7 +25,7 @@ namespace MTCG.Battles.Logging
             if (!(playerA is { } a) || !(playerB is { } b)) return;
             var round = new Dictionary<string, object>
             {
-                [a.Username] = playerA.Log, [b.Username] = playerB.Log
+                [a.Username] = playerA.Log.ToList(), [b.Username] = playerB.Log.ToList()
             };
             var result = new List<string>
             {
