@@ -13,4 +13,8 @@
     <PackageReference Include="Npgsql" Version="5.0.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components" />
+  </ItemGroup>
+
 </Project>

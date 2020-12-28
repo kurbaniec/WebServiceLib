@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Threading;
-using MTCG.DataManagement.Schemas;
+using MTCG.Components.DataManagement.Schemas;
 using Newtonsoft.Json;
 using Npgsql;
 using NpgsqlTypes;
 using WebService_Lib.Attributes;
 
-namespace MTCG.DataManagement.DB
+namespace MTCG.Components.DataManagement.DB
 {
     [Component]
     public class PostgresDatabase : IDatabase

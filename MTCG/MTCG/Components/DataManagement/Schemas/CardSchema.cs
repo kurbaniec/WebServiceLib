@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace MTCG.DataManagement.Schemas
+namespace MTCG.Components.DataManagement.Schemas
 {
     public class CardSchema
     {

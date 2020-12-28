@@ -1,4 +1,4 @@
-﻿using MTCG.DataManagement.DB;
+﻿using MTCG.Components.DataManagement.DB;
 using WebService_Lib.Attributes;
 using WebService_Lib.Attributes.Rest;
 using WebService_Lib.Server;

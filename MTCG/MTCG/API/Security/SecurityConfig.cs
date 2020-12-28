@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using MTCG.DataManagement.DB;
-using MTCG.DataManagement.Schemas;
+using MTCG.Components.DataManagement.DB;
+using MTCG.Components.DataManagement.Schemas;
 using WebService_Lib;
 using WebService_Lib.Attributes;
 

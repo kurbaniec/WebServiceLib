@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using MTCG.DataManagement.DB;
-using MTCG.DataManagement.Schemas;
+using MTCG.Components.DataManagement.DB;
+using MTCG.Components.DataManagement.Schemas;
 using Newtonsoft.Json.Linq;
 using WebService_Lib;
 using WebService_Lib.Attributes;

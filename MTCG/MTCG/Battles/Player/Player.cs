@@ -10,6 +10,7 @@ namespace MTCG.Battles.Player
         private readonly List<ICard> deck;
         public int CardCount => deck.Count;
         public ICard LastPlayed { get; private set; } = null!;
+        public Dictionary<string, object>? BattleResult { get; set; }
         private readonly Random rng;
 
         public Player(string username, List<ICard> deck)
@@ -18,7 +19,19 @@ namespace MTCG.Battles.Player
             this.deck = deck;
             rng = new Random();
         }
-        
+
+        public Player(string username)
+        {
+            Username = username;
+            deck = new List<ICard>();
+            rng = new Random();
+        }
+
+        public void AddDeck(List<ICard> cards)
+        {
+            deck.AddRange(cards);
+        }
+
         public void AddToDeck(ICard card)
         {
             deck.Add(card);

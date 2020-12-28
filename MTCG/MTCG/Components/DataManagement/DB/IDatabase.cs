@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using MTCG.DataManagement.Schemas;
+using MTCG.Components.DataManagement.Schemas;
 
-namespace MTCG.DataManagement.DB
+namespace MTCG.Components.DataManagement.DB
 {
     public interface IDatabase
     {

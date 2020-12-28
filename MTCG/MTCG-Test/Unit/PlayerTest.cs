@@ -11,6 +11,23 @@ namespace MTCG_Test.Unit
 {
     public class PlayerTest
     {
+        [Test, TestCase(TestName = "Test adding a new Deck", Description =
+             "Test adding a new Deck"
+         )]
+        public void PlayerAddDeck()
+        {
+            var cards = new List<ICard>()
+            {
+                new Mock<ICard>().Object, new Mock<ICard>().Object
+            };
+            var player = new Player("player");
+
+            player.AddDeck(cards);
+            var count = player.CardCount;
+
+            Assert.AreEqual(2, count);
+        }
+        
         [Test, TestCase(TestName = "Test Getter for Card Count", Description =
              "Test Getter for Card Count"
          )]
