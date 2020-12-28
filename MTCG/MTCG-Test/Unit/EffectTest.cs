@@ -24,6 +24,7 @@ namespace MTCG_Test.Unit
             tmpSpaceMarineMock.Setup(card => card.MonsterType).Returns(MonsterType.SpaceMarine);
             var spaceMarineMock = tmpSpaceMarineMock.As<ICard>();
             spaceMarineMock.SetupProperty(card => card.Damage);
+            spaceMarineMock.SetupProperty(card => card.Log, log);
             var spaceMarine = spaceMarineMock.Object;
             var boostEffect = new Boost();
             
@@ -42,6 +43,7 @@ namespace MTCG_Test.Unit
             tmpSpaceMarineMock.Setup(card => card.MonsterType).Returns(MonsterType.SpaceMarine);
             var spaceMarineMock = tmpSpaceMarineMock.As<ICard>();
             spaceMarineMock.SetupProperty(card => card.Damage);
+            spaceMarineMock.SetupProperty(card => card.Log, log);
             var spaceMarine = spaceMarineMock.Object;
             var boostEffect = new Boost();
             
@@ -61,6 +63,7 @@ namespace MTCG_Test.Unit
             tmpOrkMock.Setup(card => card.MonsterType).Returns(MonsterType.SpaceMarine);
             var orkMock = tmpOrkMock.As<ICard>();
             orkMock.SetupProperty(card => card.Damage, 10);
+            orkMock.SetupProperty(card => card.Log, log);
             var ork = orkMock.Object;
             var boostEffect = new FiftyFifty();
             
@@ -79,6 +82,7 @@ namespace MTCG_Test.Unit
             tmpOrkMock.Setup(card => card.MonsterType).Returns(MonsterType.SpaceMarine);
             var orkMock = tmpOrkMock.As<ICard>();
             orkMock.SetupProperty(card => card.Damage, 10);
+            orkMock.SetupProperty(card => card.Log, log);
             var ork = orkMock.Object;
             var boostEffect = new FiftyFifty();
             
@@ -98,6 +102,7 @@ namespace MTCG_Test.Unit
             tmpOrkMock.Setup(card => card.MonsterType).Returns(MonsterType.SpaceMarine);
             var orkMock = tmpOrkMock.As<ICard>();
             orkMock.SetupProperty(card => card.Damage, 0);
+            orkMock.SetupProperty(card => card.Log, log);
             var ork = orkMock.Object;
             var boostEffect = new FiftyFifty();
             
@@ -116,6 +121,7 @@ namespace MTCG_Test.Unit
             tmpOrkMock.Setup(card => card.MonsterType).Returns(MonsterType.SpaceMarine);
             var orkMock = tmpOrkMock.As<ICard>();
             orkMock.SetupProperty(card => card.Damage, 0);
+            orkMock.SetupProperty(card => card.Log, log);
             var ork = orkMock.Object;
             var boostEffect = new FiftyFifty();
             

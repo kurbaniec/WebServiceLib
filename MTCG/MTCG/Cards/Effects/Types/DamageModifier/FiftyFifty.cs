@@ -16,6 +16,9 @@ namespace MTCG.Cards.Effects.Types.DamageModifier
             if (self.Damage + value > 0) damageAdded += value;
             else damageAdded = 0;
             (this as IDamageModifier).AddDamage(self, value);
+            self.Log.AddEffectInfo(value == 2
+                ? $"Hur, Hur, Hur... {self}'s base damage increased by 2!"
+                : $"Oi! {self}'s base damage decreased by 2!");
         }
 
         public void Drop(ICard self)

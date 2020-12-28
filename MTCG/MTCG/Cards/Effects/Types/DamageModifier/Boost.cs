@@ -10,6 +10,7 @@ namespace MTCG.Cards.Effects.Types.DamageModifier
         {
             damageAdded++;
             (this as IDamageModifier).AddDamage(self, 1);
+            self.Log.AddEffectInfo($"{self}'s BOOST activated, base damage increased by 1");
         }
 
         public void Drop(ICard self)

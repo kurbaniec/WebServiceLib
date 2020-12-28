@@ -50,6 +50,9 @@ namespace MTCG.Battles.Logging
             round["result"] = result;
             log[$"round {counter}"] = round;
             counter++;
+            
+            playerA.Clear();
+            playerB.Clear();
         }
 
         public void ResultLog(bool draw, string winner = "")
