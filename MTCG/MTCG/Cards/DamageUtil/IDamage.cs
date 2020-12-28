@@ -2,7 +2,9 @@
 
 namespace MTCG.Cards.DamageUtil
 {
-    public interface IDamage : IComparable<IDamage>
+    // Force toString
+    // See: https://stackoverflow.com/a/50930292/12347616
+    public interface IDamage : IComparable<IDamage>, IFormattable
     {
         bool IsInfty { get; }
         Decimal Value { get; }

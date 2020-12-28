@@ -2,6 +2,7 @@
 using System.Linq;
 using Moq;
 using MTCG.Battles;
+using MTCG.Battles.Logging;
 using MTCG.Cards.Basis;
 using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.Basis.Spell;
@@ -18,10 +19,10 @@ namespace MTCG_Test.Unit
 {
     public class CardFactoryTest
     {
-        private IBattleLog log = null!;
+        private IPlayerLog log = null!;
 
         [OneTimeSetUp]
-        public void Setup() => log = new Mock<IBattleLog>().Object;
+        public void Setup() => log = new Mock<IPlayerLog>().Object;
         
         [Test, TestCase(TestName = "Print RegularSpell", Description =
              "Print RegularSpell which does not pierce Krakens"
@@ -357,7 +358,7 @@ namespace MTCG_Test.Unit
             Assert.IsTrue(regularOrk!.Type == DamageType.Normal);
             Assert.IsTrue(regularOrk is IMonsterCard);
             Assert.IsTrue((regularOrk as IMonsterCard)!.MonsterType == MonsterType.Ork);
-            Assert.IsTrue(regularOrk.Specialities.OfType<ControllableByWizzard>().Any());
+            Assert.IsTrue(regularOrk.Specialities.OfType<ControllableByWizard>().Any());
             Assert.IsTrue((regularOrk as IMonsterCard)!.Effects.OfType<FiftyFifty>().Any());
         }
         
@@ -373,7 +374,7 @@ namespace MTCG_Test.Unit
             Assert.IsTrue(fireOrk!.Type == DamageType.Fire);
             Assert.IsTrue(fireOrk is IMonsterCard);
             Assert.IsTrue((fireOrk as IMonsterCard)!.MonsterType == MonsterType.Ork);
-            Assert.IsTrue(fireOrk.Specialities.OfType<ControllableByWizzard>().Any());
+            Assert.IsTrue(fireOrk.Specialities.OfType<ControllableByWizard>().Any());
             Assert.IsTrue((fireOrk as IMonsterCard)!.Effects.OfType<FiftyFifty>().Any());
         }
         
@@ -389,7 +390,7 @@ namespace MTCG_Test.Unit
             Assert.IsTrue(waterOrk!.Type == DamageType.Water);
             Assert.IsTrue(waterOrk is IMonsterCard);
             Assert.IsTrue((waterOrk as IMonsterCard)!.MonsterType == MonsterType.Ork);
-            Assert.IsTrue(waterOrk.Specialities.OfType<ControllableByWizzard>().Any());
+            Assert.IsTrue(waterOrk.Specialities.OfType<ControllableByWizard>().Any());
             Assert.IsTrue((waterOrk as IMonsterCard)!.Effects.OfType<FiftyFifty>().Any());
         }
         

@@ -1,5 +1,6 @@
 ﻿using Moq;
 using MTCG.Battles;
+using MTCG.Battles.Logging;
 using MTCG.Cards.Basis;
 using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.Basis.Spell;
@@ -13,10 +14,10 @@ namespace MTCG_Test.Unit
 {
     public class SpecialityTest
     {
-        private IBattleLog log = null!;
+        private IPlayerLog log = null!;
 
         [OneTimeSetUp]
-        public void Setup() => log = new Mock<IBattleLog>().Object;
+        public void Setup() => log = new Mock<IPlayerLog>().Object;
         
         [Test, TestCase(TestName = "Goblins are too afraid of Dragons to attack", Description =
              "Test speciality \"Goblins are too afraid of Dragons to attack\" " +
@@ -29,13 +30,14 @@ namespace MTCG_Test.Unit
             var goblinMock = new Mock<IMonsterCard>();
             goblinMock.Setup(card => card.MonsterType).Returns(MonsterType.Goblin);
             var goblin = goblinMock.As<ICard>().Object;
+            goblin.Log = log;
             var dragonMock = new Mock<IMonsterCard>();
             dragonMock.Setup(card => card.MonsterType).Returns(MonsterType.Dragon);
             var dragon = dragonMock.As<ICard>().Object;
             var damage = Damage.Normal(10);
             ISpeciality speciality = new AfraidFromDragons();
             
-            speciality.Apply(dragon, damage);
+            speciality.Apply(goblin, dragon, damage);
             var result = damage.Value;
             
             Assert.AreEqual(0, result);
@@ -54,9 +56,9 @@ namespace MTCG_Test.Unit
             wizardMock.Setup(card => card.MonsterType).Returns(MonsterType.Wizard);
             var wizard = wizardMock.As<ICard>().Object;
             var damage = Damage.Normal(10);
-            ISpeciality speciality = new ControllableByWizzard();
+            ISpeciality speciality = new ControllableByWizard();
             
-            speciality.Apply(wizard, damage);
+            speciality.Apply(ork, wizard, damage);
             var result = damage.Value;
             
             Assert.AreEqual(0, result);
@@ -78,7 +80,7 @@ namespace MTCG_Test.Unit
             var damage = Damage.Normal(10);
             ISpeciality speciality = new DrownKnight();
             
-            speciality.Apply(knight, damage);
+            speciality.Apply(waterSpell, knight, damage);
             var result = damage.IsInfty;
             
             Assert.IsTrue(result);
@@ -98,7 +100,7 @@ namespace MTCG_Test.Unit
             var damage = Damage.Normal(10);
             ISpeciality speciality = new MissKrakenBecauseOfImmunity();
             
-            speciality.Apply(kraken, damage);
+            speciality.Apply(spell, kraken, damage);
             var result = damage.Value;
             
             Assert.AreEqual(0, result);
@@ -121,7 +123,7 @@ namespace MTCG_Test.Unit
             var damage = Damage.Normal(10);
             ISpeciality speciality = new MissFireElfBecauseOfEvasion();
             
-            speciality.Apply(fireElf, damage);
+            speciality.Apply(dragon, fireElf, damage);
             var result = damage.Value;
             
             Assert.AreEqual(0, result);

@@ -1,5 +1,6 @@
 ﻿using Moq;
 using MTCG.Battles;
+using MTCG.Battles.Logging;
 using MTCG.Cards.Basis;
 using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.Effects.Types.DamageModifier;
@@ -9,10 +10,10 @@ namespace MTCG_Test.Unit
 {
     public class EffectTest
     {
-        private IBattleLog log = null!;
+        private IPlayerLog log = null!;
 
         [OneTimeSetUp]
-        public void Setup() => log = new Mock<IBattleLog>().Object;
+        public void Setup() => log = new Mock<IPlayerLog>().Object;
         
         [Test, TestCase(TestName = "Apply Boost Effect on Space Marine", Description =
              "Apply Boost Effect on Space Marine Monster-Type with the help of mocks"

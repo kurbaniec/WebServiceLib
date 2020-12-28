@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using MTCG.Battles;
+using MTCG.Battles.Logging;
 using MTCG.Cards.Basis;
 using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.Basis.Spell;
@@ -14,7 +15,7 @@ namespace MTCG.Cards.Factory
 {
     public class CardFactory
     {
-        public static ICard? Print(string fullCardName, double damage, IBattleLog log)
+        public static ICard? Print(string fullCardName, double damage, IPlayerLog log)
         {
             fullCardName = InferType(fullCardName);
             var processedName = Split(fullCardName);
@@ -36,7 +37,7 @@ namespace MTCG.Cards.Factory
             return PrintMonster(damage, (DamageType) type, (MonsterType) monsterType, log);
         }
 
-        private static ICard PrintSpell(double damage, DamageType damageType, IBattleLog log)
+        private static ICard PrintSpell(double damage, DamageType damageType, IPlayerLog log)
         {
             // All spells can't pierce Krakens
             var specialities = new List<ISpeciality>() { new MissKrakenBecauseOfImmunity() };
@@ -56,7 +57,7 @@ namespace MTCG.Cards.Factory
         }
 
         private static ICard PrintMonster(
-            double damage, DamageType damageType, MonsterType monsterType, IBattleLog log
+            double damage, DamageType damageType, MonsterType monsterType, IPlayerLog log
         )
         {
             var specialities = new List<ISpeciality>();
@@ -74,7 +75,7 @@ namespace MTCG.Cards.Factory
                 case MonsterType.Wizard:
                     break;
                 case MonsterType.Ork:
-                    specialities.Add(new ControllableByWizzard());
+                    specialities.Add(new ControllableByWizard());
                     effects.Add(new FiftyFifty());
                     break;
                 case MonsterType.Knight:

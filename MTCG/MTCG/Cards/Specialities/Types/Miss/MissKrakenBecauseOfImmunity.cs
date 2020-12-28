@@ -6,12 +6,13 @@ namespace MTCG.Cards.Specialities.Types.Miss
 {
     public class MissKrakenBecauseOfImmunity : ISpeciality, IMiss
     {
-        public void Apply(ICard other, IDamage damage)
+        public void Apply(ICard self, ICard other, IDamage damage)
         {
             // Used for: "The Kraken is immune against spells"
             if (other is IMonsterCard otherMonster && otherMonster.MonsterType == MonsterType.Kraken)
             {
                 (this as IMiss).Miss(damage);
+                self.Log.AddSpecialityInfo($"Kraken took no damage from {self} attack!");
             }
         }
     }

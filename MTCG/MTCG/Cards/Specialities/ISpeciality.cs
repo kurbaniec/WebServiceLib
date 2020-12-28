@@ -6,6 +6,6 @@ namespace MTCG.Cards.Specialities
 {
     public interface ISpeciality
     {
-        void Apply(ICard other, IDamage damage);
+        void Apply(ICard self, ICard other, IDamage damage);
     }
 }

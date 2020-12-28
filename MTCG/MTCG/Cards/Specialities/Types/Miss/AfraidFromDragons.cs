@@ -7,12 +7,13 @@ namespace MTCG.Cards.Specialities.Types.Miss
 {
     public class AfraidFromDragons : ISpeciality, IMiss
     {
-        public void Apply(ICard other, IDamage damage)
+        public void Apply(ICard self, ICard other, IDamage damage)
         {
             // Used for: "Goblins are too afraid of Dragons to attack"
             if (other is IMonsterCard otherMonster && otherMonster.MonsterType == MonsterType.Dragon)
             {
                 (this as IMiss).Miss(damage);
+                self.Log.AddSpecialityInfo($"{self} is too afraid to attack a Dragon!");
             }
         }
     }

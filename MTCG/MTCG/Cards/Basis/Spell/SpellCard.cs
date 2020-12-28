@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MTCG.Battles;
+using MTCG.Battles.Logging;
 using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.DamageUtil;
 using MTCG.Cards.Effects;
@@ -13,11 +14,11 @@ namespace MTCG.Cards.Basis.Spell
         public decimal Damage { get; set; }
         public DamageType Type { get; }
         public IEnumerable<ISpeciality> Specialities { get; }
-        public IBattleLog Log { get; }
+        public IPlayerLog Log { get; set; }
 
         public SpellCard(
             double damage, DamageType damageType, IEnumerable<ISpeciality> specialities,  
-            IBattleLog log
+            IPlayerLog log
         )
         {
             Damage = Convert.ToDecimal(damage);

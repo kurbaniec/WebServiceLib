@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Moq;
 using MTCG.Battles;
+using MTCG.Battles.Logging;
 using MTCG.Cards.Basis;
 using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.Basis.Spell;
@@ -14,10 +15,10 @@ namespace MTCG_Test.Unit
     public class CardTest
     {
         
-        private IBattleLog log = null!;
+        private IPlayerLog log = null!;
 
         [OneTimeSetUp]
-        public void Setup() => log = new Mock<IBattleLog>().Object;
+        public void Setup() => log = new Mock<IPlayerLog>().Object;
         
         
         [Test, TestCase(TestName = "Card Damage calculation in Monster fight", Description =

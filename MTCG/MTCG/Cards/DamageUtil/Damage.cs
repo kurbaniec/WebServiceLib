@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace MTCG.Cards.DamageUtil
 {
@@ -52,6 +53,16 @@ namespace MTCG.Cards.DamageUtil
             if ((this.IsInfty && !other.IsInfty) ||
                 ((!this.IsInfty && !other.IsInfty) && (this.Value > other.Value))) return 1;
             return -1;
+        }
+
+        public string ToString(string? format, IFormatProvider? formatProvider)
+        {
+            return IsInfty ? "∞" : value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        public override string ToString()
+        {
+            return ToString(null, null);
         }
     }
 }
