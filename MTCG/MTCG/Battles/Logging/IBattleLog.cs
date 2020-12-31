@@ -9,7 +9,7 @@ namespace MTCG.Battles.Logging
 
         void RoundLog(IDamage playerADamage, IDamage playerBDamage, int cardsLeftA, int cardsLeftB);
 
-        void ResultLog(bool draw, string winner = "");
+        void ResultLog(bool draw, string winner = "", string looser = "");
 
         Dictionary<string, object> GetLog();
     }

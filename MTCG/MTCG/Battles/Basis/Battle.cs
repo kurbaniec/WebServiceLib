@@ -40,12 +40,12 @@ namespace MTCG.Battles.Basis
 
                 if (playerA.CardCount == 0)
                 {
-                    log.ResultLog(false, winner: playerB.Username);
+                    log.ResultLog(false, winner: playerB.Username, looser: playerA.Username);
                     return new BattleResult(playerB.Username, playerA.Username, log.GetLog());
                 }
                 if (playerB.CardCount == 0)
                 {
-                    log.ResultLog(false, winner: playerA.Username);
+                    log.ResultLog(false, winner: playerA.Username, looser: playerB.Username);
                     return new BattleResult(playerA.Username, playerB.Username, log.GetLog());
                 }
             }

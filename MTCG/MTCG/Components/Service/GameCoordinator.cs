@@ -10,6 +10,7 @@ using MTCG.Battles.Player;
 using MTCG.Cards.Basis;
 using MTCG.Cards.Factory;
 using MTCG.Components.DataManagement.DB;
+using Newtonsoft.Json;
 using WebService_Lib.Attributes;
 
 namespace MTCG.Components.Service
@@ -104,9 +105,33 @@ namespace MTCG.Components.Service
             // Let's get ready to rumble
             var battle = new Battle(playerA, playerB, battleLog);
             var result = battle.ProcessBattle();
-            // TODO db update
-            playerA.BattleResult = result.Log;
-            playerB.BattleResult = result.Log;
+            var log = (JsonConvert.SerializeObject(result.Log) is var json && json is {}) ? json : "";
+            var draw = result.Draw;
+            var winner = !draw ? result.Winner : "";
+            var looser = !draw ? result.Looser : "";
+            // Update stats and add battle to history
+            for (var i = 0; i < 10; i++)
+            {
+                // Check if update was successful
+                if (db.AddBattleResultModifyEloAndGiveCoins(
+                    playerA.Username, playerB.Username, log, draw, winner, looser
+                ))
+                {
+                    playerA.BattleResult = result.Log;
+                    playerB.BattleResult = result.Log;
+                    return;
+                }
+                // If not try again...
+                Thread.Sleep(50);
+            }
+            // Could not update stats... therefore invalid game
+            Dictionary<string, object> error = new Dictionary<string, object>()
+            {
+                {"error", "Cannot battle oneself!"}
+            };
+            playerA.BattleResult = error;
+            playerB.BattleResult = error;
+            
         }
 
         public Dictionary<string, object>? Play(string username)

@@ -171,25 +171,18 @@ namespace MTCG.Components.DataManagement.DB
                 var stats = new StatsSchema(user.Username);
                 using var statsSchemaCmd = new NpgsqlCommand(
                     "INSERT INTO statsSchema " +
-                    "VALUES(@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)",
+                    "VALUES(@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)",
                     conn);
 
-                statsSchemaCmd.Parameters.AddWithValue("p1", stats.Username);
-                statsSchemaCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
-                statsSchemaCmd.Parameters.AddWithValue("p2", stats.Elo);
-                statsSchemaCmd.Parameters[1].NpgsqlDbType = NpgsqlDbType.Bigint;
-                statsSchemaCmd.Parameters.AddWithValue("p3", stats.Wins);
-                statsSchemaCmd.Parameters[2].NpgsqlDbType = NpgsqlDbType.Bigint;
-                statsSchemaCmd.Parameters.AddWithValue("p4", stats.Looses);
-                statsSchemaCmd.Parameters[3].NpgsqlDbType = NpgsqlDbType.Bigint;
-                statsSchemaCmd.Parameters.AddWithValue("p5", stats.Coins);
-                statsSchemaCmd.Parameters[4].NpgsqlDbType = NpgsqlDbType.Bigint;
-                statsSchemaCmd.Parameters.AddWithValue("p6", stats.Realname);
-                statsSchemaCmd.Parameters[5].NpgsqlDbType = NpgsqlDbType.Varchar;
-                statsSchemaCmd.Parameters.AddWithValue("p7", stats.Bio);
-                statsSchemaCmd.Parameters[6].NpgsqlDbType = NpgsqlDbType.Varchar;
-                statsSchemaCmd.Parameters.AddWithValue("p8", stats.Image);
-                statsSchemaCmd.Parameters[7].NpgsqlDbType = NpgsqlDbType.Varchar;
+                statsSchemaCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, stats.Username);
+                statsSchemaCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Bigint, stats.Elo);
+                statsSchemaCmd.Parameters.AddWithValue("p3", NpgsqlDbType.Bigint, stats.Wins);
+                statsSchemaCmd.Parameters.AddWithValue("p4", NpgsqlDbType.Bigint, stats.Looses);
+                statsSchemaCmd.Parameters.AddWithValue("p5", NpgsqlDbType.Bigint, stats.Draws);
+                statsSchemaCmd.Parameters.AddWithValue("p6", NpgsqlDbType.Bigint, stats.Coins);
+                statsSchemaCmd.Parameters.AddWithValue("p7", NpgsqlDbType.Varchar, stats.Realname);
+                statsSchemaCmd.Parameters.AddWithValue("p8", NpgsqlDbType.Varchar, stats.Bio);
+                statsSchemaCmd.Parameters.AddWithValue("p9", NpgsqlDbType.Varchar, stats.Image);
 
                 userSchemaCmd.ExecuteNonQuery();
                 statsSchemaCmd.ExecuteNonQuery();

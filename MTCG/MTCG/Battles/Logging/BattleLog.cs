@@ -56,10 +56,19 @@ namespace MTCG.Battles.Logging
             playerB.Clear();
         }
 
-        public void ResultLog(bool draw, string winner = "")
+        public void ResultLog(bool draw, string winner = "", string looser = "")
         {
-            if (draw) log["result"] = "Draw";
-            else log["result"] = $"{winner} Victory";
+            if (draw)
+            {
+                log["result"] = new Dictionary<string, object>() { {"draw", draw} };
+            }
+            else
+            {
+                log["result"] = new Dictionary<string, object>()
+                {
+                    {"draw", draw}, {"winner", winner}, {"looser", looser}
+                };
+            }
         }
 
         public Dictionary<string, object> GetLog()
