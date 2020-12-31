@@ -14,7 +14,7 @@ namespace MTCG.Components.DataManagement.DB
     [Component]
     public class PostgresDatabase : IDatabase
     {
-        private NpgsqlConnection conn = null!;
+        private string connString = null!;
         
         public PostgresDatabase()
         {
@@ -23,7 +23,8 @@ namespace MTCG.Components.DataManagement.DB
         
         public bool AddPackage(List<CardSchema> cards)
         {
-            var transaction = BeginTransaction();
+            using var conn = Connection(connString);
+            var transaction = BeginTransaction(conn);
             if (transaction == null) return false;
             try
             {
@@ -69,7 +70,8 @@ namespace MTCG.Components.DataManagement.DB
 
         public bool AcquirePackage(string username, long packageCost = 5)
         {
-            var transaction = BeginTransaction();
+            using var conn = Connection(connString);
+            var transaction = BeginTransaction(conn);
             if (transaction == null) return false;
             NpgsqlDataReader? dr = null;
             try
@@ -152,7 +154,8 @@ namespace MTCG.Components.DataManagement.DB
 
         public bool AddUser(UserSchema user)
         {
-            var transaction = BeginTransaction();
+            using var conn = Connection(connString);
+            var transaction = BeginTransaction(conn);
             if (transaction == null) return false;
             try
             {
@@ -199,6 +202,7 @@ namespace MTCG.Components.DataManagement.DB
 
         public UserSchema? GetUser(string username)
         {
+            using var conn = Connection(connString);
             try
             {
                 using var cmd = new NpgsqlCommand(
@@ -236,6 +240,7 @@ namespace MTCG.Components.DataManagement.DB
 
         public StatsSchema? GetUserStats(string username)
         {
+            using var conn = Connection(connString);
             try
             {
                 using var cmd = new NpgsqlCommand(
@@ -299,7 +304,8 @@ namespace MTCG.Components.DataManagement.DB
 
         public bool ConfigureDeck(string username, List<string> cardIds)
         {
-            var transaction = BeginTransaction();
+            using var conn = Connection(connString);
+            var transaction = BeginTransaction(conn);
             if (transaction is null) return false;
             try
             {
@@ -348,6 +354,7 @@ namespace MTCG.Components.DataManagement.DB
 
         public List<CardSchema> GetUserDeck(string username)
         {
+            using var conn = Connection(connString);
             NpgsqlDataReader? dr = null;
             try
             {
@@ -383,6 +390,7 @@ namespace MTCG.Components.DataManagement.DB
 
         public List<CardSchema> GetUserCards(string username)
         {
+            using var conn = Connection(connString);
             NpgsqlDataReader? dr = null;
             try
             {
@@ -419,6 +427,7 @@ namespace MTCG.Components.DataManagement.DB
 
         public List<StatsSchema> GetScoreboard()
         {
+            using var conn = Connection(connString);
             NpgsqlDataReader? dr = null;
             try
             {
@@ -468,7 +477,8 @@ namespace MTCG.Components.DataManagement.DB
             int eloWin = 30, int eloLoose = -50, 
             int coinsWin = 2, int coinsDraw = 1)
         {
-            var transaction = BeginTransaction();
+            using var conn = Connection(connString);
+            var transaction = BeginTransaction(conn);
             if (transaction is null) return false;
             try
             {
@@ -618,8 +628,8 @@ namespace MTCG.Components.DataManagement.DB
             // Check if database exists
             // See: https://stackoverflow.com/a/20032567/12347616
             // And: https://www.npgsql.org/doc/index.html
-            string connString = $"Server={ip};Port={port};User Id={user};Password={password};";
-            conn = new NpgsqlConnection(connString);
+            connString = $"Server={ip};Port={port};User Id={user};Password={password};";
+            var conn = new NpgsqlConnection(connString);
             // Open General connection
             conn.Open();
             using var cmdChek = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname='mtcg'", conn);
@@ -629,7 +639,7 @@ namespace MTCG.Components.DataManagement.DB
             {
                 // Close general connection and build new one to database
                 conn.Close();
-                connString += ";Database=mtcg";
+                connString += "Database=mtcg;";
                 conn = new NpgsqlConnection(connString);
                 conn.Open();
                 return;
@@ -647,7 +657,7 @@ namespace MTCG.Components.DataManagement.DB
             }
             // Close general connection and build new one to database
             conn.Close();
-            connString += ";Database=mtcg";
+            connString += "Database=mtcg;";
             conn = new NpgsqlConnection(connString);
             conn.Open();
             
@@ -775,7 +785,7 @@ namespace MTCG.Components.DataManagement.DB
         /// Returns a <c>NpgsqlTransaction</c> when a new transaction can be started or
         /// null when not.
         /// </returns>
-        private NpgsqlTransaction? BeginTransaction()
+        private NpgsqlTransaction? BeginTransaction(NpgsqlConnection conn)
         {
             // Try to start new transaction
             for (var i = 0; i < 15; i++)
@@ -794,6 +804,7 @@ namespace MTCG.Components.DataManagement.DB
             return null;
         }
 
+        /**
         // TODO Remove for debug only
         public void DropMTCG()
         {
@@ -805,6 +816,13 @@ namespace MTCG.Components.DataManagement.DB
             using var reset = new NpgsqlCommand("DROP DATABASE mtcg", conn);
             reset.ExecuteNonQuery();
             Environment.Exit(1);
+        }*/
+
+        private static NpgsqlConnection Connection(string connString)
+        {
+            var conn = new NpgsqlConnection(connString);
+            conn.Open();
+            return conn;
         }
         
         private static bool Rollback(NpgsqlTransaction transaction)

@@ -13,7 +13,7 @@ namespace MTCG.API.Controllers
         [Get("/drop")]
         public Response Rebuild()
         {
-            db.DropMTCG();
+            //db.DropMTCG();
             return Response.Status(Status.Ok);
         }
     }
