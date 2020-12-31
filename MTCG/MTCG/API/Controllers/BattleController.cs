@@ -13,7 +13,7 @@ namespace MTCG.API.Controllers
         [Autowired] 
         private GameCoordinator game = null!;
         
-        [Get("/battles")]
+        [Post("/battles")]
         public Response LetsBattle(AuthDetails? user)
         {
             // TODO dont battle same user...

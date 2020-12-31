@@ -19,17 +19,23 @@ namespace MTCG.API.Controllers
         private readonly PostgresDatabase db = null!;
         
         [Post("/packages")]
-        public Response Packages(AuthDetails? user, Dictionary<string, object>? payload)
+        public Response AddPackages(AuthDetails? user, Dictionary<string, object>? payload)
         {
             // Check parameters
-            if (!(user is { } userDetails))
+            if (!(user is { } userDetails) || payload == null)
                 return Response.Status(Status.BadRequest);
-            return payload switch
-            {
-                null => AcquirePackage(user),
-                { } json => AddPackage(user, json),
-            };
+            return AddPackage(user, payload);
         }
+        
+        [Post("/transactions/packages")]
+        public Response AcquirePackages(AuthDetails? user)
+        {
+            // Check parameters
+            if (!(user is { } userDetails) )
+                return Response.Status(Status.BadRequest);
+            return AcquirePackage(user);
+        }
+        
 
         private Response AddPackage(AuthDetails user, Dictionary<string, object> payload)
         {

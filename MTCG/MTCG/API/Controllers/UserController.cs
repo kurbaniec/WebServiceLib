@@ -85,7 +85,7 @@ namespace MTCG.API.Controllers
             return Response.Json(jsonResponse); 
         }
 
-        [Post("/deck")]
+        [Put("/deck")]
         public Response ConfigureDeck(AuthDetails? user, Dictionary<string, object>? payload)
         {
             if (user is null) return Response.Status(Status.BadRequest);
