@@ -67,7 +67,7 @@ namespace MTCG.Components.DataManagement.DB
             }
         }
 
-        public bool AcquirePackage(string username, long packageCost)
+        public bool AcquirePackage(string username, long packageCost = 5)
         {
             var transaction = BeginTransaction();
             if (transaction == null) return false;
@@ -258,6 +258,8 @@ namespace MTCG.Components.DataManagement.DB
                     {Direction = ParameterDirection.Output});
                 cmd.Parameters.Add(new NpgsqlParameter("looses", NpgsqlDbType.Bigint)
                     {Direction = ParameterDirection.Output});
+                cmd.Parameters.Add(new NpgsqlParameter("draws", NpgsqlDbType.Bigint)
+                    {Direction = ParameterDirection.Output});
                 cmd.Parameters.Add(new NpgsqlParameter("coins", NpgsqlDbType.Bigint)
                     {Direction = ParameterDirection.Output});
                 cmd.Parameters.Add(new NpgsqlParameter("realname", NpgsqlDbType.Varchar)
@@ -274,7 +276,8 @@ namespace MTCG.Components.DataManagement.DB
                     cmd.Parameters[4].Value != null &&
                     cmd.Parameters[5].Value != null &&
                     cmd.Parameters[6].Value != null &&
-                    cmd.Parameters[7].Value != null)
+                    cmd.Parameters[7].Value != null &&
+                    cmd.Parameters[8].Value != null)
                 {
                     return new StatsSchema(
                         username,
@@ -282,8 +285,9 @@ namespace MTCG.Components.DataManagement.DB
                         (long) cmd.Parameters[2].Value!,
                         (long) cmd.Parameters[3].Value!,
                         (long) cmd.Parameters[4].Value!, 
-                        (string) cmd.Parameters[5].Value!,
+                        (long) cmd.Parameters[5].Value!,
                         (string) cmd.Parameters[6].Value!,
+                        (string) cmd.Parameters[7].Value!,
                         (string) cmd.Parameters[7].Value!);
                 }
 
@@ -436,7 +440,8 @@ namespace MTCG.Components.DataManagement.DB
                     var elo = dr.GetInt64(1);
                     var wins = dr.GetInt64(2);
                     var looses = dr.GetInt64(3);
-                    stats.Add(new StatsSchema(username, elo, wins, looses));
+                    var draws = dr.GetInt64(4);
+                    stats.Add(new StatsSchema(username, elo, wins, looses, draws));
                 }
                 dr.Close();
                 
@@ -463,7 +468,122 @@ namespace MTCG.Components.DataManagement.DB
         {
             throw new System.NotImplementedException();
         }
-        
+
+        public bool AddBattleResultModifyEloAndGiveCoins(
+            string playerA, string playerB, string log, bool draw, 
+            string winner = "", string looser = "", 
+            int eloWin = 30, int eloLoose = -50, 
+            int coinsWin = 2, int coinsDraw = 1)
+        {
+            var transaction = BeginTransaction();
+            if (transaction is null) return false;
+            try
+            {
+                // Update playerA
+                if (draw)
+                {
+                    using var playerACmd = new NpgsqlCommand(
+                        "UPDATE statsSchema " +
+                        "SET draws = draws + 1, " +
+                        "coins = coins + @p1 " +
+                        "WHERE username = @p2",
+                        conn);
+                    playerACmd.Parameters.AddWithValue("p1", NpgsqlDbType.Bigint, coinsDraw);
+                    playerACmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, playerA);
+                    playerACmd.ExecuteNonQuery();
+                } else if (playerA == winner)
+                { 
+                    using var playerACmd = new NpgsqlCommand(
+                        "UPDATE statsSchema " +
+                        "SET wins = wins + 1, " +
+                        "elo = elo + @p1, " +
+                        "coins = coins + @p2 " +
+                        "WHERE username = @p3",
+                        conn);
+                    playerACmd.Parameters.AddWithValue("p1", NpgsqlDbType.Bigint, eloWin);
+                    playerACmd.Parameters.AddWithValue("p2", NpgsqlDbType.Bigint, coinsWin);
+                    playerACmd.Parameters.AddWithValue("p3", NpgsqlDbType.Varchar, playerA);
+                    playerACmd.ExecuteNonQuery();
+                }
+                else
+                {
+                    using var playerACmd = new NpgsqlCommand(
+                        "UPDATE statsSchema " +
+                        "SET looses = looses + 1, " +
+                        "elo = elo + @p1 " +
+                        "WHERE username = @p2",
+                        conn);
+                    playerACmd.Parameters.AddWithValue("p1", NpgsqlDbType.Bigint, eloLoose);
+                    playerACmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, playerA);
+                    playerACmd.ExecuteNonQuery();
+                }
+                // Update playerB
+                if (draw)
+                {
+                    using var playerBCmd = new NpgsqlCommand(
+                        "UPDATE statsSchema " +
+                        "SET draws = draws + 1, " +
+                        "coins = coins + @p1 " +
+                        "WHERE username = @p2",
+                        conn);
+                    playerBCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Bigint, coinsDraw);
+                    playerBCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, playerB);
+                    playerBCmd.ExecuteNonQuery();
+                } else if (playerB == winner)
+                { 
+                    using var playerBCmd = new NpgsqlCommand(
+                        "UPDATE statsSchema " +
+                        "SET wins = wins + 1, " +
+                        "elo = elo + @p1, " +
+                        "coins = coins + @p2 " +
+                        "WHERE username = @p3",
+                        conn);
+                    playerBCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Bigint, eloWin);
+                    playerBCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Bigint, coinsWin);
+                    playerBCmd.Parameters.AddWithValue("p3", NpgsqlDbType.Varchar, playerB);
+                    playerBCmd.ExecuteNonQuery();
+                }
+                else
+                {
+                    using var playerBCmd = new NpgsqlCommand(
+                        "UPDATE statsSchema " +
+                        "SET looses = looses + 1, " +
+                        "elo = elo + @p1 " +
+                        "WHERE username = @p2",
+                        conn);
+                    playerBCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Bigint, eloLoose);
+                    playerBCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, playerB);
+                    playerBCmd.ExecuteNonQuery();
+                }
+                // Add battle history
+                object winVal;
+                if (winner != "") winVal = winner;
+                else winVal = DBNull.Value;
+                object looseVal;
+                if (looser != "") looseVal = looser;
+                else looseVal = DBNull.Value;
+                using var battleCmd = new NpgsqlCommand(
+                    "INSERT INTO battleSchema (playerA, playerB, draw, winner, looser, log) " +
+                    "VALUES(@p1, @p2, @p3, @p4, @p5, @p6)",
+                    conn);
+                battleCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, playerA);
+                battleCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, playerB);
+                battleCmd.Parameters.AddWithValue("p3", NpgsqlDbType.Boolean, draw);
+                battleCmd.Parameters.AddWithValue("p4", NpgsqlDbType.Varchar, winVal);
+                battleCmd.Parameters.AddWithValue("p5", NpgsqlDbType.Varchar, looseVal);
+                battleCmd.Parameters.AddWithValue("p6", NpgsqlDbType.Varchar, log);
+                battleCmd.ExecuteNonQuery();
+
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                return false;
+            }
+        }
+
         public void CreateDatabaseIfNotExists()
         {
             // Get DB config and read it
@@ -541,9 +661,9 @@ namespace MTCG.Components.DataManagement.DB
             // Build tables
             using (var cmd = new NpgsqlCommand(@"
     CREATE TABLE IF NOT EXISTS userSchema(
-        username VARCHAR(256),
-        password VARCHAR(256),
-        roleStr VARCHAR(256),
+        username VARCHAR(256) NOT NULL,
+        password VARCHAR(256) NOT NULL,
+        roleStr VARCHAR(256) NOT NULL,
         PRIMARY KEY(username)
     )", conn))
             {
@@ -565,9 +685,9 @@ namespace MTCG.Components.DataManagement.DB
             // See: https://www.postgresqltutorial.com/postgresql-foreign-key/
             using (var cmd = new NpgsqlCommand(@"
     CREATE TABLE IF NOT EXISTS cardSchema(
-        id VARCHAR(256),
-        cardname VARCHAR(256),
-        damage DOUBLE PRECISION,
+        id VARCHAR(256) NOT NULL,
+        cardname VARCHAR(256) NOT NULL,
+        damage DOUBLE PRECISION NOT NULL,
         package INTEGER,
         username VARCHAR(256),
         deck BOOLEAN,
@@ -616,16 +736,38 @@ namespace MTCG.Components.DataManagement.DB
             using (var cmd = new NpgsqlCommand(@"
     CREATE TABLE IF NOT EXISTS statsSchema(
         username VARCHAR(256),
-        elo BIGINT,
-        wins BIGINT,
-        looses BIGINT,
-        coins BIGINT,
+        elo BIGINT NOT NULL,
+        wins BIGINT NOT NULL,
+        looses BIGINT NOT NULL,
+        draws BIGINT NOT NULL,
+        coins BIGINT NOT NULL,
         realname VARCHAR(256),
         bio VARCHAR(256),
         image VARCHAR(256),
         PRIMARY KEY(username),
         CONSTRAINT fk_user
             FOREIGN KEY(username)
+                REFERENCES userSchema(username)
+    )", conn))
+            {
+                cmd.ExecuteNonQuery();
+            }
+            
+            using (var cmd = new NpgsqlCommand(@"
+    CREATE TABLE IF NOT EXISTS battleSchema(
+        id SERIAL,
+        playerA VARCHAR(256) NOT NULL,
+        playerB VARCHAR(256) NOT NULL,
+        draw BOOLEAN NOT NULL,
+        winner VARCHAR(256),
+        looser VARCHAR(256),
+        log TEXT NOT NULL,
+        PRIMARY KEY(id),
+        CONSTRAINT fk_playerA
+            FOREIGN KEY(playerA)
+                REFERENCES userSchema(username),
+        CONSTRAINT fk_playerB
+            FOREIGN KEY(playerB)
                 REFERENCES userSchema(username)
     )", conn))
             {

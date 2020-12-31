@@ -51,18 +51,30 @@ namespace MTCG.Components.Service
                 {
                     if (playerPool.Count >= 2)
                     {
-                        IPlayer? playerA, playerB;
-                        if (!playerPool.TryDequeue(out playerA) || !playerPool.TryDequeue(out playerB)) continue;
-                        // Get token & GUID and start battle processing
-                        var token = tokenSource.Token;
-                        var id = Guid.NewGuid().ToString();
-                        var task = Task.Run(() => Process(playerA, playerB), token);
-                        tasks[id] = task;
-                        // Remove task from collection when finished
-                        task.ContinueWith(t =>
+                        if (!playerPool.TryDequeue(out var playerA) || !playerPool.TryDequeue(out var playerB)) continue;
+                        // Check if players are different 
+                        if (playerA.Username == playerB.Username)
                         {
-                            tasks.TryRemove(id, out t!);
-                        }, token);
+                            Dictionary<string, object> error = new Dictionary<string, object>()
+                            {
+                                {"error", "Cannot battle oneself!"}
+                            };
+                            playerA.BattleResult = error;
+                            playerB.BattleResult = error;
+                        }
+                        else
+                        {
+                            // Get token & GUID and start battle processing
+                            var token = tokenSource.Token;
+                            var id = Guid.NewGuid().ToString();
+                            var task = Task.Run(() => Process(playerA, playerB), token);
+                            tasks[id] = task;
+                            // Remove task from collection when finished
+                            task.ContinueWith(t =>
+                            {
+                                tasks.TryRemove(id, out t!);
+                            }, token);
+                        }
                     } else Thread.Sleep(15);
                 }
                 catch (Exception)

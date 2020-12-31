@@ -6,7 +6,8 @@
         public long Elo { get; set; }
         public long Wins { get; set; }
         public long Looses { get; set; }
-        public long GamesPlayed => Wins + Looses;
+        public long Draws { get; set; }
+        public long GamesPlayed => Wins + Looses + Draws;
         public long Coins { get; set; }
         public string Realname { get; set; }
         public string Bio { get; set; }
@@ -18,6 +19,7 @@
             Elo = 1000;
             Wins = 0;
             Looses = 0;
+            Draws = 0;
             Coins = 20;
             Realname = "No name given";
             Bio = "No Bio";
@@ -25,16 +27,17 @@
         }
 
         // Used for scoreboard
-        public StatsSchema(string username, long elo, long wins, long looses)
+        public StatsSchema(string username, long elo, long wins, long looses, long draws)
         {
             Username = username;
             Elo = elo;
             Wins = wins;
             Looses = looses;
+            Draws = draws;
         }
         
         public StatsSchema(
-            string username, long elo, long wins, long looses, long coins,
+            string username, long elo, long wins, long looses, long draws, long coins,
             string realname, string bio, string image
         )
         {
@@ -45,6 +48,7 @@
             Elo = elo;
             Wins = wins;
             Looses = looses;
+            Draws = draws;
             Coins = coins;
         }
     }
