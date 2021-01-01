@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Threading;
+using System.Transactions;
 using MTCG.Components.DataManagement.Schemas;
 using Newtonsoft.Json;
 using Npgsql;
@@ -164,12 +165,9 @@ namespace MTCG.Components.DataManagement.DB
                     "VALUES(@p1, @p2, @p3)",
                     conn);
 
-                userSchemaCmd.Parameters.AddWithValue("p1", user.Username);
-                userSchemaCmd.Parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
-                userSchemaCmd.Parameters.AddWithValue("p2", user.Password);
-                userSchemaCmd.Parameters[1].NpgsqlDbType = NpgsqlDbType.Varchar;
-                userSchemaCmd.Parameters.AddWithValue("p3", user.Role.ToString());
-                userSchemaCmd.Parameters[2].NpgsqlDbType = NpgsqlDbType.Varchar;
+                userSchemaCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, user.Username);
+                userSchemaCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, user.Password);
+                userSchemaCmd.Parameters.AddWithValue("p3", NpgsqlDbType.Varchar, user.Role.ToString());
 
                 var stats = new StatsSchema(user.Username);
                 using var statsSchemaCmd = new NpgsqlCommand(
@@ -195,8 +193,7 @@ namespace MTCG.Components.DataManagement.DB
             }
             catch (Exception)
             {
-                transaction.Rollback();
-                return false;
+                return Rollback(transaction);
             }
         }
 
@@ -297,9 +294,32 @@ namespace MTCG.Components.DataManagement.DB
             }
         }
 
-        public bool EditUserProfile(string username, string bio, string image)
+        public bool EditUserProfile(string username, string realname, string bio, string image)
         {
-            throw new System.NotImplementedException();
+            using var conn = Connection(connString);
+            var transaction = BeginTransaction(conn);
+            if (transaction == null) return false;
+            try
+            {
+                using var userStatsUpdateCmd = new NpgsqlCommand(
+                    "UPDATE statsSchema " +
+                    "SET realname = @p1, bio = @p2, image = @p3 " + 
+                    "WHERE username = @p4",
+                    conn);
+
+                userStatsUpdateCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, realname);
+                userStatsUpdateCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, bio);
+                userStatsUpdateCmd.Parameters.AddWithValue("p3", NpgsqlDbType.Varchar, image);
+                userStatsUpdateCmd.Parameters.AddWithValue("p4", NpgsqlDbType.Varchar, username);
+
+                userStatsUpdateCmd.ExecuteNonQuery();
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception)
+            {
+                return Rollback(transaction);
+            }
         }
 
         public bool ConfigureDeck(string username, List<string> cardIds)
@@ -452,7 +472,7 @@ namespace MTCG.Components.DataManagement.DB
             catch (Exception)
             {
                 dr?.Close();
-                return new List<StatsSchema>();;
+                return new List<StatsSchema>();
             }
         }
 
@@ -795,7 +815,7 @@ namespace MTCG.Components.DataManagement.DB
                     var transaction = conn.BeginTransaction();
                     return transaction;
                 }
-                catch (InvalidOperationException ex)
+                catch (InvalidOperationException)
                 {
                     // Try again later...
                     Thread.Sleep(50);

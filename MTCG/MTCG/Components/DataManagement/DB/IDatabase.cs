@@ -13,7 +13,7 @@ namespace MTCG.Components.DataManagement.DB
         bool AddUser(UserSchema user);
         UserSchema? GetUser(string username);
         StatsSchema? GetUserStats(string username);
-        bool EditUserProfile(string username, string bio, string image);
+        bool EditUserProfile(string username, string realname, string bio, string image);
         bool ConfigureDeck(string username, List<string> cardIds);
         List<CardSchema> GetUserDeck(string username);
         List<CardSchema> GetUserCards(string username);

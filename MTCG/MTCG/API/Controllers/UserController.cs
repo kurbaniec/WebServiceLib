@@ -118,9 +118,42 @@ namespace MTCG.API.Controllers
             if (stats is null) return Response.Status(Status.BadRequest);
             var response = new Dictionary<string, object>
             {
-                ["Elo"] = stats.Elo, ["Wins"] = stats.Wins, ["Looses"] = stats.Looses
+                ["Elo"] = stats.Elo, ["Wins"] = stats.Wins, ["Looses"] = stats.Looses, 
+                ["Draws"] = stats.Draws, ["Total Games Played"] = stats.GamesPlayed,
+                ["Coins"] = stats.Coins
             };
             return Response.Json(response);
+        }
+
+        [Get("/users")]
+        public Response GetUserProfile(PathVariable<string> username, AuthDetails? user)
+        {
+            if (!username.Ok || user is null) return Response.Status(Status.BadRequest);
+            if (username.Value != user.Username) return Response.Status(Status.Forbidden);
+            var stats = db.GetUserStats(user.Username);
+            if (stats is null) return Response.Status(Status.BadRequest);
+            var response = new Dictionary<string, object>
+            {
+                ["Username"] = user.Username, ["Realname"] = stats.Realname,
+                ["Bio"] = stats.Bio, ["Image"] = stats.Image
+            };
+            return Response.Json(response);
+        }
+
+        [Put("/users")]
+        public Response UpdateUserProfile(
+            PathVariable<string> username, AuthDetails? user, Dictionary<string, object>? payload
+        )
+        {
+            if (!username.Ok || user is null || payload is null) return Response.Status(Status.BadRequest);
+            if (username.Value != user.Username) return Response.Status(Status.Forbidden);
+            if (!payload.ContainsKey("Name") || !(payload["Name"] is string name) || 
+                !payload.ContainsKey("Bio") || !(payload["Bio"] is string bio) || 
+                !payload.ContainsKey("Image") || !(payload["Image"] is string image)) 
+                return Response.Status(Status.BadRequest);
+            return db.EditUserProfile(user.Username, name, bio, image) ? 
+                GetUserProfile(username, user) : 
+                Response.Status(Status.BadRequest);
         }
 
         [Get("/score")]
@@ -132,7 +165,8 @@ namespace MTCG.API.Controllers
                 = stats.Select(stat => new Dictionary<string, object>
                 {
                     ["Username"] = stat.Username, ["Elo"] = stat.Elo,
-                    ["Wins"] = stat.Wins, ["Looses"] = stat.Looses
+                    ["Wins"] = stat.Wins, ["Looses"] = stat.Looses,
+                    ["Draws"] = stat.Draws
                 }).ToList();
             response["scoreboard"] = users;
             return Response.Json(response);
