@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using WebService_Lib.Server;
 
 namespace WebService_Lib
 {
@@ -67,7 +68,7 @@ namespace WebService_Lib
         /// List of strings that contain the paths to the resources that
         /// should be secured.
         /// </returns>
-        public List<string> SecurePaths();
+        public Dictionary<Method, List<string>> SecurePaths();
 
         /// <summary>
         /// Webservice_Lib's <c>AuthCheck</c> handler uses this method to

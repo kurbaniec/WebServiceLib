@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using WebService_Lib;
 using WebService_Lib.Attributes;
+using WebService_Lib.Server;
 
 namespace WebService_Test.Unit
 {
@@ -22,7 +23,14 @@ namespace WebService_Test.Unit
             public string GenerateToken(string username) => username + "-token";
             public void AddToken(string token) => tokens.Add(token);
             public void RevokeToken(string token) => tokens.Remove(token);
-            public List<string> SecurePaths() => new List<string> { "/secured" };
+            public Dictionary<Method, List<string>> SecurePaths() => new Dictionary<Method, List<string>>()
+            {
+                {Method.Delete, new List<string>(){"/secured"}},
+                {Method.Get, new List<string>(){"/secured"}},
+                {Method.Patch, new List<string>(){"/secured"}},
+                {Method.Post, new List<string>(){"/secured"}},
+                {Method.Put, new List<string>(){"/secured"}}
+            };
             public bool CheckCredentials(string username, string password) => (username == "admin" && password == "admin");
         }
         
@@ -38,7 +46,7 @@ namespace WebService_Test.Unit
         {
             var authCheck = new AuthCheck(security);
 
-            var isSecured = authCheck.IsSecured("/secured");
+            var isSecured = authCheck.IsSecured(Method.Get, "/secured");
 
             Assert.IsTrue(isSecured);
         }
@@ -49,7 +57,7 @@ namespace WebService_Test.Unit
         {
             var authCheck = new AuthCheck(security);
 
-            var isSecured = authCheck.IsSecured("/notsecured");
+            var isSecured = authCheck.IsSecured(Method.Get, "/notsecured");
 
             Assert.IsFalse(isSecured);
         }

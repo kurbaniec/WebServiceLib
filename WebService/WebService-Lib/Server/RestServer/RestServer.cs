@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using WebService_Lib.Server.RestServer.TcpClient;
@@ -88,7 +87,7 @@ namespace WebService_Lib.Server.RestServer
             else
             {
                 // Check if path is secured and authenticate if so
-                if (authCheck != null && authCheck.IsSecured(request.Path))
+                if (authCheck != null && authCheck.IsSecured(request.Method, request.Path))
                 {
                     // Check if Authorization header was send
                     if (request.Header.ContainsKey("Authorization"))

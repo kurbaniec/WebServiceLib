@@ -1,4 +1,6 @@
-﻿namespace WebService_Lib
+﻿using WebService_Lib.Server;
+
+namespace WebService_Lib
 {
     /// <summary>
     /// Wrapper Class for a concrete <c>ISecurity</c> class.
@@ -18,11 +20,12 @@
         /// <summary>
         /// Check if a given path is secured by <c>WebService_Lib</c>.
         /// </summary>
+        /// <param name="method"></param>
         /// <param name="path"></param>
         /// <returns>True if so, otherwise False</returns>
-        public bool IsSecured(string path)
+        public bool IsSecured(Method method, string path)
         {
-            return this.security.SecurePaths().Contains(path);
+            return this.security.SecurePaths()[method].Contains(path);
         }
 
         /// <summary>

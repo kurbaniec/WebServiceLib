@@ -6,6 +6,7 @@ using MTCG.Components.DataManagement.DB;
 using MTCG.Components.DataManagement.Schemas;
 using WebService_Lib;
 using WebService_Lib.Attributes;
+using WebService_Lib.Server;
 
 namespace MTCG.API.Security
 {
@@ -42,9 +43,13 @@ namespace MTCG.API.Security
         public string GenerateToken(string username) => username + "-mtcgToken";
         public void AddToken(string token) => tokens.Add(token);
         public void RevokeToken(string token) => tokens.Remove(token);
-        public List<string> SecurePaths() => new List<string>
+        Dictionary<Method, List<string>> ISecurity.SecurePaths() => new Dictionary<Method, List<string>>()
         {
-            "/packages", "/transactions/packages", "/cards", "/deck", "/stats", "/score", "/battles"
+            {Method.Get, new List<string>() {"/cards", "/deck", "/users", "/stats", "/score", "/tradings"}},
+            {Method.Post, new List<string>() {"/packages", "/transactions/packages", "/battles", "/tradings"}},
+            {Method.Put, new List<string>() {"/deck", "/users"}},
+            {Method.Patch, new List<string>() {}},
+            {Method.Delete, new List<string>() {"/tradings"}},
         };
 
         public bool CheckCredentials(string username, string password)

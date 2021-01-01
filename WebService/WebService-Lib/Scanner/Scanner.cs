@@ -50,7 +50,7 @@ namespace WebService_Lib
                     }
                     else
                     {
-                        check = Attribute.GetCustomAttribute(type, typeof(Security));
+                        check = Attribute.GetCustomAttribute(type, typeof(Attributes.Security));
                         // This check does not work because of assembly mismatch
                         // See: https://stackoverflow.com/a/4963190/12347616
                         // var interfaces = type.GetInterfaces();

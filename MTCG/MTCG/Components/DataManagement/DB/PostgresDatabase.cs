@@ -283,7 +283,7 @@ namespace MTCG.Components.DataManagement.DB
                         (long) cmd.Parameters[5].Value!,
                         (string) cmd.Parameters[6].Value!,
                         (string) cmd.Parameters[7].Value!,
-                        (string) cmd.Parameters[7].Value!);
+                        (string) cmd.Parameters[8].Value!);
                 }
 
                 return null;
