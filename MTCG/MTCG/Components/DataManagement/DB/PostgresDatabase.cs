@@ -540,6 +540,66 @@ namespace MTCG.Components.DataManagement.DB
             }
         }
 
+        public Trade? GetTradingDeal(string username, string id)
+        {
+            using var conn = Connection(connString);
+            try
+            {
+                using var getStoreCmd = new NpgsqlCommand(
+                    "SELECT * from storeSchema s " +
+                    "USING cardSchema c " +
+                    "WHERE s.trade = c.id AND " +
+                    "s.id = @p1 AND c.username = @p2",
+                    conn);
+                getStoreCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, id);
+                getStoreCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, username);
+                getStoreCmd.Parameters.Add(new NpgsqlParameter("id", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
+                getStoreCmd.Parameters.Add(new NpgsqlParameter("trade", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
+                getStoreCmd.Parameters.Add(new NpgsqlParameter("wanted", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
+                getStoreCmd.Parameters.Add(new NpgsqlParameter("minimumDamage", NpgsqlDbType.Double)
+                    {Direction = ParameterDirection.Output});
+                getStoreCmd.ExecuteNonQuery();
+
+                if (!(getStoreCmd.Parameters[2].Value is string storeId) ||
+                    !(getStoreCmd.Parameters[3].Value is string trade) ||
+                    !(getStoreCmd.Parameters[4].Value is string wanted) ||
+                    !(getStoreCmd.Parameters[5].Value is double minDamage)) return null;
+                
+                using var getCardCmd = new NpgsqlCommand(
+                    "SELECT * from cardSchema " + 
+                    "WHERE id = @p1 AND username = @p2",
+                    conn);
+                getCardCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, trade);
+                getCardCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, username);
+                getCardCmd.Parameters.Add(new NpgsqlParameter("id", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
+                getCardCmd.Parameters.Add(new NpgsqlParameter("cardname", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
+                getCardCmd.Parameters.Add(new NpgsqlParameter("damage", NpgsqlDbType.Double)
+                    {Direction = ParameterDirection.Output});
+                getCardCmd.ExecuteNonQuery();
+
+                if (getCardCmd.Parameters[2].Value is string cardId &&
+                    getCardCmd.Parameters[3].Value is string cardName &&
+                    getCardCmd.Parameters[3].Value is double damage)
+                {
+                    return new Trade(
+                        new StoreSchema(storeId, trade, wanted, minDamage),
+                        new CardSchema(cardId, cardName, damage)
+                    );
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         public bool AddTradingDeal(string username, StoreSchema deal)
         {
             using var conn = Connection(connString);
@@ -569,6 +629,33 @@ namespace MTCG.Components.DataManagement.DB
                 addTradeCmd.Parameters.AddWithValue("p4", NpgsqlDbType.Double, deal.MinimumDamage);
                 addTradeCmd.ExecuteNonQuery();
                     
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception)
+            {
+                return Rollback(transaction);
+            }
+        }
+
+        public bool DeleteTradingDeal(string username, string id)
+        {
+            using var conn = Connection(connString);
+            var transaction = BeginTransaction(conn);
+            if (transaction == null) return false;
+            try
+            {
+                // See: https://stackoverflow.com/a/11753924/12347616
+                using var deleteDealCmd = new NpgsqlCommand(
+                    "DELETE FROM storeSchema s " +
+                    "USING cardSchema c " +
+                    "WHERE s.trade = c.id AND " +
+                    "s.id = @p1 AND c.username = @p2",
+                    conn);
+                deleteDealCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, id);
+                deleteDealCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, username);
+                deleteDealCmd.ExecuteNonQuery();
+                
                 transaction.Commit();
                 return true;
             }

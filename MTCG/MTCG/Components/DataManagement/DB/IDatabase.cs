@@ -19,7 +19,9 @@ namespace MTCG.Components.DataManagement.DB
         List<CardSchema> GetUserCards(string username);
         List<StatsSchema> GetScoreboard();
         List<StoreSchema> GetTradingDeals();
+        Trade? GetTradingDeal(string username, string id);
         bool AddTradingDeal(string username, StoreSchema deal);
+        bool DeleteTradingDeal(string username, string id);
         bool Trade(string username, string myDeal, string otherDeal);
         bool AddBattleResultModifyEloAndGiveCoins(
             string playerA, string playerB, string log, bool draw, 

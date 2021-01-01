@@ -120,7 +120,10 @@ namespace MTCG.API.Controllers
         [Delete("/tradings")]
         public Response DeleteTrade(PathVariable<string> path, AuthDetails? user)
         {
-            return Response.Status(Status.Ok);
+            if (!path.Ok || user is null || path.Value is null) return Response.Status(Status.BadRequest);
+            return Response.Status(db.DeleteTradingDeal(user.Username, path.Value) 
+                ? Status.NoContent 
+                : Status.BadRequest);
         }
         
         
