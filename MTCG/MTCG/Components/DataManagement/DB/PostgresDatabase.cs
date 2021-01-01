@@ -459,6 +459,39 @@ namespace MTCG.Components.DataManagement.DB
             }
         }
 
+        public CardSchema? GetUserCard(string cardId)
+        {
+            using var conn = Connection(connString);
+            try
+            {
+                using var getCardCmd = new NpgsqlCommand(
+                    "SELECT * from cardSchema " +
+                    "WHERE id = @p1",
+                    conn);
+                getCardCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, cardId);
+                getCardCmd.Parameters.Add(new NpgsqlParameter("cardname", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
+                getCardCmd.Parameters.Add(new NpgsqlParameter("damage", NpgsqlDbType.Double)
+                    {Direction = ParameterDirection.Output});
+                getCardCmd.Parameters.Add(new NpgsqlParameter("username", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
+                getCardCmd.ExecuteNonQuery();
+
+                if (getCardCmd.Parameters[1].Value is string cardName &&
+                    getCardCmd.Parameters[2].Value is double damage &&
+                    getCardCmd.Parameters[3].Value is string cardUser)
+                {
+                    return new CardSchema(cardId, cardName, damage, cardUser);
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         public List<StatsSchema> GetScoreboard()
         {
             using var conn = Connection(connString);
@@ -540,19 +573,16 @@ namespace MTCG.Components.DataManagement.DB
             }
         }
 
-        public Trade? GetTradingDeal(string username, string id)
+        public Trade? GetTradingDeal(string id)
         {
             using var conn = Connection(connString);
             try
             {
                 using var getStoreCmd = new NpgsqlCommand(
-                    "SELECT * from storeSchema s " +
-                    "USING cardSchema c " +
-                    "WHERE s.trade = c.id AND " +
-                    "s.id = @p1 AND c.username = @p2",
+                    "SELECT * from storeSchema " +
+                    "WHERE id = @p1 ",
                     conn);
                 getStoreCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, id);
-                getStoreCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, username);
                 getStoreCmd.Parameters.Add(new NpgsqlParameter("id", NpgsqlDbType.Varchar)
                     {Direction = ParameterDirection.Output});
                 getStoreCmd.Parameters.Add(new NpgsqlParameter("trade", NpgsqlDbType.Varchar)
@@ -563,32 +593,34 @@ namespace MTCG.Components.DataManagement.DB
                     {Direction = ParameterDirection.Output});
                 getStoreCmd.ExecuteNonQuery();
 
-                if (!(getStoreCmd.Parameters[2].Value is string storeId) ||
-                    !(getStoreCmd.Parameters[3].Value is string trade) ||
-                    !(getStoreCmd.Parameters[4].Value is string wanted) ||
-                    !(getStoreCmd.Parameters[5].Value is double minDamage)) return null;
+                if (!(getStoreCmd.Parameters[1].Value is string storeId) ||
+                    !(getStoreCmd.Parameters[2].Value is string trade) ||
+                    !(getStoreCmd.Parameters[3].Value is string wanted) ||
+                    !(getStoreCmd.Parameters[4].Value is double minDamage)) return null;
                 
                 using var getCardCmd = new NpgsqlCommand(
                     "SELECT * from cardSchema " + 
-                    "WHERE id = @p1 AND username = @p2",
+                    "WHERE id = @p1",
                     conn);
                 getCardCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, trade);
-                getCardCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, username);
                 getCardCmd.Parameters.Add(new NpgsqlParameter("id", NpgsqlDbType.Varchar)
                     {Direction = ParameterDirection.Output});
                 getCardCmd.Parameters.Add(new NpgsqlParameter("cardname", NpgsqlDbType.Varchar)
                     {Direction = ParameterDirection.Output});
                 getCardCmd.Parameters.Add(new NpgsqlParameter("damage", NpgsqlDbType.Double)
                     {Direction = ParameterDirection.Output});
+                getCardCmd.Parameters.Add(new NpgsqlParameter("username", NpgsqlDbType.Varchar)
+                    {Direction = ParameterDirection.Output});
                 getCardCmd.ExecuteNonQuery();
 
-                if (getCardCmd.Parameters[2].Value is string cardId &&
-                    getCardCmd.Parameters[3].Value is string cardName &&
-                    getCardCmd.Parameters[3].Value is double damage)
+                if (getCardCmd.Parameters[1].Value is string cardId &&
+                    getCardCmd.Parameters[2].Value is string cardName &&
+                    getCardCmd.Parameters[3].Value is double damage &&
+                    getCardCmd.Parameters[4].Value is string cardUser)
                 {
                     return new Trade(
                         new StoreSchema(storeId, trade, wanted, minDamage),
-                        new CardSchema(cardId, cardName, damage)
+                        new CardSchema(cardId, cardName, damage, cardUser)
                     );
                 }
 
@@ -665,7 +697,7 @@ namespace MTCG.Components.DataManagement.DB
             }
         }
 
-        public bool Trade(string username, string myDeal, string otherDeal)
+        public bool Trade(string username, string cardToTrade, string storeId)
         {
             throw new System.NotImplementedException();
         }

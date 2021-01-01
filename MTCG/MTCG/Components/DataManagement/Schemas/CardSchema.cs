@@ -22,6 +22,14 @@ namespace MTCG.Components.DataManagement.Schemas
             Damage = damage;
         }
         
+        public CardSchema(string id, string name, double damage, string userId)
+        {
+            Id = id;
+            Name = name;
+            Damage = damage;
+            UserId = userId;
+        }
+        
         public CardSchema(string id, string name, double damage, string? packageId, string? userId, string? storeId, bool inDeck)
         {
             Id = id;

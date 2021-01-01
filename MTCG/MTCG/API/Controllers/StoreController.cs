@@ -111,9 +111,22 @@ namespace MTCG.API.Controllers
         }
 
         private Response PerformTrade(
-            string tradeId, AuthDetails user, Dictionary<string, object> payload
+            string storeId, AuthDetails user, Dictionary<string, object> payload
         )
         {
+            if (payload.ContainsKey("value") && payload["value"] is string cardId)
+            {
+                var trade = db.GetTradingDeal(storeId);
+                var card = db.GetUserCard(cardId);
+                if (trade is {} && card is {})
+                {
+                    // Cannot trade with oneself
+                    if (trade.Card.UserId != card.UserId)
+                    {
+                        
+                    }
+                }
+            }
             return Response.Status(Status.Ok);
         }
 

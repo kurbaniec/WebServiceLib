@@ -17,12 +17,13 @@ namespace MTCG.Components.DataManagement.DB
         bool ConfigureDeck(string username, List<string> cardIds);
         List<CardSchema> GetUserDeck(string username);
         List<CardSchema> GetUserCards(string username);
+        CardSchema? GetUserCard(string cardId);
         List<StatsSchema> GetScoreboard();
         List<StoreSchema> GetTradingDeals();
-        Trade? GetTradingDeal(string username, string id);
+        Trade? GetTradingDeal(string id);
         bool AddTradingDeal(string username, StoreSchema deal);
         bool DeleteTradingDeal(string username, string id);
-        bool Trade(string username, string myDeal, string otherDeal);
+        bool Trade(string username, string cardToTrade, string storeId);
         bool AddBattleResultModifyEloAndGiveCoins(
             string playerA, string playerB, string log, bool draw, 
             string winner = "", string looser = "", 
