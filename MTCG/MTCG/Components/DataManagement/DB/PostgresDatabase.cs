@@ -332,8 +332,8 @@ namespace MTCG.Components.DataManagement.DB
                 foreach (var cardId in cardIds)
                 {
                     using var storeCheckCmd = new NpgsqlCommand(
-                        "SELECT tradeId from storeSchema " + 
-                        "WHERE tradeId = @p1",
+                        "SELECT trade from storeSchema " + 
+                        "WHERE trade = @p1",
                         conn);
                     storeCheckCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, cardId);
                     storeCheckCmd.Parameters.Add(new NpgsqlParameter("tradeId", NpgsqlDbType.Varchar)
@@ -497,7 +497,7 @@ namespace MTCG.Components.DataManagement.DB
             try
             {
                 using var cmd = new NpgsqlCommand(
-                    "SELECT * FROM storeSchema ORDER BY elo DESC LIMIT 10",
+                    "SELECT * FROM storeSchema",
                     conn);
                 dr = cmd.ExecuteReader();
                 var tradings = new List<StoreSchema>();
@@ -514,11 +514,11 @@ namespace MTCG.Components.DataManagement.DB
                 foreach (var trade in tradings)
                 {
                     using var getCardCmd = new NpgsqlCommand(
-                        "SELECT name, damage FROM cardSchema " +
+                        "SELECT cardname, damage FROM cardSchema " +
                         "WHERE id = @p1",
                         conn);
                     getCardCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, trade.CardToTradeId);
-                    getCardCmd.Parameters.Add(new NpgsqlParameter("name", NpgsqlDbType.Varchar)
+                    getCardCmd.Parameters.Add(new NpgsqlParameter("cardname", NpgsqlDbType.Varchar)
                         {Direction = ParameterDirection.Output});
                     getCardCmd.Parameters.Add(new NpgsqlParameter("damage", NpgsqlDbType.Double)
                         {Direction = ParameterDirection.Output});
@@ -542,7 +542,40 @@ namespace MTCG.Components.DataManagement.DB
 
         public bool AddTradingDeal(string username, StoreSchema deal)
         {
-            throw new System.NotImplementedException();
+            using var conn = Connection(connString);
+            var transaction = BeginTransaction(conn);
+            if (transaction == null) return false;
+            try
+            {
+                using var getCardCmd = new NpgsqlCommand(
+                    "SELECT deck FROM cardSchema " +
+                    "WHERE id = @p1 AND username = @p2",
+                    conn);
+                getCardCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, deal.CardToTradeId);
+                getCardCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, username);
+                getCardCmd.Parameters.Add(new NpgsqlParameter("deck", NpgsqlDbType.Boolean)
+                    {Direction = ParameterDirection.Output});
+                getCardCmd.ExecuteNonQuery();
+
+                if (!(getCardCmd.Parameters[2].Value is bool deck) || deck) return Rollback(transaction);
+                
+                using var addTradeCmd = new NpgsqlCommand(
+                    "INSERT INTO storeSchema " + 
+                    "VALUES(@p1, @p2, @p3, @p4)",
+                    conn);
+                addTradeCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, deal.Id);
+                addTradeCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, deal.CardToTradeId);
+                addTradeCmd.Parameters.AddWithValue("p3", NpgsqlDbType.Varchar, deal.Wanted);
+                addTradeCmd.Parameters.AddWithValue("p4", NpgsqlDbType.Double, deal.MinimumDamage);
+                addTradeCmd.ExecuteNonQuery();
+                    
+                transaction.Commit();
+                return true;
+            }
+            catch (Exception)
+            {
+                return Rollback(transaction);
+            }
         }
 
         public bool Trade(string username, string myDeal, string otherDeal)

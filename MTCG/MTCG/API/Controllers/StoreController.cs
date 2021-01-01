@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MTCG.Components.DataManagement.DB;
 using MTCG.Components.DataManagement.Schemas;
@@ -83,7 +84,44 @@ namespace MTCG.API.Controllers
             response["tradings"] = tradings;
             return Response.Json(response);
         }
-        
+
+        [Post("/tradings")]
+        public Response AddOrPerformTrade(
+            PathVariable<string> path, AuthDetails? user, Dictionary<string, object>? payload
+        )
+        {
+            if (user is null || payload is null) return Response.Status(Status.BadRequest);
+            if (path.Ok && path.Value != null) return PerformTrade(path.Value, user, payload);
+            return AddTrade(user, payload);
+        }
+
+        private Response AddTrade(AuthDetails user, Dictionary<string, object> payload)
+        {
+            if (payload.ContainsKey("Id") && payload["Id"] is string id &&
+                payload.ContainsKey("CardToTrade") && payload["CardToTrade"] is string tradeId &&
+                payload.ContainsKey("Type") && payload["Type"] is string wanted &&
+                payload.ContainsKey("MinimumDamage") && 
+                Convert.ToDouble(payload.ContainsKey("MinimumDamage")) is var minDamage)
+            {
+                return Response.Status(db.AddTradingDeal(user.Username, new StoreSchema(id, tradeId, wanted, minDamage)) 
+                    ? Status.Created 
+                    : Status.BadRequest);
+            }
+            return Response.Status(Status.BadRequest);
+        }
+
+        private Response PerformTrade(
+            string tradeId, AuthDetails user, Dictionary<string, object> payload
+        )
+        {
+            return Response.Status(Status.Ok);
+        }
+
+        [Delete("/tradings")]
+        public Response DeleteTrade(PathVariable<string> path, AuthDetails? user)
+        {
+            return Response.Status(Status.Ok);
+        }
         
         
     }
