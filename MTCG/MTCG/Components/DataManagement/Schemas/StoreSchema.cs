@@ -3,14 +3,26 @@
     public class StoreSchema
     {
         public string Id { get; set; }
-        public string CardToTrade { get; set; }
+        public string CardToTradeId { get; set; }
+        public string CardToTradeName { get; set; }
+        public double CardToTradeDamage { get; set; }
         public string Wanted { get; set; }
-        public uint MinimumDamage { get; set; }
+        public double MinimumDamage { get; set; }
 
-        public StoreSchema(string id, string cardId, string wanted, uint minimumDamage)
+        public StoreSchema(string id, string cardId, string cardName, double cardDamage, string wanted, double minimumDamage)
         {
             Id = id;
-            CardToTrade = cardId;
+            CardToTradeId = cardId;
+            CardToTradeName = cardName;
+            CardToTradeDamage = cardDamage;
+            Wanted = wanted;
+            MinimumDamage = minimumDamage;
+        }
+        
+        public StoreSchema(string id, string cardId, string wanted, double minimumDamage)
+        {
+            Id = id;
+            CardToTradeId = cardId;
             Wanted = wanted;
             MinimumDamage = minimumDamage;
         }

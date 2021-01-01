@@ -329,6 +329,20 @@ namespace MTCG.Components.DataManagement.DB
             if (transaction is null) return false;
             try
             {
+                foreach (var cardId in cardIds)
+                {
+                    using var storeCheckCmd = new NpgsqlCommand(
+                        "SELECT tradeId from storeSchema " + 
+                        "WHERE tradeId = @p1",
+                        conn);
+                    storeCheckCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, cardId);
+                    storeCheckCmd.Parameters.Add(new NpgsqlParameter("tradeId", NpgsqlDbType.Varchar)
+                        {Direction = ParameterDirection.Output});
+
+                    storeCheckCmd.ExecuteNonQuery();
+                    if (storeCheckCmd.Parameters[1].Value != null) return false;
+                }
+
                 using var cardRevertDeckCmd = new NpgsqlCommand(
                     "UPDATE cardSchema " + 
                     "SET deck = @p1 WHERE username = @p2", 
@@ -478,7 +492,52 @@ namespace MTCG.Components.DataManagement.DB
 
         public List<StoreSchema> GetTradingDeals()
         {
-            throw new System.NotImplementedException();
+            using var conn = Connection(connString);
+            NpgsqlDataReader? dr = null;
+            try
+            {
+                using var cmd = new NpgsqlCommand(
+                    "SELECT * FROM storeSchema ORDER BY elo DESC LIMIT 10",
+                    conn);
+                dr = cmd.ExecuteReader();
+                var tradings = new List<StoreSchema>();
+                while (dr.Read())
+                {
+                    var id = dr.GetString(0);
+                    var trade = dr.GetString(1);
+                    var wanted = dr.GetString(2);
+                    var minDamage = dr.GetDouble(3);
+                    tradings.Add(new StoreSchema(id, trade, wanted, minDamage));
+                }
+                dr.Close();
+                
+                foreach (var trade in tradings)
+                {
+                    using var getCardCmd = new NpgsqlCommand(
+                        "SELECT name, damage FROM cardSchema " +
+                        "WHERE id = @p1",
+                        conn);
+                    getCardCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, trade.CardToTradeId);
+                    getCardCmd.Parameters.Add(new NpgsqlParameter("name", NpgsqlDbType.Varchar)
+                        {Direction = ParameterDirection.Output});
+                    getCardCmd.Parameters.Add(new NpgsqlParameter("damage", NpgsqlDbType.Double)
+                        {Direction = ParameterDirection.Output});
+                    getCardCmd.ExecuteNonQuery();
+                    trade.CardToTradeName = (getCardCmd.Parameters[1].Value is var obj && obj is string name)
+                        ? name
+                        : "Unknown Card";
+                    trade.CardToTradeDamage = (getCardCmd.Parameters[2].Value is var obj2 && obj2 is double damage)
+                        ? damage
+                        : 0.0;
+                }
+                
+                return tradings;
+            }
+            catch (Exception)
+            {
+                dr?.Close();
+                return new List<StoreSchema>();
+            }
         }
 
         public bool AddTradingDeal(string username, StoreSchema deal)

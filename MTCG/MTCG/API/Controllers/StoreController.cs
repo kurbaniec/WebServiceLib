@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using MTCG.Components.DataManagement.DB;
 using MTCG.Components.DataManagement.Schemas;
 using Newtonsoft.Json.Linq;
@@ -36,7 +37,6 @@ namespace MTCG.API.Controllers
             return AcquirePackage(user);
         }
         
-
         private Response AddPackage(AuthDetails user, Dictionary<string, object> payload)
         {
             // Package needs to consists of 5 cards
@@ -66,6 +66,24 @@ namespace MTCG.API.Controllers
             return Response.Status(db.AcquirePackage(user.Username, packageCost) 
                 ? Status.Created : Status.BadRequest);
         }
+
+        [Get("/tradings")]
+        public Response GetTradings(AuthDetails? user)
+        {
+            if (user is null) return Response.Status(Status.BadRequest);
+            var response = new Dictionary<string, object>();
+            var tradingsQuery = db.GetTradingDeals();
+            var tradings 
+                = tradingsQuery.Select(trade => new Dictionary<string, object>
+                {
+                    ["Id"] = trade.Id, ["CardToTrade-Name"] = trade.CardToTradeName,
+                    ["CardToTrade-Damage"] = trade.CardToTradeDamage, 
+                    ["Wanted"] = trade.Wanted, ["Minimum Damage"] = trade.MinimumDamage
+                }).ToList();
+            response["tradings"] = tradings;
+            return Response.Json(response);
+        }
+        
         
         
     }
