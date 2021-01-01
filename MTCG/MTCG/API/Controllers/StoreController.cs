@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MTCG.Battles.Logging;
+using MTCG.Cards.Basis;
+using MTCG.Cards.Basis.Monster;
+using MTCG.Cards.Basis.Spell;
+using MTCG.Cards.Factory;
 using MTCG.Components.DataManagement.DB;
 using MTCG.Components.DataManagement.Schemas;
 using Newtonsoft.Json.Linq;
@@ -123,7 +128,38 @@ namespace MTCG.API.Controllers
                     // Cannot trade with oneself
                     if (trade.Card.UserId != card.UserId)
                     {
-                        
+                        // Check damage requirements
+                        if (card.Damage >= trade.Store.MinimumDamage)
+                        {
+                            // "Print" card
+                            var printedCard = CardFactory.Print(card.Name, card.Damage, new PlayerLog(card.UserId!));
+                            if (printedCard is {})
+                            {
+                                if (trade.Store.Wanted.ToLower() == "monster")
+                                {
+                                    if (printedCard is IMonsterCard)
+                                    {
+                                        
+                                    }
+                                } else if (trade.Store.Wanted.ToLower() == "spell")
+                                {
+                                    if (printedCard is ISpellCard)
+                                    {
+                                        
+                                    }
+                                }
+                                else
+                                {
+                                    // Direct type comparison
+                                    if (string.Equals(
+                                        printedCard.ToString()!, trade.Store.Wanted, 
+                                        StringComparison.CurrentCultureIgnoreCase))
+                                    {
+                                        
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
