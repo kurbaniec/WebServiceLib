@@ -106,7 +106,7 @@ namespace MTCG.API.Controllers
                 payload.ContainsKey("CardToTrade") && payload["CardToTrade"] is string tradeId &&
                 payload.ContainsKey("Type") && payload["Type"] is string wanted &&
                 payload.ContainsKey("MinimumDamage") && 
-                Convert.ToDouble(payload.ContainsKey("MinimumDamage")) is var minDamage)
+                Convert.ToDouble(payload["MinimumDamage"]) is var minDamage)
             {
                 return Response.Status(db.AddTradingDeal(user.Username, new StoreSchema(id, tradeId, wanted, minDamage)) 
                     ? Status.Created 
@@ -126,7 +126,10 @@ namespace MTCG.API.Controllers
                 if (trade is {} && card is {})
                 {
                     // Cannot trade with oneself
-                    if (trade.Card.UserId != card.UserId)
+                    // Cards cannot be in deck and offer card cannot be part of another deal
+                    if (trade.Card.UserId != card.UserId && 
+                        trade.Card.StoreId != null && !trade.Card.InDeck &&
+                        card.StoreId == null && !card.InDeck)
                     {
                         // Check damage requirements
                         if (card.Damage >= trade.Store.MinimumDamage)
@@ -135,27 +138,16 @@ namespace MTCG.API.Controllers
                             var printedCard = CardFactory.Print(card.Name, card.Damage, new PlayerLog(card.UserId!));
                             if (printedCard is {})
                             {
-                                if (trade.Store.Wanted.ToLower() == "monster")
-                                {
-                                    if (printedCard is IMonsterCard)
-                                    {
-                                        
-                                    }
-                                } else if (trade.Store.Wanted.ToLower() == "spell")
-                                {
-                                    if (printedCard is ISpellCard)
-                                    {
-                                        
-                                    }
-                                }
-                                else
-                                {
-                                    // Direct type comparison
-                                    if (string.Equals(
+                                if ((trade.Store.Wanted.ToLower() == "monster" && printedCard is IMonsterCard) ||
+                                    (trade.Store.Wanted.ToLower() == "spell" && printedCard is ISpellCard) ||
+                                    (string.Equals(
                                         printedCard.ToString()!, trade.Store.Wanted, 
-                                        StringComparison.CurrentCultureIgnoreCase))
+                                        StringComparison.CurrentCultureIgnoreCase)))
+                                {
+                                    if (db.Trade(card.UserId!, card.Id,
+                                        trade.Card.UserId!, trade.Card.Id, trade.Store.Id))
                                     {
-                                        
+                                        return Response.Status(Status.NoContent);
                                     }
                                 }
                             }
@@ -163,7 +155,7 @@ namespace MTCG.API.Controllers
                     }
                 }
             }
-            return Response.Status(Status.Ok);
+            return Response.Status(Status.BadRequest);
         }
 
         [Delete("/tradings")]

@@ -23,7 +23,11 @@ namespace MTCG.Components.DataManagement.DB
         Trade? GetTradingDeal(string id);
         bool AddTradingDeal(string username, StoreSchema deal);
         bool DeleteTradingDeal(string username, string id);
-        bool Trade(string username, string cardToTrade, string storeId);
+
+        bool Trade(
+            string cardUser, string cardOffer,
+            string storeUser, string cardToTrade, string storeId
+        );
         bool AddBattleResultModifyEloAndGiveCoins(
             string playerA, string playerB, string log, bool draw, 
             string winner = "", string looser = "", 
