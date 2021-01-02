@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace MTCG.Battles.Basis
 {
+    /// <summary>
+    /// Data class that represent a battle result.
+    /// </summary>
     public class BattleResult
     {
         public bool Draw { get; }

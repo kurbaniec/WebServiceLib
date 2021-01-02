@@ -4,6 +4,10 @@ using MTCG.Cards.Basis;
 
 namespace MTCG.Battles.Player
 {
+    /// <summary>
+    /// Concrete implementation of <c>IPlayer</c>.
+    /// Represents a player of a <c>Battle</c>.
+    /// </summary>
     public class Player : IPlayer
     {
         public string Username { get; }
@@ -27,21 +31,39 @@ namespace MTCG.Battles.Player
             rng = new Random();
         }
 
+        /// <summary>
+        /// Add a deck of cards that will be used for the battle.
+        /// </summary>
+        /// <param name="cards"></param>
         public void AddDeck(List<ICard> cards)
         {
             deck.AddRange(cards);
         }
 
+        /// <summary>
+        /// Add a single card to the existing deck.
+        /// </summary>
+        /// <param name="card"></param>
         public void AddToDeck(ICard card)
         {
             deck.Add(card);
         }
 
+        /// <summary>
+        /// Remove a concrete card from the deck.
+        /// </summary>
+        /// <param name="card"></param>
         public void RemoveFromDeck(ICard card)
         {
             deck.Remove(card);
         }
 
+        /// <summary>
+        /// Get a random card from the deck.
+        /// </summary>
+        /// <returns>
+        /// Returns a random card that is a member of the current deck.
+        /// </returns>
         public ICard GetRandomCard()
         {
             // Random list access

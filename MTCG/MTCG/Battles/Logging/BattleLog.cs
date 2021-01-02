@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
 using MTCG.Cards.DamageUtil;
 
 namespace MTCG.Battles.Logging
 {
+    /// <summary>
+    /// Concrete implementation for <c>IBattleLog</c>.
+    /// Used to log battles.
+    /// </summary>
     public class BattleLog : IBattleLog
     {
         private readonly Dictionary<string, object> log = new Dictionary<string, object>();
@@ -13,6 +15,14 @@ namespace MTCG.Battles.Logging
         private IPlayerLog playerA = null!;
         private IPlayerLog playerB = null!;
 
+        /// <summary>
+        /// Used to generate <c>IPlayerLog</c>'s that will be used by the user cards.
+        /// </summary>
+        /// <param name="playerAName"></param>
+        /// <param name="playerBName"></param>
+        /// <returns>
+        /// Pair of <c>IPlayerLog</c>'s corresponding to the given usernames
+        /// </returns>
         public (IPlayerLog, IPlayerLog) GetPlayerLogs(string playerAName, string playerBName)
         {
             playerA = new PlayerLog(playerAName);
@@ -20,6 +30,13 @@ namespace MTCG.Battles.Logging
             return (playerA, playerB);
         }
 
+        /// <summary>
+        /// Used to log a finished round.
+        /// </summary>
+        /// <param name="playerADamage"></param>
+        /// <param name="playerBDamage"></param>
+        /// <param name="cardsLeftA"></param>
+        /// <param name="cardsLeftB"></param>
         public void RoundLog(IDamage playerADamage, IDamage playerBDamage, int cardsLeftA, int cardsLeftB)
         {
             if (!(playerA is { } a) || !(playerB is { } b)) return;
@@ -56,6 +73,12 @@ namespace MTCG.Battles.Logging
             playerB.Clear();
         }
 
+        /// <summary>
+        /// Used to log a finished game.
+        /// </summary>
+        /// <param name="draw"></param>
+        /// <param name="winner"></param>
+        /// <param name="looser"></param>
         public void ResultLog(bool draw, string winner = "", string looser = "")
         {
             if (draw)
@@ -71,6 +94,13 @@ namespace MTCG.Battles.Logging
             }
         }
 
+        /// <summary>
+        /// Method used to acquire the log of the battle as a Dictionary, that
+        /// is convenient to parse to JSON.
+        /// </summary>
+        /// <returns>
+        /// Log of the battle as a Dictionary
+        /// </returns>
         public Dictionary<string, object> GetLog()
         {
             return log;

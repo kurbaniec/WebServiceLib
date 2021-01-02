@@ -4,6 +4,9 @@ using MTCG.Cards.DamageUtil;
 
 namespace MTCG.Cards.Basis.Monster
 {
+    /// <summary>
+    /// Enum that lists all possible monster types.
+    /// </summary>
     public enum MonsterType
     {
         Goblin,
@@ -17,10 +20,20 @@ namespace MTCG.Cards.Basis.Monster
         SpaceMarine,
     }
     
+    /// <summary>
+    /// Utility class for <c>MonsterType</c>.
+    /// </summary>
     // Extension class for enum
     // See: https://stackoverflow.com/a/5985710/12347616
     static class MonsterTypeMethods
     {
+        /// <summary>
+        /// Get prettified string representation of a <c>MonsterType</c>.
+        /// </summary>
+        /// <param name="mt"></param>
+        /// <returns>
+        /// String representation of a <c>MonsterType</c>.
+        /// </returns>
         public static string GetString(this MonsterType mt)
         {
             // Get name of MonsterType as string
@@ -34,6 +47,13 @@ namespace MTCG.Cards.Basis.Monster
             return prettified ?? name;
         }
 
+        /// <summary>
+        /// Get default <c>DamageType</c> of a <c>MonsterType</c>.
+        /// </summary>
+        /// <param name="mt"></param>
+        /// <returns>
+        /// Default <c>DamageType</c> of a <c>MonsterType</c> as string
+        /// </returns>
         public static string GetDefaultDamageType(this MonsterType mt)
         {
             string damageType;
@@ -62,6 +82,13 @@ namespace MTCG.Cards.Basis.Monster
             return damageType;
         }
         
+        /// <summary>
+        /// Get <c>MonsterType</c> from a given string.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>
+        /// Concrete <c>MonsterType</c> enum value or null.
+        /// </returns>
         public static MonsterType? GetType(string type)
         {
             if (Enum.TryParse(type, out MonsterType enumType)) return enumType;

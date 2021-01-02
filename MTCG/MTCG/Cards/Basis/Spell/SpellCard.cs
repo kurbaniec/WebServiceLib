@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using MTCG.Battles;
 using MTCG.Battles.Logging;
-using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.DamageUtil;
-using MTCG.Cards.Effects;
 using MTCG.Cards.Specialities;
 
 namespace MTCG.Cards.Basis.Spell
 {
+    /// <summary>
+    /// Represents a concrete spell card.
+    /// </summary>
     public class SpellCard : ICard, ISpellCard
     {
         public decimal Damage { get; set; }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using MTCG.Battles;
+﻿using System.Collections.Generic;
 using MTCG.Battles.Logging;
 using MTCG.Cards.Basis.Spell;
 using MTCG.Cards.DamageUtil;
@@ -8,6 +6,9 @@ using MTCG.Cards.Specialities;
 
 namespace MTCG.Cards.Basis
 {
+    /// <summary>
+    /// Interface that describes a card that is used in a <c>IBattle</c>s.
+    /// </summary>
     public interface ICard
     {
         decimal Damage { get; set; }
@@ -15,6 +16,13 @@ namespace MTCG.Cards.Basis
         IEnumerable<ISpeciality> Specialities { get; }
         IPlayerLog Log { get; set;  }
 
+        /// <summary>
+        /// Calculate damage of a card in a round of a battle.
+        /// This considers base and speciality damage and
+        /// specialities because of card relations.
+        /// </summary>
+        /// <param name="other">Opponent's card</param>
+        /// <returns></returns>
         IDamage CalculateDamage(ICard other)
         {
             Log.AddNewCardLog(this.ToString()!);

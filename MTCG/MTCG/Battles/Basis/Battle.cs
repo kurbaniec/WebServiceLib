@@ -3,6 +3,10 @@ using MTCG.Battles.Player;
 
 namespace MTCG.Battles.Basis
 {
+    /// <summary>
+    /// Concrete implementation of the battle logic for the
+    /// Monster Trading Cards Game.
+    /// </summary>
     public class Battle : IBattle
     {
         private readonly IPlayer playerA;
@@ -16,6 +20,12 @@ namespace MTCG.Battles.Basis
             this.log = log;
         }
         
+        /// <summary>
+        /// Perform a Monster Trading Cards Game battle.
+        /// </summary>
+        /// <returns>
+        /// <c>BattleResult</c> of the battle
+        /// </returns>
         public BattleResult ProcessBattle()
         {
             for (var i = 0; i < 100; i++)
