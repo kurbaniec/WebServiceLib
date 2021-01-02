@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using MTCG.Components.DataManagement.DB;
@@ -10,6 +9,9 @@ using WebService_Lib.Server;
 
 namespace MTCG.API.Security
 {
+    /// <summary>
+    /// Security config that manages endpoint access and user management.
+    /// </summary>
     [WebService_Lib.Attributes.Security]
     public class SecurityConfig : ISecurity
     {
@@ -18,14 +20,13 @@ namespace MTCG.API.Security
 
         private readonly SHA512 hasher = new SHA512Managed();
         
+        private readonly HashSet<string> tokens = new HashSet<string>();
+        
         public AuthDetails AuthDetails(string token)
         {
             var username = token.Substring(0, token.Length - 10);
             return new AuthDetails(username, token);
         }
-        
-        private readonly HashSet<string> tokens = new HashSet<string>();
-
         public bool Authenticate(string token) => tokens.Contains(token);
         public (bool, string) Register(string username, string password)
         {
@@ -51,10 +52,9 @@ namespace MTCG.API.Security
             }},
             {Method.Post, new List<string>() {"/packages", "/transactions/packages", "/battles", "/tradings"}},
             {Method.Put, new List<string>() {"/deck", "/users"}},
-            {Method.Patch, new List<string>() {}},
+            {Method.Patch, new List<string>()},
             {Method.Delete, new List<string>() {"/tradings"}},
         };
-
         public bool CheckCredentials(string username, string password)
         {
             var check = db.GetUser(username);
@@ -62,6 +62,15 @@ namespace MTCG.API.Security
             return GenerateHash(password) == check.Password;
         }
 
+        /// <summary>
+        /// Generate a hashed password
+        /// </summary>
+        /// <param name="password">
+        /// Password to be hashed
+        /// </param>
+        /// <returns>
+        /// Hash representation of the password.
+        /// </returns>
         private string GenerateHash(string password)
         {
             // Calculate hash
@@ -72,7 +81,6 @@ namespace MTCG.API.Security
             string hash = string.Empty;
             var hashBuffer = hasher.ComputeHash(Encoding.ASCII.GetBytes(password));
             foreach (var b in hashBuffer) hash += b.ToString("x2");
-            //return Encoding.ASCII.GetString(hashBuffer, 0, hashBuffer.Length);
             return hash;
         }
     }

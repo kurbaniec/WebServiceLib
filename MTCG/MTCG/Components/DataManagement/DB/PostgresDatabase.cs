@@ -507,7 +507,7 @@ namespace MTCG.Components.DataManagement.DB
             try
             {
                 using var cmd = new NpgsqlCommand(
-                    "SELECT * FROM statsSchema ORDER BY elo DESC LIMIT 10",
+                    "SELECT * FROM statsSchema ORDER BY elo DESC LIMIT 100",
                     conn);
                 dr = cmd.ExecuteReader();
                 var stats = new List<StatsSchema>();
@@ -1154,20 +1154,6 @@ namespace MTCG.Components.DataManagement.DB
             }
             return null;
         }
-
-        /**
-        // TODO Remove for debug only
-        public void DropMTCG()
-        {
-            string connString = $"Server={conn.Host};Port={conn.Port};User Id=postgres;Password=postgres;";
-            conn.Close();
-            conn = new NpgsqlConnection(connString);
-            // Open General connection
-            conn.Open();
-            using var reset = new NpgsqlCommand("DROP DATABASE mtcg", conn);
-            reset.ExecuteNonQuery();
-            Environment.Exit(1);
-        }*/
 
         private static NpgsqlConnection Connection(string connString)
         {

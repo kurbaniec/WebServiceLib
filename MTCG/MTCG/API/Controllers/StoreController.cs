@@ -16,15 +16,23 @@ using WebService_Lib.Server;
 
 namespace MTCG.API.Controllers
 {
+    /// <summary>
+    /// <c>Controller</c> class that manages packages and trade deals.
+    /// </summary>
     [Controller]
     public class StoreController
     {
-        [Autowired]
-        private readonly AuthCheck auth = null!;
-
         [Autowired] 
         private readonly PostgresDatabase db = null!;
         
+        /// <summary>
+        /// Endpoint used by admins to add a new package from the given cards.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="payload"></param>
+        /// <returns>
+        /// Returns status code 201 (Created) on valid requests
+        /// </returns>
         [Post("/packages")]
         public Response AddPackages(AuthDetails? user, Dictionary<string, object>? payload)
         {
@@ -32,15 +40,6 @@ namespace MTCG.API.Controllers
             if (!(user is { } userDetails) || payload == null)
                 return Response.Status(Status.BadRequest);
             return AddPackage(user, payload);
-        }
-        
-        [Post("/transactions/packages")]
-        public Response AcquirePackages(AuthDetails? user)
-        {
-            // Check parameters
-            if (!(user is { } userDetails) )
-                return Response.Status(Status.BadRequest);
-            return AcquirePackage(user);
         }
         
         private Response AddPackage(AuthDetails user, Dictionary<string, object> payload)
@@ -61,6 +60,23 @@ namespace MTCG.API.Controllers
             return Response.Status(result ? Status.Created : Status.Conflict);
         }
         
+        /// <summary>
+        /// Endpoint used by users to acquire new cards through packages.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="payload"></param>
+        /// <returns>
+        /// Returns status code 201 (Created) on valid requests
+        /// </returns>
+        [Post("/transactions/packages")]
+        public Response AcquirePackages(AuthDetails? user)
+        {
+            // Check parameters
+            if (!(user is { } userDetails) )
+                return Response.Status(Status.BadRequest);
+            return AcquirePackage(user);
+        }
+        
         private Response AcquirePackage(AuthDetails user)
         {
             var packageCost = 5;
@@ -73,6 +89,13 @@ namespace MTCG.API.Controllers
                 ? Status.Created : Status.BadRequest);
         }
 
+        /// <summary>
+        /// Endpoints used by users to query trading deals.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns>
+        /// JSON representation of all trading deals
+        /// </returns>
         [Get("/tradings")]
         public Response GetTradings(AuthDetails? user)
         {
@@ -90,6 +113,16 @@ namespace MTCG.API.Controllers
             return Response.Json(response);
         }
 
+        /// <summary>
+        /// Endpoint used by users to add or perform a trading deal.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="user"></param>
+        /// <param name="payload"></param>
+        /// <returns>
+        /// Addition of trading deals returns a status code of 201 (Created),
+        /// a valid trade deals returns a status code of 204 (No Content)
+        /// </returns>
         [Post("/tradings")]
         public Response AddOrPerformTrade(
             PathVariable<string> path, AuthDetails? user, Dictionary<string, object>? payload
@@ -158,6 +191,14 @@ namespace MTCG.API.Controllers
             return Response.Status(Status.BadRequest);
         }
 
+        /// <summary>
+        /// Endpoint used by users to delete own ongoing trading deals.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="user"></param>
+        /// <returns>
+        /// A successful deletion returns a status code of 204 (No Content)
+        /// </returns>
         [Delete("/tradings")]
         public Response DeleteTrade(PathVariable<string> path, AuthDetails? user)
         {

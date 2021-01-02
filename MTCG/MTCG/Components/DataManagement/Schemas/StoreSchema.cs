@@ -1,4 +1,6 @@
-﻿namespace MTCG.Components.DataManagement.Schemas
+﻿using System;
+
+namespace MTCG.Components.DataManagement.Schemas
 {
     public class StoreSchema
     {
@@ -25,6 +27,7 @@
             CardToTradeId = cardId;
             Wanted = wanted;
             MinimumDamage = minimumDamage;
+            CardToTradeName = string.Empty;
         }
     }
 }

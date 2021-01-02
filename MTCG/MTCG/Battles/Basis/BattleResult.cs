@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MTCG.Battles.Basis
 {
@@ -21,6 +22,8 @@ namespace MTCG.Battles.Basis
         {
             Draw = true;
             Log = log;
+            Winner = string.Empty;
+            Looser = string.Empty;
         }
     }
 }

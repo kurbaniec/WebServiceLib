@@ -1,4 +1,6 @@
-﻿namespace MTCG.Components.DataManagement.Schemas
+﻿using System;
+
+namespace MTCG.Components.DataManagement.Schemas
 {
     public class StatsSchema
     {
@@ -34,6 +36,9 @@
             Wins = wins;
             Looses = looses;
             Draws = draws;
+            Realname = string.Empty;
+            Bio = string.Empty;
+            Image = string.Empty;
         }
         
         public StatsSchema(

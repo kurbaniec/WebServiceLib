@@ -9,6 +9,9 @@ using WebService_Lib.Server;
 
 namespace MTCG.API.Controllers
 {
+    /// <summary>
+    /// <c>Controller</c> class that manages users.
+    /// </summary>
     [Controller]
     public class UserController
     {
@@ -18,6 +21,13 @@ namespace MTCG.API.Controllers
         [Autowired] 
         private readonly PostgresDatabase db = null!;
         
+        /// <summary>
+        /// Endpoint used to register users (and first admin account).
+        /// </summary>
+        /// <param name="payload"></param>
+        /// <returns>
+        /// Successful creation returns a status code of 201 (Created).
+        /// </returns>
         [Post("/users")]
         public Response Register(Dictionary<string, object>? payload)
         {
@@ -30,6 +40,13 @@ namespace MTCG.API.Controllers
             return !result.Item1 ? Response.Status(Status.Conflict) : Response.PlainText(result.Item2, Status.Created);
         }
 
+        /// <summary>
+        /// Endpoint used by users to login into the system.
+        /// </summary>
+        /// <param name="payload"></param>
+        /// <returns>
+        /// Successful login returns the access token as plaintext.
+        /// </returns>
         [Post("/sessions")]
         public Response Login(Dictionary<string, object>? payload)
         {
@@ -42,6 +59,13 @@ namespace MTCG.API.Controllers
             return result.Item1 ? Response.PlainText(result.Item2!) : Response.Status(Status.Unauthorized);
         }
 
+        /// <summary>
+        /// Endpoint used by users to query all of their acquired cards.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns>
+        /// JSON representation of all acquired cards
+        /// </returns>
         [Get("/cards")]
         public Response GetCards(AuthDetails? user)
         {
@@ -57,6 +81,15 @@ namespace MTCG.API.Controllers
             return Response.Json(response); 
         }
         
+        /// <summary>
+        /// Endpoint used by users to query their current deck.
+        /// Supports JSON (default) and plaintext representation.
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="user"></param>
+        /// <returns>
+        /// JSON or plaintext representation of user deck
+        /// </returns>
         [Get("/deck")]
         public Response GetDeck(RequestParam param, AuthDetails? user)
         {
@@ -85,6 +118,14 @@ namespace MTCG.API.Controllers
             return Response.Json(jsonResponse); 
         }
 
+        /// <summary>
+        /// Endpoint used by users to configure their deck with given cards.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="payload"></param>
+        /// <returns>
+        /// Returns the deck as described in <c>GetDeck</c>
+        /// </returns>
         [Put("/deck")]
         public Response ConfigureDeck(AuthDetails? user, Dictionary<string, object>? payload)
         {
@@ -110,6 +151,14 @@ namespace MTCG.API.Controllers
             return Response.Json(response, status);
         }
 
+        /// <summary>
+        /// Endpoint used by users to query their game statistics.
+        /// Also returns available coins.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns>
+        /// JSON representation of the user stats
+        /// </returns>
         [Get("/stats")]
         public Response GetStats(AuthDetails? user)
         {
@@ -125,6 +174,15 @@ namespace MTCG.API.Controllers
             return Response.Json(response);
         }
 
+        /// <summary>
+        /// Endpoint used by users query their profile page.
+        /// PathVariable and requesting user must match in order to work.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="user"></param>
+        /// <returns>
+        /// JSON representation of the user profile
+        /// </returns>
         [Get("/users")]
         public Response GetUserProfile(PathVariable<string> username, AuthDetails? user)
         {
@@ -140,6 +198,16 @@ namespace MTCG.API.Controllers
             return Response.Json(response);
         }
 
+        /// <summary>
+        /// Endpoint used by users to update their profile page.
+        /// PathVariable and requesting user must match in order to work.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="user"></param>
+        /// <param name="payload"></param>
+        /// <returns>
+        /// Returns the user profile as described in <c>GetUserProfile</c>
+        /// </returns>
         [Put("/users")]
         public Response UpdateUserProfile(
             PathVariable<string> username, AuthDetails? user, Dictionary<string, object>? payload
@@ -156,6 +224,13 @@ namespace MTCG.API.Controllers
                 Response.Status(Status.BadRequest);
         }
 
+        /// <summary>
+        /// Endpoints used by users to query the overall game scoreboard.
+        /// Scoreboard is sorted by Elo.
+        /// </summary>
+        /// <returns>
+        /// JSON representation of the scoreboard
+        /// </returns>
         [Get("/score")]
         public Response GetScoreboard()
         {
