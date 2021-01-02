@@ -711,7 +711,7 @@ namespace MTCG.Components.DataManagement.DB
                 deleteDealCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Varchar, id);
                 deleteDealCmd.Parameters.AddWithValue("p2", NpgsqlDbType.Varchar, username);
                 deleteDealCmd.ExecuteNonQuery();
-                
+
                 transaction.Commit();
                 return true;
             }
