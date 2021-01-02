@@ -23,7 +23,6 @@ namespace MTCG.Components.DataManagement.DB
         Trade? GetTradingDeal(string id);
         bool AddTradingDeal(string username, StoreSchema deal);
         bool DeleteTradingDeal(string username, string id);
-
         bool Trade(
             string cardUser, string cardOffer,
             string storeUser, string cardToTrade, string storeId
@@ -34,5 +33,7 @@ namespace MTCG.Components.DataManagement.DB
             int eloWin = 30, int eloLoose = 50,
             int coinsWin = 2, int coinsDraw = 1
         );
+        List<BattleSchema> GetBattleHistory(int page);
+        string? GetBattleLog(int battleId);
     }
 }

@@ -45,7 +45,10 @@ namespace MTCG.API.Security
         public void RevokeToken(string token) => tokens.Remove(token);
         Dictionary<Method, List<string>> ISecurity.SecurePaths() => new Dictionary<Method, List<string>>()
         {
-            {Method.Get, new List<string>() {"/cards", "/deck", "/users", "/stats", "/score", "/tradings"}},
+            {Method.Get, new List<string>()
+            {
+                "/cards", "/deck", "/users", "/stats", "/score", "/tradings", "/admin/battles", "/admin/battle"
+            }},
             {Method.Post, new List<string>() {"/packages", "/transactions/packages", "/battles", "/tradings"}},
             {Method.Put, new List<string>() {"/deck", "/users"}},
             {Method.Patch, new List<string>() {}},

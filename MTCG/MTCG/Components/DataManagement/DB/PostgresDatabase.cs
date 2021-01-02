@@ -879,6 +879,66 @@ namespace MTCG.Components.DataManagement.DB
             }
         }
 
+        public List<BattleSchema> GetBattleHistory(int page)
+        {
+            using var conn = Connection(connString);
+            NpgsqlDataReader? dr = null;
+            try
+            {
+                using var getBattlesCmd = new NpgsqlCommand(
+                    "SELECT id, playerA, playerB, draw, winner, looser FROM battleSchema " + 
+                    "LIMIT 100 OFFSET @p1",
+                    conn);
+                getBattlesCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Integer, 100 * page);
+                dr = getBattlesCmd.ExecuteReader();
+                var battles = new List<BattleSchema>();
+                while (dr.Read())
+                {
+                    var id = dr.GetInt32(0);
+                    var playerA = dr.GetString(1);
+                    var playerB = dr.GetString(2);
+                    var draw = dr.GetBoolean(3);
+                    if (draw)
+                        battles.Add(new BattleSchema(id, playerA, playerB));
+                    else
+                    {
+                        var winner = dr.GetString(4);
+                        var looser = dr.GetString(5);
+                        battles.Add(new BattleSchema(id, playerA, playerB, winner, looser));
+                    }
+                }
+                dr.Close();
+                return battles;
+            }
+            catch (Exception)
+            {
+                dr?.Close();
+                return new List<BattleSchema>();
+            }
+        }
+
+        public string? GetBattleLog(int battleId)
+        {
+            using var conn = Connection(connString);
+            try
+            {
+                using var getBattleLogCmd = new NpgsqlCommand(
+                    "SELECT log FROM battleSchema WHERE id = @p1",
+                    conn);
+                getBattleLogCmd.Parameters.AddWithValue("p1", NpgsqlDbType.Integer, battleId);
+                getBattleLogCmd.Parameters.Add(new NpgsqlParameter("log", NpgsqlDbType.Text)
+                    {Direction = ParameterDirection.Output});
+                getBattleLogCmd.ExecuteNonQuery();
+
+                return getBattleLogCmd.Parameters[1].Value as string;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            
+        }
+
         public void CreateDatabaseIfNotExists()
         {
             // Get DB config and read it
@@ -886,7 +946,6 @@ namespace MTCG.Components.DataManagement.DB
             // And: https://docs.microsoft.com/en-us/dotnet/api/system.io.file.exists?view=net-5.0
             string user, password, ip;
             long port;
-
             try
             {
                 string runningPath = AppDomain.CurrentDomain.BaseDirectory!;

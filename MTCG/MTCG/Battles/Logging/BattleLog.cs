@@ -29,8 +29,8 @@ namespace MTCG.Battles.Logging
             };
             var result = new List<string>
             {
-                $"{a.CardName}\tVS\t{b.CardName}", 
-                $"{playerADamage.ToString()}\tVS\t{playerBDamage.ToString()}"
+                $"{a.CardName} VS {b.CardName}", 
+                $"{playerADamage.ToString()} VS {playerBDamage.ToString()}"
             };
             if (playerADamage.CompareTo(playerBDamage) == 0)
             {

@@ -52,14 +52,10 @@ namespace MTCG.Components.Service
                 {
                     if (playerPool.Count >= 2)
                     {
-                        Console.WriteLine("HERE!");
                         // Get players from queue
                         IPlayer? playerA = null, playerB = null;
                         while (playerA == null) playerPool.TryDequeue(out playerA);
                         while (playerB == null) playerPool.TryDequeue(out playerB);
-                        //if (!playerPool.TryDequeue(out var playerA) || !playerPool.TryDequeue(out var playerB)) continue;
-                        Console.WriteLine("NOT HERE!");
-                        
                         // Check if players are different 
                         if (playerA.Username == playerB.Username)
                         {
@@ -143,13 +139,10 @@ namespace MTCG.Components.Service
 
         public Dictionary<string, object>? Play(string username)
         {
-            Console.WriteLine("A");
             var deck = db.GetUserDeck(username);
             if (deck.Count == 0) return null;
-            Console.WriteLine("B");
             IPlayer player = new Player(username);
             playerPool.Enqueue(player);
-            Console.WriteLine("C");
             while (player.BattleResult is null)
             {
                 Thread.Sleep(30);
