@@ -4,6 +4,9 @@ using Newtonsoft.Json.Linq;
 
 namespace MTCG.Components.DataManagement.Schemas
 {
+    /// <summary>
+    /// Data class that represent a card.
+    /// </summary>
     public class CardSchema
     {
         public string Id { get; set; }
@@ -41,6 +44,13 @@ namespace MTCG.Components.DataManagement.Schemas
             InDeck = inDeck;
         }
 
+        /// <summary>
+        /// Used to parse a JSON request of cards into a list of <c>CardSchema</c>s.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns>
+        /// List of <c>CardSchema</c>s
+        /// </returns>
         public static List<CardSchema> ParseRequest(JArray array)
         {
             // Parse Cards

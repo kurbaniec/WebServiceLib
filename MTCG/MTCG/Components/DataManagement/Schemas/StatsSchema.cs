@@ -2,6 +2,9 @@
 
 namespace MTCG.Components.DataManagement.Schemas
 {
+    /// <summary>
+    /// Data class that represent user stats and additional information (coins, profile page).
+    /// </summary>
     public class StatsSchema
     {
         public string Username { get; set; }

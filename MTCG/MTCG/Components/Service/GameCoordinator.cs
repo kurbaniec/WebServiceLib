@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using MTCG.Battles.Basis;
 using MTCG.Battles.Logging;
 using MTCG.Battles.Player;
-using MTCG.Cards.Basis;
 using MTCG.Cards.Factory;
 using MTCG.Components.DataManagement.DB;
 using Newtonsoft.Json;
@@ -15,13 +14,17 @@ using WebService_Lib.Attributes;
 
 namespace MTCG.Components.Service
 {
+    /// <summary>
+    /// Game Coordinator that is responsible for matchmaking and the processing
+    /// of battles.
+    /// </summary>
     [Component]
     public class GameCoordinator
     {
         [Autowired] 
-        private PostgresDatabase db = null!;
+        private readonly PostgresDatabase db = null!;
 
-        private ConcurrentQueue<IPlayer> playerPool;
+        private readonly ConcurrentQueue<IPlayer> playerPool;
         private bool listening;
         private readonly ConcurrentDictionary<string, Task> tasks;
         private readonly CancellationTokenSource tokenSource;
@@ -37,13 +40,10 @@ namespace MTCG.Components.Service
             autoStart.Start();
         }
 
-        public void ReStart()
-        {
-            if (autoStart.IsAlive) return;
-            autoStart = new Thread(Run);
-            autoStart.Start();
-        }
-
+        /// <summary>
+        /// Matchmaking loop. When two players are in the player pool
+        /// a new match will be processed.
+        /// </summary>
         private void Run()
         {
             while (listening)
@@ -88,6 +88,11 @@ namespace MTCG.Components.Service
             }
         }
 
+        /// <summary>
+        /// Used to process a battle.
+        /// </summary>
+        /// <param name="playerA"></param>
+        /// <param name="playerB"></param>
         private void Process(IPlayer playerA, IPlayer playerB)
         {
             // Get loggers
@@ -137,6 +142,13 @@ namespace MTCG.Components.Service
             
         }
 
+        /// <summary>
+        /// Used by users to enter matchmaking and play a game.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns>
+        /// Returns battle log or error message in form of a dictionary.
+        /// </returns>
         public Dictionary<string, object>? Play(string username)
         {
             var deck = db.GetUserDeck(username);
@@ -149,6 +161,40 @@ namespace MTCG.Components.Service
             }
             return player.BattleResult;
         }
+
+        /// <summary>
+        /// Used to stop the game coordinator.
+        /// </summary>
+        public void Stop()
+        {
+            playerPool.Clear();
+            listening = false;
+            tokenSource.Cancel();
+            foreach (var task in tasks.Values)
+            {
+                if (task.IsCompleted) continue;
+                try
+                {
+                    task.Wait(500);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                    // Prevent TaskCanceledException
+                }
+            }
+            tasks.Clear();
+            autoStart.Join(1000);
+        }
         
+        /// <summary>
+        /// Used to restart the game coordinator.
+        /// </summary>
+        public void ReStart()
+        {
+            if (autoStart.IsAlive) return;
+            autoStart = new Thread(Run);
+            autoStart.Start();
+        }
     }
 }

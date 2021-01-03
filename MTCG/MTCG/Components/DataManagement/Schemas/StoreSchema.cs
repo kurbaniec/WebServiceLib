@@ -2,6 +2,9 @@
 
 namespace MTCG.Components.DataManagement.Schemas
 {
+    /// <summary>
+    /// Data class that represent a trading deal.
+    /// </summary>
     public class StoreSchema
     {
         public string Id { get; set; }

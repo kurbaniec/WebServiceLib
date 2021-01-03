@@ -1,5 +1,8 @@
 ﻿namespace MTCG.Components.DataManagement.Schemas
 {
+    /// <summary>
+    /// Data class that represent a battle.
+    /// </summary>
     public class BattleSchema
     {
         public int Id { get; set; }
