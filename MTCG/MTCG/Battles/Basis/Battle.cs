@@ -1,5 +1,6 @@
 ﻿using MTCG.Battles.Logging;
 using MTCG.Battles.Player;
+using MTCG.Cards.Basis.Monster;
 
 namespace MTCG.Battles.Basis
 {
@@ -39,11 +40,13 @@ namespace MTCG.Battles.Basis
                 {
                     playerA.AddToDeck(cardB);
                     playerB.RemoveFromDeck(cardB);
+                    if (cardA is MonsterCard monsterCard) monsterCard.ApplyEffects();
                 }
                 else if (damageA.CompareTo(damageB) < 0)
                 {
                     playerB.AddToDeck(cardA);
                     playerA.RemoveFromDeck(cardA);
+                    if (cardB is MonsterCard monsterCard) monsterCard.ApplyEffects();
                 }
                 
                 log.RoundLog(damageA, damageB, playerA.CardCount, playerB.CardCount);
@@ -59,6 +62,7 @@ namespace MTCG.Battles.Basis
                     return new BattleResult(playerA.Username, playerB.Username, log.GetLog());
                 }
             }
+            log.ResultLog(true);
             return new BattleResult(log.GetLog());
         }
     }

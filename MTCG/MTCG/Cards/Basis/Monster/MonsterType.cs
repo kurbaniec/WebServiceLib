@@ -43,7 +43,7 @@ namespace MTCG.Cards.Basis.Monster
             // Prettify it (e.g. SpaceMarine => Space Marine
             // See: https://stackoverflow.com/a/36147193/12347616
             // And: https://stackoverflow.com/a/37262742/12347616
-            var prettified = string.Concat(Regex.Split(name, @"(?<!^)(?=[A-Z])"));
+            var prettified = string.Join(" ", Regex.Split(name, @"(?<!^)(?=[A-Z])"));
             return prettified ?? name;
         }
 
