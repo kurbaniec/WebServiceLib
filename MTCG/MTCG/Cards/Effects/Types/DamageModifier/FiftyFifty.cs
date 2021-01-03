@@ -3,11 +3,20 @@ using MTCG.Cards.Basis;
 
 namespace MTCG.Cards.Effects.Types.DamageModifier
 {
+    /// <summary>
+    /// Concrete <c>IEffect</c> and <c>IDamageModifier</c> that
+    /// increased or decreases damage by 2. Hence the name Fifty/Fifty.
+    /// Used by Orks.
+    /// </summary>
     public class FiftyFifty : IEffect, IDamageModifier
     {
         private long damageAdded = 0;
         private readonly Random rng = new Random();
         
+        /// <summary>
+        /// Apply Effect on monster card.
+        /// </summary>
+        /// <param name="self"></param>
         public void Apply(ICard self)
         {
             // Get random value
@@ -21,6 +30,10 @@ namespace MTCG.Cards.Effects.Types.DamageModifier
                 : $"Oi! {self}'s base damage decreased by 2!");
         }
 
+        /// <summary>
+        /// Drop Effect from monster card.
+        /// </summary>
+        /// <param name="self"></param>
         public void Drop(ICard self)
         {
             (this as IDamageModifier).AddDamage(self, -damageAdded);

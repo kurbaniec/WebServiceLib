@@ -1,10 +1,12 @@
-﻿using MTCG.Cards.DamageUtil;
-
-namespace MTCG.Cards.DamageUtil
+﻿namespace MTCG.Cards.DamageUtil
 {
+    /// <summary>
+    /// Utility class to help calculate effective damage based on element type.
+    /// </summary>
     public class WeaponTriangle
     {
         /// <summary>
+        /// Calculate effective damage based on element type.
         /// Holy weapon triangle:
         /// • water -> fire
         /// • fire -> normal

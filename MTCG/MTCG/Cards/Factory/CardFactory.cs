@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using MTCG.Battles;
 using MTCG.Battles.Logging;
 using MTCG.Cards.Basis;
 using MTCG.Cards.Basis.Monster;
@@ -13,8 +12,28 @@ using MTCG.Cards.Specialities.Types.Miss;
 
 namespace MTCG.Cards.Factory
 {
-    public class CardFactory
+    /// <summary>
+    /// Simple Factory used to "print" (=build) cards to use them in battles.
+    /// </summary>
+    public static class CardFactory
     {
+        /// <summary>
+        /// "Print" (=build) a card using their name, damage and logger.
+        /// </summary>
+        /// <param name="fullCardName">
+        /// Name of the card to print, can be a fully qualified name like "FireDragon" or
+        /// one that can be correctly interpreted like "Dragon"
+        /// </param>
+        /// <param name="damage">
+        /// Base damage of the card
+        /// </param>
+        /// <param name="log">
+        /// Player logger used to track card events.
+        /// </param>
+        /// <returns>
+        /// Concrete battle ready card as <c>ICard</c> or null when a invalid or
+        /// unsupported name was given.
+        /// </returns>
         public static ICard? Print(string fullCardName, double damage, IPlayerLog log)
         {
             fullCardName = InferType(fullCardName);
@@ -37,6 +56,15 @@ namespace MTCG.Cards.Factory
             return PrintMonster(damage, (DamageType) type, (MonsterType) monsterType, log);
         }
 
+        /// <summary>
+        /// Internal method used to build spell cards.
+        /// </summary>
+        /// <param name="damage"></param>
+        /// <param name="damageType"></param>
+        /// <param name="log"></param>
+        /// <returns>
+        /// Spell card as <c>ICard</c>
+        /// </returns>
         private static ICard PrintSpell(double damage, DamageType damageType, IPlayerLog log)
         {
             // All spells can't pierce Krakens
@@ -56,6 +84,16 @@ namespace MTCG.Cards.Factory
             return card;
         }
 
+        /// <summary>
+        /// Internal method used to build monster cards.
+        /// </summary>
+        /// <param name="damage"></param>
+        /// <param name="damageType"></param>
+        /// <param name="monsterType"></param>
+        /// <param name="log"></param>
+        /// <returns>
+        /// Monster card as <c>ICard</c>
+        /// </returns>
         private static ICard PrintMonster(
             double damage, DamageType damageType, MonsterType monsterType, IPlayerLog log
         )
@@ -92,6 +130,14 @@ namespace MTCG.Cards.Factory
             return card;
         }
 
+        /// <summary>
+        /// Check if the card name is a fully qualified name like "FireDragon", when not
+        /// try to infer the default element type so "Dragon" becomes "FireDragon".
+        /// </summary>
+        /// <param name="fullCardName"></param>
+        /// <returns>
+        /// Fully qualified card name or same parameter value when name is not supported
+        /// </returns>
         private static string InferType(string fullCardName)
         {
             if (fullCardName.StartsWith("Normal") || fullCardName.StartsWith("Regular") ||
@@ -107,7 +153,13 @@ namespace MTCG.Cards.Factory
             return fullCardName;
         }
         
-
+        /// <summary>
+        /// Split fully qualified card name to a pair of type and name.
+        /// </summary>
+        /// <param name="fullCardName"></param>
+        /// <returns>
+        /// Tuple of the cards type and name or null when the name is invalid
+        /// </returns>
         private static (string, string)? Split(string fullCardName)
         {
             for (var i = 1; i < fullCardName.Length; i++)
