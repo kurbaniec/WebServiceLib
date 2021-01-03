@@ -93,7 +93,7 @@ namespace MTCG.Cards.DamageUtil
 
         public string ToString(string? format, IFormatProvider? formatProvider)
         {
-            return IsInfty ? "∞" : value.ToString(CultureInfo.InvariantCulture);
+            return IsInfty ? "Infinity" : value.ToString(CultureInfo.InvariantCulture);
         }
 
         public override string ToString()

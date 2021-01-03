@@ -36,7 +36,10 @@ namespace MTCG.Battles.Logging
         /// <param name="damage"></param>
         public void AddBaseDamageInfo(decimal damage)
         {
-            Log.Add($"{Username} summons a {CardName} with base damage {damage}");
+            // Use decimal point
+            // See: https://stackoverflow.com/a/4076832/12347616
+            Log.Add($"{Username} summons a {CardName} with base damage " +
+                    $"{damage.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
         }
 
         /// <summary>
@@ -45,7 +48,9 @@ namespace MTCG.Battles.Logging
         /// <param name="damage"></param>
         public void AddWeaponTriangleInfo(decimal damage)
         {
-            Log.Add($"{CardName} has an effective damage of {damage} in this battle");
+            Log.Add($"{CardName} has an effective damage of " +
+                    $"{damage.ToString(System.Globalization.CultureInfo.InvariantCulture)} " +
+                    "in this battle");
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MTCG.Cards.Basis;
 
 namespace MTCG.Battles.Player
@@ -46,6 +47,8 @@ namespace MTCG.Battles.Player
         /// <param name="card"></param>
         public void AddToDeck(ICard card)
         {
+            // Update card log on new card
+            card.Log = deck.First().Log;
             deck.Add(card);
         }
 
