@@ -1120,8 +1120,10 @@ namespace MTCG.Components.DataManagement.DB
             try
             {
                 string runningPath = AppDomain.CurrentDomain.BaseDirectory!;
+                // Platform agnostic path
+                // See: https://stackoverflow.com/a/38428899/12347616
                 string configPath =
-                    $"{Path.GetFullPath(Path.Combine(runningPath!, @"..\..\..\"))}Resources\\dbConfig.json";
+                    $"{Path.GetFullPath(Path.Combine(runningPath!, @$"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"))}Resources{Path.DirectorySeparatorChar}dbConfig.json";
                 if (!File.Exists(configPath)) throw new FileNotFoundException("dbConfig.json not found in Resources folder");
                 
                 string config = File.ReadAllText(configPath);
