@@ -24,11 +24,11 @@ dotnet test
 
 For the integration the application [Postman](https://www.postman.com/) is needed.
 
-The test collection for Postman can be found under `WebService-Test/integration/postman`.
+The test collection for Postman can be found under `WebService-Test/Integration/postman`.
 
 
 
-## `WebService_Lib` Design
+## `WebService_Lib` Design
 
 ![](res/WebService_Lib_UML.png)
 

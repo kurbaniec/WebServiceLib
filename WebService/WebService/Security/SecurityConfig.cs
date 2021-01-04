@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using WebService_Lib;
+using WebService_Lib.Server;
 
 namespace WebService.Security
 {
@@ -25,7 +26,14 @@ namespace WebService.Security
         public string GenerateToken(string username) => username + "-token";
         public void AddToken(string token) => tokens.Add(token);
         public void RevokeToken(string token) => tokens.Remove(token);
-        public List<string> SecurePaths() => new List<string> { "/secret" };
+        public Dictionary<Method, List<string>> SecurePaths() => new Dictionary<Method, List<string>>()
+        {
+            {Method.Delete, new List<string>(){"/secret"}},
+            {Method.Get, new List<string>(){"/secret"}},
+            {Method.Patch, new List<string>(){"/secret"}},
+            {Method.Post, new List<string>(){"/secret"}},
+            {Method.Put, new List<string>(){"/secret"}}
+        };
         public bool CheckCredentials(string username, string password) 
             => users.ContainsKey(username) && users[username] == password;
     }
