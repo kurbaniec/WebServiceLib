@@ -7,7 +7,7 @@ namespace MTCG
     {
         static void Main(string[] args)
         {
-            var service = new SimpleWebService();
+            var service = new SimpleWebService(port: 8080);
             service.Start();
         }
     }
