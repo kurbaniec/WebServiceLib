@@ -5,4 +5,16 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\WebService\WebService-Lib\WebService-Lib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="5.0.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components" />
+  </ItemGroup>
+
 </Project>

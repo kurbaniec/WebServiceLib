@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using WebService_Lib.Server;
 
 namespace WebService_Lib
 {
@@ -16,6 +17,19 @@ namespace WebService_Lib
         /// <param name="token"></param>
         /// <returns>True, when the token is valid, else False</returns>
         public bool Authenticate(string token);
+
+        /// <summary>
+        /// Is used to register new users. When the registration is completed
+        /// without errors, the methods <c>Authenticate</c> and <c>CheckDetails</c>
+        /// should return <c>True</c>.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns>
+        /// A tuple returning the registration status (successful/not successful) and the
+        /// generated access token or <c>""</c> in an error case.
+        /// </returns>
+        public (bool, string) Register(string username, string password);
 
         /// <summary>
         /// Generate a token that can be used to access secured resources through
@@ -54,7 +68,7 @@ namespace WebService_Lib
         /// List of strings that contain the paths to the resources that
         /// should be secured.
         /// </returns>
-        public List<string> SecurePaths();
+        public Dictionary<Method, List<string>> SecurePaths();
 
         /// <summary>
         /// Webservice_Lib's <c>AuthCheck</c> handler uses this method to

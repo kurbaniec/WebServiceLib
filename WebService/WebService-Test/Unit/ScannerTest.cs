@@ -5,6 +5,7 @@ using System.Reflection;
 using NUnit.Framework;
 using WebService_Lib;
 using WebService_Lib.Attributes;
+using WebService_Lib.Server;
 
 namespace WebService_Test.Unit
 {
@@ -30,10 +31,18 @@ namespace WebService_Test.Unit
             }
             private readonly HashSet<string> tokens = new HashSet<string>();
             public bool Authenticate(string token) => tokens.Contains(token);
+            public (bool, string) Register(string username, string password) => (true, GenerateToken("admin"));
             public string GenerateToken(string username) => username + "-token";
             public void AddToken(string token) => tokens.Add(token);
             public void RevokeToken(string token) => tokens.Remove(token);
-            public List<string> SecurePaths() => new List<string> { "/secured" };
+            public Dictionary<Method, List<string>> SecurePaths() => new Dictionary<Method, List<string>>()
+            {
+                {Method.Delete, new List<string>(){"/secured"}},
+                {Method.Get, new List<string>(){"/secured"}},
+                {Method.Patch, new List<string>(){"/secured"}},
+                {Method.Post, new List<string>(){"/secured"}},
+                {Method.Put, new List<string>(){"/secured"}}
+            };
             public bool CheckCredentials(string username, string password) => (username == "admin" && password == "admin");
         }
         
