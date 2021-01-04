@@ -1,5 +1,4 @@
 ﻿using Moq;
-using MTCG.Battles;
 using MTCG.Battles.Logging;
 using MTCG.Cards.Basis;
 using MTCG.Cards.Basis.Monster;

@@ -1,15 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Moq;
 using MTCG.Battles.Basis;
 using MTCG.Battles.Logging;
 using MTCG.Battles.Player;
 using MTCG.Cards.Basis;
 using MTCG.Cards.Basis.Monster;
-using MTCG.Cards.Basis.Spell;
 using MTCG.Cards.DamageUtil;
-using MTCG.Cards.Factory;
-using MTCG.Cards.Specialities.Types.Miss;
 using NUnit.Framework;
 
 namespace MTCG_Test.Unit

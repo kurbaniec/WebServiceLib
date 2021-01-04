@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
 using Moq;
-using MTCG.Battles.Basis;
 using MTCG.Battles.Player;
 using MTCG.Cards.Basis;
-using MTCG.Cards.Basis.Monster;
-using MTCG.Cards.DamageUtil;
 using NUnit.Framework;
 
 namespace MTCG_Test.Unit

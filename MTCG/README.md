@@ -104,9 +104,42 @@ A smaller problem was a design choice from the `WebService`-library. In the secu
 
 ### Unit test design
 
-Like requirements document
+The implemented unit tests are all somewhat connected to the battle and battle logic. Each test suite tests one aspect of the code for example cards or players and uses only related classes, all other ones are mocked with the [Moq](https://github.com/moq/moq4) framework.
 
+My unit tests are usually inspired by the exercise requirements.  The example "*PlayerA: WaterGoblin (10 Damage) vs PlayerB: FireTroll (15 Damage) => Troll defeats Goblin*" becomes following unit test:
 
+```c#
+[OneTimeSetUp]
+public void Setup() => log = new Mock<IPlayerLog>().Object;
+        
+[Test, TestCase(TestName = "Card Damage calculation in Monster fight", Description =
+    "Calculate Damage for a round, in which both cards are Monsters. " +
+    "No Specialities or Effects are in use."
+)]
+public void CalculateDamageMonsters()
+{
+    ICard waterGoblin = new MonsterCard(
+    	10, DamageType.Water, MonsterType.Goblin, new List<ISpeciality>(),
+    	new List<IEffect>(), log 
+    );
+    ICard fireTroll = new MonsterCard(
+    	15, DamageType.Fire, MonsterType.Troll, new List<ISpeciality>(),
+    	new List<IEffect>(), log 
+    );
+
+    var waterGoblinResult = waterGoblin.CalculateDamage(fireTroll).Value;
+    var fireTrollResult = fireTroll.CalculateDamage(waterGoblin).Value;
+
+    Assert.AreEqual(10, waterGoblinResult);
+    Assert.AreEqual(15, fireTrollResult);
+}       
+```
+
+`Specialities` and `Effects` are tested in a similar way. But in their respective test suites the concrete specialties and effects are used with mocked cards.
+
+One test suite that is maybe a bit different to the other ones, is the test suite for the `CardFactory`. The unit tests check if the returned `ICards` matches the given requirements, so that one can be sure that fights are fought with spells and monsters that match specifications.
+
+Other aspects of the code like the database with `PostgresDatabse` or matchmaking with `GameCoordinator` are better tested with the CURL script. I also added two postman collections, one is a straight port of the CURL script, so one can better see and test automatically with the collection runner if the returned responses match, even when no payload is returned like `204 No Content`.  The additional postman collection tests my bonus features (`Effects`, `Space Marine` monsters and a API for admins to fetch battle histories and logs).
 
 ### Time spent
 
@@ -121,6 +154,20 @@ https://github.com/kurbaniec/SWE1-MTCG
 ### Used collections
 
 Mainly used collections:
+
+* `List<T>`
+
+  Convenient collection for general use where one can specify the concrete type and has not to worry about the internal size.
+
+* `Dictionary<string, object>`
+
+  The closest form of a collection that matches a JSON structure in `.NET` (in my opinion).
+
+* `ConcurrentQueue<IPlayer>`
+
+  A queue that resembles a player pool. The concurrent variant is used because players can join in parallel theoretically while the game loop starts battles with two players at the same time (which are removed from the pool).
+
+
 
 
 

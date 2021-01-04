@@ -1,16 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Moq;
-using MTCG.Battles;
 using MTCG.Battles.Logging;
-using MTCG.Cards.Basis;
 using MTCG.Cards.Basis.Monster;
 using MTCG.Cards.Basis.Spell;
 using MTCG.Cards.DamageUtil;
-using MTCG.Cards.Effects;
 using MTCG.Cards.Effects.Types.DamageModifier;
 using MTCG.Cards.Factory;
-using MTCG.Cards.Specialities;
 using MTCG.Cards.Specialities.Types.Destruction;
 using MTCG.Cards.Specialities.Types.Miss;
 using NUnit.Framework;
