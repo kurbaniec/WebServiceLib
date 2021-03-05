@@ -1,20 +1,56 @@
-# SWE1-MTCG
+<div  align="center">
+  <h1>
+      WebServiceLib
+  </h1>
+   <p>
+       Simple REST Web Service library with inversion of control.
+   </p>
+</div>
 
-Project consists of two modules:
 
-## `MTCG` 🃏
+## 📚 About
 
-Implementation of the Monster Trading Cards Game. Game server can be found under `MTCG/MTCG`, tests cases are located under `MTCG/MTCG-Test`.
+`WebServiceLib` makes it easy to create a REST server with the help of a simple *Inversion of Control* container with *Dependency Injection*. 
 
-Learn more about the `MTCG` and read the protocol [here](MTCG/README.md).
+With `WebServiceLib` one can annotate classes with the `[Component]` attribute, so that their are instanced by the library.  Other classes can get these managed classes through injecting them in their fields via the `[Autowired]` attribute.
 
-## `WebService` 🚀
+Endpoints are are managed through classes marked with `[Controller]`. There one can define endpoints with methods that are marked with HTTP-method and path attributes like `[Post("/battles")]`. These methods can have parameters for payloads like `Dictionary<string, object>?` for JSON or just `string?` for plaintext. Additional path variables like  the 1 in `/foo/1` can be accessed through a `PathVariable` parameter, additional information in the format `/foo?id=1` can be accessed through a `PathParam` attribute. User information can be read from an additional `AuthDetails?` parameter.  User information is only available on secured endpoints, which are configured by a security config class annotated with `[Security]`.
 
-Contains the library `WebService_Lib` that provides a simple `REST/HTTP-based WebService`.
+## 🛠 Build 
 
-The directory also contains test cases under `WebService/WebService-Test`and example code for a CRUD message listener under  `WebService/WebService`.
+```
+dotnet build --configuration Release
+```
 
-Learn more about the the `WebService` [here](WebService/README.md).
+## 🚴‍♂️Run
+
+Run CRUD message listener example code
+
+```
+dotnet run --project ./Example/Example.csproj
+```
+
+## 🧪 Test
+
+Run unit tests
+
+```
+dotnet test
+```
+
+For the integration the application [Postman](https://www.postman.com/) is needed.
+
+The test collection for Postman can be found under `WebService-Test/Integration/postman`.
+
+## 🚀Example
+
+A more complex example using the `WebServiceLib` can be found under https://github.com/kurbaniec/SWE1-MTCG.
+
+## `UML` Diagram
+
+![](.res/WebService_Lib_UML.png)
+
+
 
 
 

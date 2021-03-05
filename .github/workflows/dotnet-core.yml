@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: WebService
+        working-directory: .
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
@@ -25,23 +25,3 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Test WebService_Lib
       run: dotnet test --no-restore --verbosity normal --filter 'FullyQualifiedName!~RestServerTest'
-
-  build_mtcg:
-
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: MTCG
-    needs: build_webservice
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.301
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build MTCG
-      run: dotnet build --configuration Release --no-restore
-    - name: Test MTCG
-      run: dotnet test --no-restore --verbosity normal
