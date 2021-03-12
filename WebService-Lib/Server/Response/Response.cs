@@ -18,9 +18,8 @@ namespace WebService_Lib.Server
         public uint StatusCode;
         public string StatusName;
         public string? Payload;
+        public byte[]? Data;
         public string? ContentType;
-
-        public byte[] Data;
 
         private static FileExtensionContentTypeProvider? provider;
 
@@ -77,12 +76,11 @@ namespace WebService_Lib.Server
             this.ContentType = "text/plain; charset=utf-8";
         }
 
-        private Response(string content, string mimeContentType, byte[] data, Status status = Server.Status.Ok)
+        private Response(byte[] content, string mimeContentType, Status status = Server.Status.Ok)
         {
-            this.Data = data;
             this.StatusCode = (uint)status;
             this.StatusName = ((Status) this.StatusCode).ToString().ToUpper();
-            this.Payload = content;
+            this.Data = content;
             this.ContentType = mimeContentType;
         }
 
@@ -138,22 +136,28 @@ namespace WebService_Lib.Server
             return new Response(plainText, customStatus);
         }
 
+        /// <summary>
+        /// Returns a file response with a 200 status.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>Returns a JSON response with a 200 status.</returns>
         public static Response? File(string path)
         {
             return File(path, Server.Status.Ok);
         }
         
+        /// <summary>
+        /// Returns a file response with a custom status.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="customStatus"></param>
+        /// <returns>Returns a plaintext response with a custom status.</returns>
         public static Response? File(string path, Status customStatus)
         {
             if (!System.IO.File.Exists(path)) return null;
             var data = System.IO.File.ReadAllBytes(path);
-            var check = Convert.ToBase64String(System.IO.File.ReadAllBytes(path)).Length;
-            var check2 = new FileInfo(path).Length;
-            
             var mimeType = GetMimeType(path);
-            var content = $"data:{mimeType};charset=utf-8;base64,{Convert.ToBase64String(System.IO.File.ReadAllBytes(path))}";
-            
-            return new Response(content, mimeType, data, customStatus);
+            return new Response(data, mimeType, customStatus);
         }
 
         // See: https://dotnetcoretutorials.com/2018/08/14/getting-a-mime-type-from-a-file-name-in-net-core/
