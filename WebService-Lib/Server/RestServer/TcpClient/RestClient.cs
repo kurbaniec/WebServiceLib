@@ -144,16 +144,33 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                 // See: https://riptutorial.com/dot-net/example/88/sending-a-post-request-with-a-string-payload-using-system-net-webclient
                 // And: https://stackoverflow.com/a/4414118/12347616
                 writer.Write($"Content-Type: {response.ContentType}\r\n");
+                /*
                 //var data = Encoding.UTF8.GetBytes(response.Payload!);
                 //var payload = Encoding.UTF8.GetPreamble().Concat(data).ToArray();
-                var payload = Encoding.UTF8.GetBytes(response.Payload!);
+                var payload = Encoding.Default.GetBytes(response.Payload!);
+                //var payload = response.Payload!;
+                
                 var length = payload.Length;
+                //var length = 381324;
+                //var length = 285992;
                 writer.Write($"Content-Length: {length}\r\n");
                 writer.Write("\r\n");
                 // Send proper string (and not 'System.Byte[}')
                 // See: https://stackoverflow.com/a/10940923/12347616
-                writer.Write(Encoding.UTF8.GetString(payload));
+                writer.Write(Encoding.Default.GetString(payload));
+                //writer.Write(payload);
                 writer.Close();
+                */
+
+                var length = response.Data.Length;
+                writer.Write($"Content-Length: {length}\r\n");
+                writer.Write("\r\n");
+                foreach (var t in response.Data)
+                {
+                    writer.BaseStream.WriteByte(t);
+                }
+                writer.BaseStream.Flush();
+                writer.BaseStream.Close();
             }
         }
 

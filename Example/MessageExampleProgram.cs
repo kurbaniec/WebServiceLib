@@ -1,4 +1,6 @@
-﻿using WebService_Lib;
+﻿using System;
+using System.IO;
+using WebService_Lib;
 
 namespace WebService
 {
@@ -15,6 +17,14 @@ namespace WebService
             // and automatically instantiate both of them.
             // The controller will provide the endpoints which are then used
             // in the internal REST server.
+            
+            string runningPath = AppDomain.CurrentDomain.BaseDirectory!;
+            // Platform agnostic path
+            // See: https://stackoverflow.com/a/38428899/12347616
+            string img =
+                $"{Path.GetFullPath(Path.Combine(runningPath!, @$"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"))}res{Path.DirectorySeparatorChar}doge.jpg";
+            Console.WriteLine($"{img}");
+            
             var service = new SimpleWebService();
             service.Start();
         }

@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.AspNetCore.StaticFiles;
 using Newtonsoft.Json;
 
 namespace WebService_Lib.Server
@@ -16,6 +19,10 @@ namespace WebService_Lib.Server
         public string StatusName;
         public string? Payload;
         public string? ContentType;
+
+        public byte[] Data;
+
+        private static FileExtensionContentTypeProvider? provider;
 
         private Response(uint status)
         {
@@ -70,6 +77,15 @@ namespace WebService_Lib.Server
             this.ContentType = "text/plain; charset=utf-8";
         }
 
+        private Response(string content, string mimeContentType, byte[] data, Status status = Server.Status.Ok)
+        {
+            this.Data = data;
+            this.StatusCode = (uint)status;
+            this.StatusName = ((Status) this.StatusCode).ToString().ToUpper();
+            this.Payload = content;
+            this.ContentType = mimeContentType;
+        }
+
         /// <summary>
         /// Returns the given response with no content.
         /// </summary>
@@ -120,6 +136,35 @@ namespace WebService_Lib.Server
         public static Response PlainText(string plainText, Status customStatus)
         {
             return new Response(plainText, customStatus);
+        }
+
+        public static Response? File(string path)
+        {
+            return File(path, Server.Status.Ok);
+        }
+        
+        public static Response? File(string path, Status customStatus)
+        {
+            if (!System.IO.File.Exists(path)) return null;
+            var data = System.IO.File.ReadAllBytes(path);
+            var check = Convert.ToBase64String(System.IO.File.ReadAllBytes(path)).Length;
+            var check2 = new FileInfo(path).Length;
+            
+            var mimeType = GetMimeType(path);
+            var content = $"data:{mimeType};charset=utf-8;base64,{Convert.ToBase64String(System.IO.File.ReadAllBytes(path))}";
+            
+            return new Response(content, mimeType, data, customStatus);
+        }
+
+        // See: https://dotnetcoretutorials.com/2018/08/14/getting-a-mime-type-from-a-file-name-in-net-core/
+        private static string GetMimeType(string path)
+        {
+            provider ??= new FileExtensionContentTypeProvider();
+            if(!provider.TryGetContentType(path, out string contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
         }
     }
 }
