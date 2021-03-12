@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using WebService_Lib;
 using WebService_Lib.Attributes;
 using WebService_Lib.Attributes.Rest;
@@ -42,6 +44,16 @@ namespace WebService.Controllers
                 {"float", 1.1},
                 {"string", "Hi"}
             });
+        }
+
+        [Get("/img")]
+        public Response Img()
+        {
+            // Get example image
+            string runningPath = AppDomain.CurrentDomain.BaseDirectory!;
+            string imgPath =
+                $"{Path.GetFullPath(Path.Combine(runningPath!, @$"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"))}res{Path.DirectorySeparatorChar}doge.jpg";
+            return Response.File(imgPath) ?? Response.Status(Status.NotFound);
         }
     }
 }
