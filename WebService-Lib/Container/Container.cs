@@ -24,6 +24,11 @@ namespace WebService_Lib
                 // See: https://stackoverflow.com/a/755/12347616
                 var instance = Activator.CreateInstance(component);
                 container.Add(component, instance);
+                
+                // Also associate instance to its (directly) implemented interfaces
+                var interfaces = component.DumpInterface();
+                foreach (var iInterface in interfaces)
+                    container.Add(iInterface, instance);
             }
 
             Autowire(components);
