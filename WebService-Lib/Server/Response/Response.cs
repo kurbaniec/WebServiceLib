@@ -58,22 +58,22 @@ namespace WebService_Lib.Server
             this.ContentType = "application/json";
         }
 
-        private Response(string plainText)
+        private Response(string plainText, string contentType = "text/plain; charset=utf-8")
         {
             this.StatusCode = 200;
             this.StatusName = ((Status) this.StatusCode).ToString().ToUpper();
             this.IsText = true;
             this.Payload = plainText;
-            this.ContentType = "text/plain; charset=utf-8";
+            this.ContentType = contentType;
         }
         
-        private Response(string plainText, Status status)
+        private Response(string plainText, Status status, string contentType = "text/plain; charset=utf-8")
         {
             this.StatusCode = (uint)status;
             this.StatusName = ((Status) this.StatusCode).ToString().ToUpper();
             this.IsText = true;
             this.Payload = plainText;
-            this.ContentType = "text/plain; charset=utf-8";
+            this.ContentType = contentType;
         }
 
         private Response(byte[] content, string mimeContentType, Status status = Server.Status.Ok)
@@ -113,6 +113,27 @@ namespace WebService_Lib.Server
         public static Response Json(Dictionary<string, object> json, Status customStatus)
         {
             return new Response(json, customStatus);
+        }
+
+        /// <summary>
+        /// Returns a JSON response with a 200 status.
+        /// </summary>
+        /// <param name="jsonString"></param>
+        /// <returns>Returns a JSON response with a 200 status.</returns>
+        public static Response Json(string jsonString)
+        {
+            return new Response(jsonString, contentType: "application/json");
+        }
+
+        /// <summary>
+        /// Returns a JSON response with a custom status.
+        /// </summary>
+        /// <param name="jsonString"></param>
+        /// <param name="customStatus"></param>
+        /// <returns>Returns a JSON response with a custom status.</returns>
+        public static Response Json(string jsonString, Status customStatus)
+        {
+            return new Response(jsonString, customStatus, contentType: "application/json");
         }
 
         /// <summary>
