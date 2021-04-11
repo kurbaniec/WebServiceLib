@@ -42,6 +42,8 @@ namespace WebService_Lib.Server.RestServer
         /// <param name="contentType"></param>
         public static void ParsePayload(ref object? payload, string contentType)
         {
+            // Note: Further Parsing is now done in Mapping`s Invoke function.
+            // This makes it possible to parse more effectively to the requirements (See JsonString).
             switch (contentType)
             {
                 case "text/plain":
@@ -54,24 +56,6 @@ namespace WebService_Lib.Server.RestServer
                     if (payload == null || payload.GetType() != typeof(string))
                     {
                         payload = "{}";
-                    }
-                    // Support for single values
-                    if ((payload as string)!.StartsWith("\""))
-                    {
-                        payload = "{\"value\":" + payload + "}";
-                    }
-                    // Support for arrays
-                    if ((payload as string)!.StartsWith("["))
-                    {
-                        payload = "{\"array\":" + payload + "}";
-                    }
-                    try
-                    {
-                        payload = JsonConvert.DeserializeObject<Dictionary<string, object>>((string) payload);
-                    }
-                    catch (Exception)
-                    {
-                        payload = null;
                     }
                     break;
                 default:

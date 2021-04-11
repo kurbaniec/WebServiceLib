@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json;
+using WebService_Lib.Attributes;
 using WebService_Lib.Attributes.Rest;
 using WebService_Lib.Server.Exceptions;
 
@@ -71,13 +73,18 @@ namespace WebService_Lib.Server
                     {
                         mappingsParam.Add(MappingParams.Auth);
                     }
-                    else if (parameter.ParameterType == typeof(string))
+                    else if (parameter.ParameterType == typeof(string) &&
+                             parameter.GetCustomAttribute(typeof(JsonString), true) != null)
                     {
-                        mappingsParam.Add(MappingParams.Text);
+                        mappingsParam.Add(MappingParams.JsonString);
                     }
                     else if (parameter.ParameterType == typeof(Dictionary<string, object>))
                     {
                         mappingsParam.Add(MappingParams.Json);
+                    }
+                    else if (parameter.ParameterType == typeof(string))
+                    {
+                        mappingsParam.Add(MappingParams.Text);
                     }
                     // In order to check generic types you must compare the original generic type,
                     // not the concrete one
@@ -196,8 +203,43 @@ namespace WebService_Lib.Server
                         case MappingParams.Auth:
                             parameters.Add(authDetails);
                             break;
+                        case MappingParams.JsonString:
+                            parameters.Add(payload is string ? payload : null);
+                            break;
                         case MappingParams.Json:
-                            parameters.Add(payload is Dictionary<string, object> ? payload : null);
+                            switch (payload)
+                            {
+                                // Serialize to Dictionary
+                                case string jsonString:
+                                {
+                                    // Support for single values
+                                    if (jsonString.StartsWith("\""))
+                                    {
+                                        payload = "{\"value\":" + payload + "}";
+                                    }
+                                    // Support for arrays
+                                    if (jsonString.StartsWith("["))
+                                    {
+                                        payload = "{\"array\":" + payload + "}";
+                                    }
+                                    try
+                                    {
+                                        payload = JsonConvert.DeserializeObject<Dictionary<string, object>>((string) payload);
+                                    }
+                                    catch (Exception)
+                                    {
+                                        payload = null;
+                                    }
+                                    parameters.Add(payload);
+                                    break;
+                                }
+                                case Dictionary<string, object> _:
+                                    parameters.Add(payload);
+                                    break;
+                                default:
+                                    parameters.Add(null);
+                                    break;
+                            }
                             break;
                         case MappingParams.Text:
                             parameters.Add(payload is string ? payload : null);
@@ -215,9 +257,17 @@ namespace WebService_Lib.Server
                             break;
                     }
                 }
-                // Invoke method
-                // See: https://docs.microsoft.com/en-us/dotnet/api/system.reflection.methodbase.invoke?view=netcore-3.1
-                return (Response)method.Invoke(instance, parameters.ToArray());
+                try
+                {
+                    // Invoke method
+                    // See: https://docs.microsoft.com/en-us/dotnet/api/system.reflection.methodbase.invoke?view=netcore-3.1
+                    return (Response) method.Invoke(instance, parameters.ToArray());
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    return Response.Status(Status.InternalServerError);
+                }
             }
 
         }
@@ -230,6 +280,7 @@ namespace WebService_Lib.Server
             Auth,
             Text,
             Json,
+            JsonString,
             PathVariable,
             RequestParam
         }
