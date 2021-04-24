@@ -18,21 +18,22 @@ namespace WebService_Lib
         private IMapping mapping = null!;
         private AuthCheck? authCheck;
         private RestServer? server;
-        private readonly uint port;
 
-        public SimpleWebService(Assembly programAssembly, uint port = 8080)
+        public static uint Port = 8080;
+
+        public SimpleWebService(Assembly programAssembly, uint? port = null)
         {
             // Convert Assembly to List<Type>
             this.scanner = new Scanner(programAssembly.GetTypes().ToList());
-            this.port = port;
+            if (port is { } portValue) Port = portValue;
         }
         
-        public SimpleWebService(uint port = 8080)
+        public SimpleWebService(uint? port = null)
         {
             // Get Assembly from caller
             Assembly programAssembly = Assembly.GetCallingAssembly();
             this.scanner = new Scanner(programAssembly.GetTypes().ToList());
-            this.port = port;
+            if (port is { } portValue) Port = portValue;
         }
 
         /// <summary>
@@ -49,7 +50,7 @@ namespace WebService_Lib
                 container.Add(authCheck);
             }
             mapping = new Mapping(container.GetObjects(result.Item2));
-            var listener = new RestListener(port);
+            var listener = new RestListener(Port);
             server = new RestServer(listener, mapping, authCheck);
             server.Start();
         }
