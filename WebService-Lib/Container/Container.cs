@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 using WebService_Lib.Attributes;
+using WebService_Lib.Logging;
 
 namespace WebService_Lib
 {
@@ -13,8 +15,8 @@ namespace WebService_Lib
     public class Container : IContainer
     {
         private Dictionary<Type, object> container = new Dictionary<Type, object>();
-
         public Dictionary<Type, object> GetContainer => container;
+        private readonly ILogger logger = WebServiceLogging.CreateLogger<Container>();
 
         public Container(List<Type> components)
         {
@@ -107,9 +109,9 @@ namespace WebService_Lib
                         // Happens later on
                         else if (fType != typeof(AuthCheck))
                         {
-                            Console.Error.WriteLine("Err: Can not find property of type " + fType.FullName +
-                                                    " to autowire field " + field.Name + " in Class " + component.FullName);
-                            Console.Error.WriteLine("Err: Field will not be initialized");
+                            logger.Log(LogLevel.Error, "Can not find property of type " + fType.FullName +
+                                                       " to autowire field " + field.Name + " in Class " + component.FullName);
+                            logger.Log(LogLevel.Error, "Field will not be initialized");
                         }
                     }
                 }
