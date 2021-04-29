@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using WebService_Lib.Attributes;
+using WebService_Lib.Logging;
 
 namespace WebService_Lib
 {
@@ -12,6 +14,8 @@ namespace WebService_Lib
     public class Scanner : IScanner
     {
         private readonly List<Type> programAssembly;
+        private readonly ILogger logger = WebServiceLogging.CreateLogger<Scanner>();
+        
         public Scanner(List<Type> programAssembly)
         {
             this.programAssembly = programAssembly;
@@ -70,8 +74,9 @@ namespace WebService_Lib
                         }
                         if (check != null && !containsInterface)
                         {
-                            Console.Error.WriteLine("Found class annotated with [Security] that " +
-                                                    "does not implement 'ISecurity'\nConfiguration will not be used");
+                            logger.Log(LogLevel.Error, 
+                                "Found class annotated with [Security] that does not implement 'ISecurity'");
+                            logger.Log(LogLevel.Error, "Configuration will not be used");
                             continue;
                         }
                         if (check != null && containsInterface)

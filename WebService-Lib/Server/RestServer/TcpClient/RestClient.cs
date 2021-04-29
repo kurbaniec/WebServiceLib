@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using WebService_Lib.Logging;
 
 namespace WebService_Lib.Server.RestServer.TcpClient
 {
@@ -11,6 +13,7 @@ namespace WebService_Lib.Server.RestServer.TcpClient
     public class RestClient : ITcpClient
     {
         private readonly System.Net.Sockets.TcpClient client;
+        private readonly ILogger logger = WebServiceLogging.CreateLogger<RestClient>();
         
         public RestClient(System.Net.Sockets.TcpClient client)
         {
@@ -118,7 +121,7 @@ namespace WebService_Lib.Server.RestServer.TcpClient
             }
             // Log request and return RequestContext if the requested endpoint exists
             var request = new RequestContext(method, path, version, header, payload, pathVariable, requestParam);
-            Console.Out.WriteLine(request);
+            logger.Log(LogLevel.Information, request.ToString());
             return noMapping ? null : request;
         }
 

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WebService_Lib.Attributes;
 using WebService_Lib.Attributes.Rest;
+using WebService_Lib.Logging;
 using WebService_Lib.Server.Exceptions;
 
 namespace WebService_Lib.Server
@@ -17,6 +19,7 @@ namespace WebService_Lib.Server
     {
         private Dictionary<Method, Dictionary<string, MethodCaller>> mappings;
         public Dictionary<Method, Dictionary<string, MethodCaller>> GetMappings => mappings;
+        private readonly ILogger logger = WebServiceLogging.CreateLogger<Mapping>();
 
         public Mapping(List<object> controllers)
         {
@@ -48,7 +51,7 @@ namespace WebService_Lib.Server
         /// <param name="controller"></param>
         private void AddMapping(MethodInfo method, object controller)
         {
-            var restMethods = new List<Type> { typeof(Get), typeof(Post), typeof(Put), typeof(Delete), typeof(Patch) };
+            var restMethods = new List<Type> {typeof(Get), typeof(Post), typeof(Put), typeof(Delete), typeof(Patch)};
             foreach (var restMethod in restMethods)
             {
                 // Get custom attribute 
@@ -58,14 +61,15 @@ namespace WebService_Lib.Server
                 var parameters = method.GetParameters();
                 if (parameters.Length > 4)
                 {
-                    Console.Error.WriteLine("Err: Wrong endpoint method syntax - more than four parameters");
-                    Console.Error.WriteLine("Err: Please correct method " + method.Name + " from Class " +
-                                            controller.GetType().FullName + " to restore functionality");
+                    logger.Log(LogLevel.Error,
+                        "Wrong endpoint method syntax - more than four parameters");
+                    logger.Log(LogLevel.Error,
+                        $"Please correct method {method.Name} from Class {controller.GetType().FullName} to restore functionality");
                     break;
                 }
 
                 var mappingsParam = new List<MappingParams>();
-                var pathVariableType = (Type?)null;
+                var pathVariableType = (Type?) null;
                 var error = false;
                 foreach (var parameter in parameters)
                 {
@@ -89,7 +93,8 @@ namespace WebService_Lib.Server
                     // In order to check generic types you must compare the original generic type,
                     // not the concrete one
                     // See: https://stackoverflow.com/a/457708/12347616
-                    else if (parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof(PathVariable<>))
+                    else if (parameter.ParameterType.IsGenericType &&
+                             parameter.ParameterType.GetGenericTypeDefinition() == typeof(PathVariable<>))
                     {
                         mappingsParam.Add(MappingParams.PathVariable);
                         pathVariableType = parameter.ParameterType.GenericTypeArguments[0];
@@ -100,14 +105,15 @@ namespace WebService_Lib.Server
                     }
                     else
                     {
-                        Console.Error.WriteLine("Err: Wrong endpoint method syntax - usage of not supported type " +
-                                                mappingsParam.GetType());
-                        Console.Error.WriteLine("Err: Please correct method " + method.Name + " from Class " +
-                                                controller.GetType().FullName + " to restore functionality");
+                        logger.Log(LogLevel.Error, "Wrong endpoint method syntax - usage of not supported type " +
+                            mappingsParam.GetType());
+                        logger.Log(LogLevel.Error, "Please correct method " + method.Name + " from Class " +
+                            controller.GetType().FullName + " to restore functionality");
                         error = true;
                         break;
                     }
                 }
+
                 // Check if some parameters are duplicate
                 // See: https://stackoverflow.com/a/972323/12347616
                 var mappingCheck = Enum.GetValues(typeof(MappingParams)).Cast<MappingParams>();
@@ -117,12 +123,13 @@ namespace WebService_Lib.Server
                     // See: https://stackoverflow.com/a/21579086/12347616
                     var count = mappingsParam.Count(c => c == mapping);
                     if (count <= 1) continue;
-                    Console.Error.WriteLine("Err: Duplicate parameter of for action " + mapping + " defined");
-                    Console.Error.WriteLine("Err: Please correct method " + method.Name + " from Class " +
-                                            controller.GetType().FullName + " to restore functionality");
+                    logger.Log(LogLevel.Error, "Duplicate parameter of for action " + mapping + " defined");
+                    logger.Log(LogLevel.Error, "Please correct method " + method.Name + " from Class " +
+                        controller.GetType().FullName + " to restore functionality");
                     error = true;
                     break;
                 }
+
                 if (error) break;
 
                 var path = attribute.Path;
@@ -157,11 +164,11 @@ namespace WebService_Lib.Server
         /// </exception>
         /// <returns>Response as a Response object</returns>
         public Response Invoke(
-            Method method, string path, AuthDetails? authDetails, object? payload, 
+            Method method, string path, AuthDetails? authDetails, object? payload,
             string? pathVariable, string? requestParam
         )
         {
-            if (mappings[method].ContainsKey(path)) 
+            if (mappings[method].ContainsKey(path))
                 return mappings[method][path].Invoke(authDetails, payload, pathVariable, requestParam);
             throw new EndpointNotFoundException();
         }
@@ -176,8 +183,10 @@ namespace WebService_Lib.Server
             private readonly object instance;
             private readonly List<MappingParams> paramInfo;
             private readonly Type? pathVariableType;
+            private readonly ILogger logger = WebServiceLogging.CreateLogger<MethodCaller>();
 
-            public MethodCaller(MethodInfo method, object instance, List<MappingParams> paramInfo, Type? pathVariableType)
+            public MethodCaller(MethodInfo method, object instance, List<MappingParams> paramInfo,
+                Type? pathVariableType)
             {
                 this.method = method;
                 this.instance = instance;
@@ -193,7 +202,8 @@ namespace WebService_Lib.Server
             /// <param name="pathVariable"></param>
             /// <param name="requestParam"></param>
             /// <returns>Response as a Response object</returns>
-            public Response Invoke(AuthDetails? authDetails, object? payload, string? pathVariable, string? requestParam)
+            public Response Invoke(AuthDetails? authDetails, object? payload, string? pathVariable,
+                string? requestParam)
             {
                 var parameters = new List<object?>();
                 foreach (var param in paramInfo)
@@ -217,19 +227,23 @@ namespace WebService_Lib.Server
                                     {
                                         payload = "{\"value\":" + payload + "}";
                                     }
+
                                     // Support for arrays
                                     if (jsonString.StartsWith("["))
                                     {
                                         payload = "{\"array\":" + payload + "}";
                                     }
+
                                     try
                                     {
-                                        payload = JsonConvert.DeserializeObject<Dictionary<string, object>>((string) payload);
+                                        payload = JsonConvert.DeserializeObject<Dictionary<string, object>>(
+                                            (string) payload);
                                     }
                                     catch (Exception)
                                     {
                                         payload = null;
                                     }
+
                                     parameters.Add(payload);
                                     break;
                                 }
@@ -240,6 +254,7 @@ namespace WebService_Lib.Server
                                     parameters.Add(null);
                                     break;
                             }
+
                             break;
                         case MappingParams.Text:
                             parameters.Add(payload is string ? payload : null);
@@ -257,6 +272,7 @@ namespace WebService_Lib.Server
                             break;
                     }
                 }
+
                 try
                 {
                     // Invoke method
@@ -265,11 +281,11 @@ namespace WebService_Lib.Server
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    logger.Log(LogLevel.Error, "Exception encountered in response invocation:");
+                    logger.Log(LogLevel.Error, ex.StackTrace);
                     return Response.Status(Status.InternalServerError);
                 }
             }
-
         }
 
         /// <summary>

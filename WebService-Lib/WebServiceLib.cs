@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
+using WebService_Lib.Logging;
 using WebService_Lib.Server;
 using WebService_Lib.Server.RestServer;
 using WebService_Lib.Server.RestServer.TcpListener;
@@ -18,6 +20,7 @@ namespace WebService_Lib
         private IMapping mapping = null!;
         private AuthCheck? authCheck;
         private RestServer? server;
+        private readonly ILogger logger = WebServiceLogging.CreateLogger<SimpleWebService>();
 
         public static uint Port = 8080;
 
@@ -41,7 +44,6 @@ namespace WebService_Lib
         /// </summary>
         public void Start()
         {
-            Console.WriteLine("WebService has started...");
             var result = scanner.ScanAssembly();
             container = new Container(result.Item1);
             if (result.Item3 != null)
@@ -52,6 +54,7 @@ namespace WebService_Lib
             mapping = new Mapping(container.GetObjects(result.Item2));
             var listener = new RestListener(Port);
             server = new RestServer(listener, mapping, authCheck);
+            logger.Log(LogLevel.Information, $"Webservice has started on Port {Port}");
             server.Start();
         }
 
@@ -61,7 +64,7 @@ namespace WebService_Lib
         public void Stop()
         {
             if (server == null) return;
-            Console.WriteLine("Stopping WebService...");
+            logger.Log(LogLevel.Information, "Stopping WebService...");
             server.Stop();
         }
     }

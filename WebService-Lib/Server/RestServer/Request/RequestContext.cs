@@ -76,6 +76,7 @@ namespace WebService_Lib.Server.RestServer
             {
                 header.AppendLine($"|| {entry.Key}: {entry.Value}");
             }
+            output.AppendLine("Incoming request:");
             output.AppendLine("//==========");
             output.AppendLine($"|| {Method} {Path} {Version}");
             if (PathVariable != null || RequestParam != null)
@@ -105,7 +106,7 @@ namespace WebService_Lib.Server.RestServer
                         break;
                 }
             }
-            output.AppendLine("\\\\==========");
+            output.Append("\\\\==========");
             return output.ToString();
         }
     }
