@@ -2,7 +2,7 @@
 
 namespace WebService_Lib.Logging
 {
-    public class WebServiceLogging
+    public static class WebServiceLogging
     {
         // ReSharper disable once MemberCanBePrivate.Global
         public static ILoggerFactory LoggerFactory {get;} = new LoggerFactory();
