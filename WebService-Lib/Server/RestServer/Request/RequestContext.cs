@@ -44,7 +44,10 @@ namespace WebService_Lib.Server.RestServer
         {
             // Note: Further Parsing is now done in Mapping`s Invoke function.
             // This makes it possible to parse more effectively to the requirements (See JsonString).
-            switch (contentType)
+            // ---
+            // Also Split is used here to get only the content type like 'application/json'
+            // without encoding information like 'application/json; charset=utf-8'.
+            switch (contentType.Split(';').First())
             {
                 case "text/plain":
                     if (payload == null || payload.GetType() != typeof(string))
