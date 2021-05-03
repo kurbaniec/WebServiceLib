@@ -98,27 +98,39 @@ namespace WebService_Lib.Server.RestServer.TcpClient
             // Read http body (when existing)
             if (contentLength > 0 && header.ContainsKey("Content-Type"))
             {
+                var errorOccured = false;
                 StringBuilder data = new StringBuilder(200);
                 char[] buffer = new char[1024];
-                int bytesReadTotal = 0;
-                while (bytesReadTotal < contentLength)
+                var bytesReadTotal = 0;
+                while (bytesReadTotal < contentLength - 1)
                 {
                     try
                     {
-                        var bytesRead = reader.Read(buffer, 0, 1024);
+                        var left = contentLength - bytesReadTotal;
+                        var bytesRead = reader.Read(buffer, 0, left > 1024 ? 1024 : left);
                         bytesReadTotal += bytesRead;
                         if (bytesRead == 0) break;
                         data.Append(buffer, 0, bytesRead);
+                        errorOccured = false;
                     }
+                    // Note this should be fixed via `contentLength - 1`:
+                    // ---
                     // IOException can occur when there is a mismatch of the 'Content-Length'
                     // because a different encoding is used
                     // Sending a 'plain/text' payload with special characters (äüö...) is
                     // an example of this
-                    catch (IOException) { break; }
+                    catch (IOException ex)
+                    {
+                        logger.Log(LogLevel.Error, ex.StackTrace);
+                        // If error occurs the second time in a row break
+                        if (errorOccured) break;
+                        errorOccured = true;
+                    }
                 }
                 payload = data.ToString();
                 RequestContext.ParsePayload(ref payload, header["Content-Type"]);
             }
+            
             // Log request and return RequestContext if the requested endpoint exists
             var request = new RequestContext(method, path, version, header, payload, pathVariable, requestParam);
             logger.Log(LogLevel.Information, request.ToString());
@@ -152,7 +164,7 @@ namespace WebService_Lib.Server.RestServer.TcpClient
                 if (response.Payload is { } text)
                 {
                     var payload = Encoding.Default.GetBytes(text);
-                    var length = text.Length;
+                    var length = payload.Length;
                     writer.Write($"Content-Length: {length}\r\n");
                     writer.Write("\r\n");
                     // Send proper string (and not 'System.Byte[}')
