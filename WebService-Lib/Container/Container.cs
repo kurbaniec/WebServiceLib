@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using WebService_Lib.Attributes;
@@ -25,12 +26,27 @@ namespace WebService_Lib
                 // Instance components
                 // See: https://stackoverflow.com/a/755/12347616
                 var instance = Activator.CreateInstance(component);
-                container.Add(component, instance);
+                if (!container.ContainsKey(component))
+                    container.Add(component, instance);
+                else
+                {
+                    logger.Log(LogLevel.Warning, 
+                        $"Container already contains Component of type {component}");
+                    logger.Log(LogLevel.Warning, "Component will be skipped");
+                }
                 
                 // Also associate instance to its (directly) implemented interfaces
                 var interfaces = component.DumpInterface();
                 foreach (var iInterface in interfaces)
-                    container.Add(iInterface, instance);
+                    if (!container.ContainsKey(iInterface))
+                        container.Add(iInterface, instance);
+                    else
+                    {
+                        logger.Log(LogLevel.Warning, 
+                            $"Container already contains concrete component for interface of type {iInterface}");
+                        logger.Log(LogLevel.Warning, 
+                            $"Component of type {component} will not be associated with interface");
+                    }
             }
 
             Autowire(components);
@@ -84,7 +100,10 @@ namespace WebService_Lib
             {
                 // In C# there is a distinct difference between fields and props
                 // See: https://stackoverflow.com/a/295109/12347616
-                // We want to autowire FIELDS, so GetFields needs to be called
+                // ---
+                // Old versions of WebServiceLib autowired just fields, new versions 
+                // also supports now properties
+                // ---
                 // Also BindingFlags need to be set in order to get private fields
                 // See: https://stackoverflow.com/a/1040816/12347616
                 var fields = component.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
@@ -111,6 +130,27 @@ namespace WebService_Lib
                         {
                             logger.Log(LogLevel.Error, "Can not find property of type " + fType.FullName +
                                                        " to autowire field " + field.Name + " in Class " + component.FullName);
+                            logger.Log(LogLevel.Error, "Field will not be initialized");
+                        }
+                    }
+                }
+                var properties = component.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                foreach (var property in properties)
+                {
+                    var needsAutowire = Attribute.IsDefined(property, typeof(Autowired));
+                    if (needsAutowire)
+                    {
+                        Type fType = property.PropertyType;
+                        if (container.ContainsKey(fType))
+                        {
+                            var instance = container[component];
+                            var instanceToWire = container[fType];
+                            property.SetValue(instance, instanceToWire);
+                        }
+                        else if (fType != typeof(AuthCheck))
+                        {
+                            logger.Log(LogLevel.Error, "Can not find property of type " + fType.FullName +
+                                                       " to autowire field " + property.Name + " in Class " + component.FullName);
                             logger.Log(LogLevel.Error, "Field will not be initialized");
                         }
                     }
